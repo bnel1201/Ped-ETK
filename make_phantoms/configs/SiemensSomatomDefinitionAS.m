@@ -5,7 +5,7 @@ sdd = 1085.6;          % source-to-detector distance
 dod = sdd - sid;    % isocenter-to-detector distance
 
 nb = 900;           % number of detector columns (Value based on ZengEtAl2015-IEEE-NuclearScience-v6n5)
-na = 1160/2;           % number of views in a roatation
+na = 1160; %from 580 % number of views in a roatation
 
 ds = 1;        % detector column size 
 offset_s = 1.25;    % lateral shift of detector

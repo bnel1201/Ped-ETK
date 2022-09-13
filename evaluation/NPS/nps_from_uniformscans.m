@@ -12,8 +12,8 @@ proc_kernel = 'sharpM1-R0-S3'; %'sharpM1-R0-S3';
 % folder_path = ['/raida/rpz/data/DLCT/phantom_sim/for_CT2020Conf/uniform_proc/' fbp_kernel '/' proc_kernel '/'];
 %folder_path = ['/gpfs_projects/rxz4/data/DLCT/phantom_sim/for_CT2020Conf/uniform_proc/' fbp_kernel '/' proc_kernel '/'];
 
-folder_path = '/gpfs_projects/rxz4/data/DLCT/phantom_sim/2022/uniform_quarter/';
-folder_path1 = '/gpfs_projects/prabhat.kc/lowdosect/transfers/transfers_4_spie/exps/exps/exps_4r_phan_insert/results/'; 
+folder_path = '/gpfs_projects_old/rxz4/data/DLCT/phantom_sim/2022/uniform_quarter/';
+folder_path1 = '/gpfs_projects_old/prabhat.kc/lowdosect/transfers/transfers_4_spie/exps/exps/exps_4r_phan_insert/results/'; 
 proc_path = {'REDCNN_sg2/checkpoint-25/','DnCNN_sg2/checkpoint-20/', 'UNet/checkpoint-6/','GAN/SRGAN_Generator_model_19/', 'CNN3/checkpoint-25/', 'REDCNN_sg3/checkpoint-20/','DnCNN_sg3/checkpoint-20/'};
 id=1
 folder_path = [folder_path1 'uniform_quarter_' proc_path{id}]

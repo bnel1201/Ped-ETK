@@ -32,6 +32,14 @@ if exist('nsims', 'var') == false
     nsims = 5
 end
 
+if exist('aec_on', 'var') == false
+    aec_on = true;
+end
+
+if exist('add_noise', 'var') == false
+    add_noise = true;
+end
+
 batch = 1:nsims;
 rand('state', batch(end));
 % Set save folder
@@ -59,9 +67,13 @@ end
 
 mu_water = 0.2059 / 10;     % in mm-1
 
+aec_factors = exp(mu_water*patient_diameters)./exp(mu_water*patient_diameters(1));
+
 for idx=1:length(patient_diameters)
     patient_diameter = patient_diameters(idx)
     fov = 1.1*patient_diameter
+    aec_factor = aec_factors(idx);
+
     ig = image_geom('nx', nx, 'fov', fov, 'down', down);
     % ig <-- write this to text file and read in later
     patient_folder = [physics_type_folder '/diameter' num2str(patient_diameter) 'mm/']
@@ -98,24 +110,29 @@ for idx=1:length(patient_diameters)
         % FBP reconstruction operator
         fg = fbp2(sg, ig,'type','std:mat'); %choose 'std:mat' to be able to using different recon filter
                                             %default would be 'std:mex' but only ramp filter was implemented in it
+        if aec_on == true
+            I0 = aec_factor*I0; %accounts for different patient size
+        end
+
         if(has_bowtie==1)
             I0_afterbowtie=apply_bowtie_filter(I0, sg, mu_water, patient_diameter);           
         else
             I0_afterbowtie=I0;            
         end        
         proj = I0_afterbowtie .* exp(-sino);
-
         for isim = batch      
-            isim                        
-            proj_noisy = poisson(proj); %This poisson generator respond to the seed number setby rand('sate',x');
-            
-            if any(proj_noisy(:) == 0)
-                warn('%d of %d values are 0 in sinogram!', ...
-                    sum(proj_noisy(:)==0), length(proj_noisy(:)));
-                proj_noisy(proj_noisy==0) = 1;
+            isim
+            if add_noise == true      
+                proj = poisson(proj); %This poisson generator respond to the seed number setby rand('sate',x');
             end
 
-            sino_noisy = -log(proj_noisy ./ I0_afterbowtie);            % noisy fan-beam sinogram
+            if any(proj(:) == 0)
+                warn('%d of %d values are 0 in sinogram!', ...
+                    sum(proj(:)==0), length(proj(:)));
+                proj(proj==0) = 1;
+            end
+
+            sino_noisy = -log(proj ./ I0_afterbowtie);            % noisy fan-beam sinogram
 
             x_fbp_sharp = fbp2(sino_noisy, fg, 'window', 'hann205');
             x_fbp_sharp_hu = 1000*(x_fbp_sharp - mu_water)/mu_water;

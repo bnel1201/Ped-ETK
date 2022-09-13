@@ -29,6 +29,7 @@ end
 if exist('nsims', 'var') == false
     nsims = 5
 end
+aec_on = 1;
 
 batch = 1:nsims;
 rand('state', batch(end)); %need this for the first time run to control
@@ -62,6 +63,8 @@ mu_water = 0.2059 / 10;     % in mm-1
 for idx=1:length(patient_diameters)
     patient_diameter = patient_diameters(idx)
     fov = 1.1*patient_diameter
+    relative_size = patient_diameter / min(patient_diameters);
+    aec_factor = exp(1 - relative_size);
     ig = image_geom('nx', nx, 'fov', fov, 'down', down);
 
     patient_folder = [physics_type_folder '/diameter' num2str(patient_diameter) 'mm/']
@@ -104,6 +107,9 @@ for idx=1:length(patient_diameters)
 
         for isim = batch      
             isim
+            if aec_on == true
+                proj = aec_factor*proj; %accounts for different patient size
+            end
             proj_noisy = poisson(proj); %This poisson generator respond to the seed number setby rand('sate',x');
             
             if any(proj_noisy(:) == 0)

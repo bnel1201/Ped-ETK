@@ -88,11 +88,11 @@ esf = esf_edge;
 if(1)
 midseg = round(length(esf)/2)+[-round(length(esf)/2.5):floor(length(esf)/2.5)];% 1:length(esf_edge);
 sigm_param = sigm_fit((1:length(esf_edge(midseg)))', esf_edge(midseg));
-fsigm = @(param,xval) param(1)+(param(2)-param(1))./(1+10.^((param(3)-xval)*param(4)))
+fsigm = @(param,xval) param(1)+(param(2)-param(1))./(1+10.^((param(3)-xval)*param(4)));
 x=1:length(esf);
 y=fsigm(sigm_param,x);
 dummy=corrcoef(y(midseg), esf_edge(midseg));
-rho = dummy(1,2)
+rho = dummy(1,2);
 if(rho<0.8)
    disp('MTF failed because the disk image is too noisy.');
    mtf=0; freq_vector = 0; esf = 0;

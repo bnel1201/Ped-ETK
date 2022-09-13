@@ -4,6 +4,16 @@ date: 2022-09-02
 author: Brandon J. Nelson
 ---
 
+## AEC
+
+To try and account for the differences in patient sizes to get approximately equal noise in all patient sizes an `aec_on` boolean is included which when `true` applied an automatic exposure control - equivalent of increasing x-ray counts $\propto exp(patient_diameter/smallest_patient_diameter - 1)$. This way, all patients should have apporximately equal noise since x-rays are attenuated exponentially with path length, thus by including this multiplicative factor to account for path length differences in patients we can approximate an AEC that would be used in a scanner
+
+This ranges from 1 (for the smallest) to 4.9885 for the largest
+
+(This didn't work, needs to be empirical...)
+
+## CTP404: low contrast detectbility module
+
 ## CCT189: Catphan Abdomen low contrast detectability phantom
 
 CCT189 is is the Catphan low contrast detectability in the phanom developed by the MITA (Medical Imaging Technology Alliance) <https://www.medicalimaging.org/>
