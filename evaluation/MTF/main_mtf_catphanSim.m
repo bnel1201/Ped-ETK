@@ -14,3 +14,17 @@ for idx=1:length(diams)
     folder_path = [datadir filesep diams(idx).name filesep dose_level filesep kernel filesep]
     run('utils/eval_CTP404_MTF.m')
 end
+
+% run eval on DLIR images
+% folder_path = ['/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic/diameter112mm/I0_3000000_processed/fbp_sharp/'];
+% run('utils/eval_CTP404_MTF.m')
+
+datadir = fullfile(basedir, 'CTP404/monochromatic/');
+dose_level = 'I0_3000000_processed';
+kernel = 'fbp_sharp';
+dir_contents = dir(datadir);
+diams = dir_contents(3:end);
+for idx=1:length(diams)
+    folder_path = [datadir filesep diams(idx).name filesep dose_level filesep kernel filesep]
+    run('utils/eval_CTP404_MTF.m')
+end
