@@ -7,17 +7,20 @@ if exist('folder_path', 'var') == false
 end
 
 % outfolder = '/home/brandon.nelson/Data/temp/CTP404/rxz_results'
-outfolder = folder_path
+outfolder = folder_path;
 parentfolder = dirname(folder_path, 3);
 phantom_info = read_phantom_info([parentfolder '/phantom_info_pix_idx.csv']);
 ig = read_image_geom_info([parentfolder '/image_geom_info.csv']);
 loc = phantom_info(2:end-1, 1:2);
-
+%offset = ig.offset
+offset = 1000;
+img_sz = ig.nx;
+% img_sz = 256;
 fileinfo = dir(folder_path);
 nfile = length(fileinfo)-2;
 
 find_disk_loc = 0;
-img_sz = 512;
+
 %display a image to assist a manual localization of the disk area.
 if(find_disk_loc==1)
     file1 = [folder_path fileinfo(3).name]
@@ -48,7 +51,7 @@ for i=1:nfile
     filename = fileinfo(i+2).name;
     filepath = [folder_path filename];
     fid = fopen(filepath);
-    img = fread(fid,[img_sz img_sz], 'int16');
+    img = fread(fid,[img_sz img_sz], 'int16') - offset;
     fclose(fid);
        
     fprintf(fnames_MTF50_id, '\r\n%s', filename);
@@ -66,14 +69,17 @@ for i=1:nfile
         
         %estimate the MTF
         [mtf, freq] = MTF_from_disk_edge(disk_img);
+
         freq_vector = freq/pixelsz;
+
         if j == 1
             mtf_data(1, :) = freq_vector;
         end
-        mtf_data(j + 1, :) = mtf;
-        %mtf_all(i,:) = mtf;
-        %freq_all(i,:) = freq_vector;
-        % write_MTF([dirname(folder_path, 2) filesep filename(1:end-4) '_' num2str(round(disk_HUs(j))) 'HU' '_mtf.csv'], freq, mtf);
+        if length(mtf) ~= length(mtf_data)
+            mtf_data(j + 1, :) = interp1(freq_vector, mtf, mtf_data(1, :)); % <-- double check this later... meant to account for slight differences in array length from MTF_from_disk_edge due to rounding errors
+        else
+            mtf_data(j + 1, :) = mtf;
+        end
 
         %Estimate the mtf50% and mtf10% values
         mtf50_all(i, j) = MTF_width(mtf, 0.5, freq_vector);

@@ -40,6 +40,10 @@ if exist('add_noise', 'var') == false
     add_noise = true;
 end
 
+if exist('offset', 'var') == false
+    offset = 0
+end
+
 batch = 1:nsims;
 rand('state', batch(end));
 % Set save folder
@@ -54,6 +58,15 @@ end
 %% Set parameters
 % ------ Scan Parameters ------
 SiemensSomatomDefinitionAS
+
+% overwrite defaults with config file
+if exist('image_matrix_size', 'var')
+    nx = image_matrix_size;
+end
+
+if exist('nangles', 'var')
+    na = nangles;
+end
 
 sg = sino_geom('fan', 'units', 'mm', ...
     'nb', nb, 'na', na, 'ds', ds, ...
@@ -135,7 +148,7 @@ for idx=1:length(patient_diameters)
             sino_noisy = -log(proj ./ I0_afterbowtie);            % noisy fan-beam sinogram
 
             x_fbp_sharp = fbp2(sino_noisy, fg, 'window', 'hann205');
-            x_fbp_sharp_hu = 1000*(x_fbp_sharp - mu_water)/mu_water;
+            x_fbp_sharp_hu = 1000*(x_fbp_sharp - mu_water)/mu_water + offset;
             file_prefix = [files_sharp 'fbp_sharp_'];
             file_num = isim;
             filename_fbp_sharp = [file_prefix 'v' sprintf('%03d', file_num) '.raw'];

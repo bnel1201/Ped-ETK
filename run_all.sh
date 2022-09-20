@@ -1,17 +1,15 @@
-val=$(hostname)
-if [ "${val:0:4}" != "node" ]; then
-    echo "It's not Equal"
-    ssh -X node
-fi
+# bash ssh_node.sh "matlab -nodesktop -nosplash"
+# bash ssh_node.sh "cd make_phantoms; bash run_make_phantoms.sh"
+bash ssh_node.sh "cd make_phantoms; bash ./run_make_phantoms.sh; exit; cd .."
+# cd ..
 
-# # make phantoms
-# matlab -nodesktop -nosplash ./make_phantoms/make_phantoms.m
+# run denoising
+# conda activate DLIR #change to whatever virtual env needed or comment if already in env
+bash ./denoising/run_denoising.sh
 
-# # run denoising
-# bash ./denoising/run_denoising.sh
+# run evaluations
+cd evaluation/MTF
+bash ../../ssh_node.sh "bash ./_1_run_MTF_analysis.sh; exit"
 
-# # run evaluations
-# matlab -nodesktop -nosplash ./evaluation/run_all.m
-
-# # make plots
-# bash ./evaluation/MTF/run.sh
+# make plots
+bash ./_2_generate_MTF_plots.sh

@@ -85,7 +85,8 @@ end
 esf = esf_edge;
 
 % apply sigmoid fit to the edge spread function to reduce the disturbance of noise on the flat part of the curve.
-if(1)
+apply_sigmoid_fit=true;
+if(apply_sigmoid_fit)
 midseg = round(length(esf)/2)+[-round(length(esf)/2.5):floor(length(esf)/2.5)];% 1:length(esf_edge);
 sigm_param = sigm_fit((1:length(esf_edge(midseg)))', esf_edge(midseg));
 fsigm = @(param,xval) param(1)+(param(2)-param(1))./(1+10.^((param(3)-xval)*param(4)));
