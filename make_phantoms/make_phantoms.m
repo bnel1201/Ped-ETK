@@ -9,17 +9,19 @@ aec_on = true; %automatic exposure control
 add_noise = false;
 basedataFolder = ['/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/'];
 
-add_noise = false;
-offset = 1000; %needed for some models
-disp('Simulation series 1/3')
-disp('Now running CTP404 Multicontrast Phantom simulations...')
-run('./CTP404/make_CTP404.m')
+% add_noise = false;
+% offset = 1000; %needed for some models
+% disp('Simulation series 1/3')
+% disp('Now running CTP404 Multicontrast Phantom simulations...')
+% run('./CTP404/make_CTP404.m')
 
-% add_noise = true;
-% max_dose_level = 3e5
-% disp('Simulation series 2/3')
-% disp('Now running CCT189 low contrast detectability simulations...')
-% run('./CCT189/make_CCT189.m')
+add_noise = true;
+max_dose_level = 3e5;
+nangles = 1160;
+add_noise = true;
+disp('Simulation series 2/3')
+disp('Now running CCT189 low contrast detectability simulations...')
+run('./CCT189/make_CCT189.m')
 
 % disp('Simulation series 3/3')
 % disp('Now running Uniform Water Phantom simulations...')

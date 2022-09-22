@@ -28,3 +28,5 @@ for idx=1:length(diams)
     folder_path = [datadir filesep diams(idx).name filesep dose_level filesep kernel filesep]
     run('utils/eval_CTP404_MTF.m')
 end
+
+exit
