@@ -5,10 +5,11 @@ from pathlib import Path
 def plot_patient_diameter_mtf(mtf_csv_fname:str|Path, patient_diameter:str=None, ax=None):
     if ax is None:
         f, ax = plt.subplots()
-    mtf_csv_fname = Path(mtf_csv_fname)
     
+    mtf_csv_fname = Path(mtf_csv_fname)
+    patient_diameter_dir = mtf_csv_fname.parents[1]
     diameter = patient_diameter_dir.stem.split('diameter')[1]
-    df = pd.read_csv(patient_diameter_dir / 'I0_3000000' / 'fbp_sharp_v001_mtf.csv')
+    df = pd.read_csv(mtf_csv_fname)
     freq_lpcm_lbl = 'frequencies [lp/cm]'
     df[freq_lpcm_lbl] = df['frequencies [1/mm]']*10
     HUs = sorted([int(h.split(' HU')[0]) for h in df.columns[1:-1]])

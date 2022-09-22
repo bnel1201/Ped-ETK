@@ -1,39 +1,24 @@
 # %%
 import matplotlib.pyplot as plt
-import pandas as pd
 from pathlib import Path
-# from utils.mtf_plot import plot_patient_diameter_mtf
+from utils.mtf_plot import plot_patient_diameter_mtf
 
-# %%
-def plot_patient_diameter_mtf(patient_diameter_dir, ax=None):
-    if ax is None:
-        f, ax = plt.subplots()
-    diameter = patient_diameter_dir.stem.split('diameter')[1]
-    df = pd.read_csv(patient_diameter_dir / 'I0_3000000' / 'fbp_sharp_v001_mtf.csv')
-    freq_lpcm_lbl = 'frequencies [lp/cm]'
-    df[freq_lpcm_lbl] = df['frequencies [1/mm]']*10
-    HUs = sorted([int(h.split(' HU')[0]) for h in df.columns[1:-1]])
-    cols = [freq_lpcm_lbl]
-    cols += [f' {h} HU' for h in HUs]
-    df = df[cols]
-    df.plot(ax=ax, x=freq_lpcm_lbl, xlim=[0, 20], title=diameter, ylabel='MTF')
-    return ax
-# %%
 
 def main():
     datadir = Path('/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic/')
     patient_dirs = sorted(list(datadir.glob('diameter*')))
-    idx = 0
-    df = pd.read_csv(patient_dirs[idx] / 'I0_3000000' / 'fbp_sharp_v001_mtf.csv')
-    df
+
     plt.style.use('seaborn')
     f, axs = plt.subplots(2, 3, figsize=(9, 7), sharex='col', sharey='row',
                         gridspec_kw=dict(hspace=0.1, wspace=0.1))
-    for d, ax in zip(patient_dirs, axs.flatten()):
-        plot_patient_diameter_mtf(d, ax)
+    for patient_dir, ax in zip(patient_dirs, axs.flatten()):
+        mtf_csv_fname = patient_dir / 'I0_3000000' / 'fbp_sharp_v001_mtf.csv'
+        plot_patient_diameter_mtf(mtf_csv_fname, ax=ax)
     # %%
     fname = 'fbp_mtf_baseline.png'
     f.savefig(fname, dpi=600)
     print(f'File saved: {fname}')
 
 # %%
+if __name__ == '__main__':
+    main()
