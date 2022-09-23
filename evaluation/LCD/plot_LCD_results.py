@@ -15,3 +15,9 @@ snr = f['snr'][:]
 
 snr.shape
 # %%
+f['dose_levels'][:]
+# %%
+f['recon_types'][:]
+# %%
+f['readers'][:]
+# %%

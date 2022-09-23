@@ -182,4 +182,7 @@ end
 
 results_fname = [outfolder filesep 'test_results.h5']
 hdf5write(results_fname, '/auc', auc_all);
+hdf5write(results_fname, '/recon_types', all_recon_type, 'WriteMode', 'append');
+hdf5write(results_fname, '/readers', n_reader, 'WriteMode', 'append');
+hdf5write(results_fname, '/dose_levels', I0_vector, 'WriteMode', 'append');
 hdf5write(results_fname, '/snr', snr_all, 'WriteMode', 'append');
