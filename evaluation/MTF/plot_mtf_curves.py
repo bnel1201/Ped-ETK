@@ -1,4 +1,3 @@
-# %%
 import argparse
 from pathlib import Path
 
@@ -19,20 +18,20 @@ def main(datadir=None, output_fname=None, processed=False):
         else:
             mtf_csv_fname = patient_dir / 'I0_3000000' / 'fbp_sharp_v001_mtf.csv'
         plot_patient_diameter_mtf(mtf_csv_fname, ax=ax)
-    # %%
+
     if output_fname is None:
         plt.show()
     else:
-        # fname = output_fname or 'fbp_mtf_baseline.png'
+        Path(output_fname).parent.mkdir(exist_ok=True, parents=True)
         f.savefig(output_fname, dpi=600)
         print(f'File saved: {output_fname}')
 
-# %%
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Plots MTF Curves')
-    parser.add_argument('datadir',
+    parser.add_argument('--datadir', '-d',
                         help="directory containing different patient diameter CT simulations")
-    parser.add_argument('output_fname',
+    parser.add_argument('--output_fname','-o', required=False,
                         help="filename for the saved plot")
     parser.add_argument('--processed', action='store_true', default=False,
                         help='boolean to plot the processed results, defaults to false using the baseline')

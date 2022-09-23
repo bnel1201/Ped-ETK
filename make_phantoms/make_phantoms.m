@@ -17,14 +17,12 @@ basedataFolder = ['/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomt
 
 add_noise = true;
 max_dose_level = 3e5;
-nangles = 1160;
+nangles = 580;
 add_noise = true;
+nsims = 200;
+offset = 1000; %needed for some models
 disp('Simulation series 2/3')
 disp('Now running CCT189 low contrast detectability simulations...')
 run('./CCT189/make_CCT189.m')
-
-% disp('Simulation series 3/3')
-% disp('Now running Uniform Water Phantom simulations...')
-% run('./uniform/make_uniform.m')
 
 exit

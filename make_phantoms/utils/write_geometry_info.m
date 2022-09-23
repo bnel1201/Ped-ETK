@@ -1,4 +1,4 @@
-function status = write_image_geom_info(fname, ig)
+function status = write_geometry_info(fname, ig)
     fid = fopen(fname, 'w')
     fprintf(fid, 'nx, %d\r\n', ig.nx);
     fprintf(fid, 'ny, %d\r\n', ig.ny);

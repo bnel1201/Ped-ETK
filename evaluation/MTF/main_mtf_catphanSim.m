@@ -16,8 +16,6 @@ for idx=1:length(diams)
 end
 
 % run eval on DLIR images
-% folder_path = ['/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic/diameter112mm/I0_3000000_processed/fbp_sharp/'];
-% run('utils/eval_CTP404_MTF.m')
 
 datadir = fullfile(basedir, 'CTP404/monochromatic/');
 dose_level = 'I0_3000000_processed';

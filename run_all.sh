@@ -1,7 +1,5 @@
-# bash ssh_node.sh "matlab -nodesktop -nosplash"
-# bash ssh_node.sh "cd make_phantoms; bash run_make_phantoms.sh"
+# make phantoms
 bash ssh_node.sh "cd make_phantoms; bash ./run_make_phantoms.sh; exit; cd .."
-# cd ..
 
 # run denoising
 # conda activate DLIR #change to whatever virtual env needed or comment if already in env

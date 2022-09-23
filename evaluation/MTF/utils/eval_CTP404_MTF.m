@@ -1,16 +1,17 @@
 addpath('/home/brandon.nelson/Dev/PhantomSimulations/CT_simulator')
-if exist('homedir', 'var') == false %checks if setpath has been run
+if ~exist('homedir', 'var') %checks if setpath has been run
     setpath
 end
-if exist('folder_path', 'var') == false
+if ~exist('folder_path', 'var')
     folder_path = '/home/brandon.nelson/Data/temp/CTP404/monochromatic/diameter112mm/I0_3000000/fbp_sharp/';
 end
 
-% outfolder = '/home/brandon.nelson/Data/temp/CTP404/rxz_results'
+addpath([dirname(fileparts(mfilename('fullpath')), 2) '/utils'])
+
 outfolder = folder_path;
 parentfolder = dirname(folder_path, 3);
 phantom_info = read_phantom_info([parentfolder '/phantom_info_pix_idx.csv']);
-ig = read_image_geom_info([parentfolder '/image_geom_info.csv']);
+ig = read_geometry_info([parentfolder '/geometry_info.csv']);
 loc = phantom_info(2:end-1, 1:2);
 %offset = ig.offset
 offset = 1000;
