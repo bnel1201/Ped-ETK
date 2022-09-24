@@ -1,5 +1,5 @@
 function status = write_geometry_info(fname, ig)
-    fid = fopen(fname, 'w')
+    fid = fopen(fname, 'w');
     fprintf(fid, 'nx, %d\r\n', ig.nx);
     fprintf(fid, 'ny, %d\r\n', ig.ny);
     fprintf(fid, 'dx, %2.4g\r\n', ig.dx);

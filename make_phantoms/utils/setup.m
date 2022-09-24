@@ -5,7 +5,7 @@ if exist('homedir', 'var') == false %checks if setpath has been run
 end
 % addpath('./configs')
 if exist('max_dose_level', 'var') == false
-    max_dose_level = 3e6
+    max_dose_level = 3e5
 end
 I0_vector = max_dose_level; %[30 55 70 85 100]/100;
 

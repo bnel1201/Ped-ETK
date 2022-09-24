@@ -20,7 +20,7 @@ sg = sino_geom('fan', 'units', 'mm', ...
     'dsd', sdd, 'dod', dod, 'offset_s', offset_s, ...
     'down', down);
 
-sampleFolder = [basedataFolder 'CCT189/']
+sampleFolder = [basedataFolder 'CCT189/'];
 if ~exist(sampleFolder, 'dir')
     mkdir(sampleFolder)
 end
@@ -30,17 +30,19 @@ if ~exist(physics_type_folder, 'dir')
 end
 
 mu_water = 0.2059 / 10;     % in mm-1
-
-aec_factors = exp(mu_water*patient_diameters)./exp(mu_water*patient_diameters(1));
+ref_diameter = 200; % in mm, from /home/rxz4/ct_deeplearning/make_phantom/make_CCT189_wD45_B30.m line 81
+% ref_diameter = patient_diameters(1)
+aec_factors = exp(mu_water*patient_diameters)./exp(mu_water*ref_diameter);
 
 for idx=1:length(patient_diameters)
-    patient_diameter = patient_diameters(idx)
-    fov = 1.1*patient_diameter
+    patient_diameter = patient_diameters(idx);
+    fov = 1.1*patient_diameter;
+    disp(sprintf('diameter: %d, FOV: %d [%d/%d]', patient_diameter, round(fov), idx, length(patient_diameters)
     aec_factor = aec_factors(idx);
 
     ig = image_geom('nx', nx, 'fov', fov, 'down', down);
 
-    patient_folder = [physics_type_folder '/diameter' num2str(patient_diameter) 'mm/']
+    patient_folder = [physics_type_folder '/diameter' num2str(patient_diameter) 'mm/'];
     if ~exist(patient_folder, 'dir')
         mkdir(patient_folder)
     end
@@ -100,7 +102,7 @@ for idx=1:length(patient_diameters)
         bkg_proj = I0_afterbowtie .* exp(-bkg_sino);
 
         for isim = batch      
-            isim
+            disp(sprintf('simulation [%3.0d/%3.0d]', isim, length(batch)))
             if add_noise == true      
                 disk_proj = poisson(disk_proj); %This poisson generator respond to the seed number setby rand('sate',x');
                 bkg_proj = poisson(bkg_proj); %is it ok if these are different noise instances?

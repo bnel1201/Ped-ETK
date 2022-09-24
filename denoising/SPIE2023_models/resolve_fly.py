@@ -61,7 +61,7 @@ if (specific_epoch == True):
 	if (chckpt_no != -1): chckpt_no = chckpt_no-1
 
 
-csv_file = Path(input_folder).parents[1] / 'image_info.csv'
+csv_file = Path(input_folder).parents[1] / 'geometry_info.csv'
 if csv_file.exists():
 	ig = pd.read_csv(csv_file, header=None)
 	ig = pd.DataFrame({r:[c] for r,c in zip(ig.loc[:,0], ig.loc[:,1])})
