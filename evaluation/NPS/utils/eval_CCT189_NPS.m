@@ -81,7 +81,7 @@ fr = 1/2 *linspace(0, 1, (length(nps1d)));
 % saveas(gcf, fullfile(results_path, '2D_nps.png'));
 parts = regexp(parentfolder, '/', 'split');
 
-nps_raw_fname = fullfile(results_path, sprintf('2D_nps_float16_%d.raw', nx_roi));
+nps_raw_fname = fullfile(results_path, sprintf('2D_nps_float32_%d.raw', nx_roi));
 my_write_rawfile(nps_raw_fname, single(nps), 'single');
 %check mean HU variations in the set of images
 tiny_roi = round(nx/10/2);
