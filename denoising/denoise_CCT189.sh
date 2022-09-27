@@ -54,8 +54,7 @@ PHANTOM=CCT189
 # PHANTOM=CTP404
 
 DOSELEVEL=I0_0300000
-BASE_DIR=/home/brandon.nelson/Data/temp/
-# BASE_DIR=/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/
+BASE_DIR=/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/
 orginal_dir=$(pwd)
 cd $(dirname $0)
 for DIAMETER in 112 131 151 185 216 292

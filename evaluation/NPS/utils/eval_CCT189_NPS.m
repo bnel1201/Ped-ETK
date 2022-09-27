@@ -72,13 +72,6 @@ ang = [0:1:180];
 nps1d = mc;
 fr = 1/2 *linspace(0, 1, (length(nps1d)));
 
-%save nps, nps1d, one slice of sample image, freq_vec 
-
-% figure(1);
-% subplot(121); imagesc(nps); colormap(gray), daspect([1 1 1]);
-% subplot(122), plot(fr,nps1d); xlabel 'cyc/pixel'; ylabel 'Magnitude';
-
-% saveas(gcf, fullfile(results_path, '2D_nps.png'));
 parts = regexp(parentfolder, '/', 'split');
 
 nps_raw_fname = fullfile(results_path, sprintf('2D_nps_float32_%d.raw', nx_roi));
@@ -111,8 +104,8 @@ fr_dft = dfr_dft*(0:length(nps1d)-1); %freq points in cyc/pix;
 
 nps_1d_csv_fname = fullfile(results_path, '1D_nps.csv');
 fid = fopen(nps_1d_csv_fname, 'w');
-fprintf(fid, '%s\r\n', 'spatial frequency [lp/mm], magnitude');
-fprintf(fid, '%3.4f, %3.4f\r\n', cat(1, fr, nps1d));
+fprintf(fid, '%s\r\n', 'spatial frequency [cyc/pix], magnitude');
+fprintf(fid, '%3.4f, %3.4f\r\n', cat(1, fr_dft, nps1d));
 fclose(fid);
 disp('files written:')
 disp(sprintf('%s\r\n', nps_raw_fname, roi_stats_csv_fname, nps_1d_csv_fname))

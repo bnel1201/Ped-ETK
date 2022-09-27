@@ -30,6 +30,7 @@ def get_img(img_dir):
     fname =  np.random.choice(list(img_dir.glob('*.raw')), 1)[0]
     return imread(fname, sz=sz, dtype=np.int16)
 
+
 def plot_noise_images(patient_dir, outdir=None):
     fbp_nps_dir = patient_dir / DOSELEVEL / 'NPS'
     proc_nps_dir = patient_dir / (DOSELEVEL + '_processed') / 'NPS'
