@@ -1,8 +1,6 @@
 %contrast-dependent MTF from catphan scans
 clear all;
-%Load slice in
 addpath('utils')
-% folder_path = '/gpfs_projects/rxz4/data/DLCT/phantom_sim/for_CT2020Conf/ctp404_proc/'; %Bv44d, Bf32d
 basedir = '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/'; %see ../../make_phantoms/make_phantoms.m
 
 datadir = fullfile(basedir, 'CTP404/monochromatic/');

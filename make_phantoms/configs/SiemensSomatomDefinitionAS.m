@@ -10,6 +10,6 @@ na = 580; %from 580 % number of views in a roatation
 ds = 1;        % detector column size 
 offset_s = 1.25;    % lateral shift of detector
 fov = 380; % 
-nx = 512; %matrix size
+nx = 256; %matrix size
 down = 1;
 has_bowtie = 0;

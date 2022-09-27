@@ -20,7 +20,7 @@ sg = sino_geom('fan', 'units', 'mm', ...
     'dsd', sdd, 'dod', dod, 'offset_s', offset_s, ...
     'down', down);
 
-sampleFolder = [basedataFolder 'CCT189/'];
+sampleFolder = [basedataFolder 'CCT189/']
 if ~exist(sampleFolder, 'dir')
     mkdir(sampleFolder)
 end
@@ -33,12 +33,11 @@ mu_water = 0.2059 / 10;     % in mm-1
 ref_diameter = 200; % in mm, from /home/rxz4/ct_deeplearning/make_phantom/make_CCT189_wD45_B30.m line 81
 % ref_diameter = patient_diameters(1)
 aec_factors = exp(mu_water*patient_diameters)./exp(mu_water*ref_diameter);
-
-for idx=1:length(patient_diameters)
-    patient_diameter = patient_diameters(idx);
+ndiams = length(patient_diameters); 
+for diam_idx=1:ndiams
+    patient_diameter = patient_diameters(diam_idx);
     fov = 1.1*patient_diameter;
-    disp(sprintf('diameter: %d, FOV: %d [%d/%d]', patient_diameter, round(fov), idx, length(patient_diameters)
-    aec_factor = aec_factors(idx);
+    aec_factor = aec_factors(diam_idx);
 
     ig = image_geom('nx', nx, 'fov', fov, 'down', down);
 
@@ -98,14 +97,19 @@ for idx=1:length(patient_diameters)
             I0_afterbowtie=I0;            
         end
 
-        disk_proj = I0_afterbowtie .* exp(-disk_sino);
-        bkg_proj = I0_afterbowtie .* exp(-bkg_sino);
+        disk_proj_noisefree = I0_afterbowtie .* exp(-disk_sino);
+        bkg_proj_noisefree = I0_afterbowtie .* exp(-bkg_sino);
 
-        for isim = batch      
-            disp(sprintf('simulation [%3.0d/%3.0d]', isim, length(batch)))
-            if add_noise == true      
-                disk_proj = poisson(disk_proj); %This poisson generator respond to the seed number setby rand('sate',x');
-                bkg_proj = poisson(bkg_proj); %is it ok if these are different noise instances?
+        for sim_idx = batch
+            total_idx = sim_idx+(diam_idx-1)*nsims;
+            total_sim = ndiams*nsims;
+            disp(sprintf('%s, diameter: %dmm (FOV: %dmm) [%d/%d], simulation: [%d/%d], Total: %3.2f%% [%d/%d]', mfilename, patient_diameter, round(fov), diam_idx, ndiams, sim_idx, nsims, total_idx/total_sim*100, total_idx, total_sim))
+            if add_noise   
+                disk_proj = poisson(disk_proj_noisefree); %This poisson generator respond to the seed number setby rand('sate',x');
+                bkg_proj = poisson(bkg_proj_noisefree); %is it ok if these are different noise instances?
+            else
+                disk_proj = disk_proj_noisefree;
+                bkg_proj = bkg_proj_noisefree;
             end
 
             disk_proj = replace_zeros(disk_proj);
@@ -121,12 +125,12 @@ for idx=1:length(patient_diameters)
             bkg_fbp_hu = 1000*(bkg_fbp - mu_water)/mu_water + offset;
 
             file_prefix = [files_disk 'fbp_sharp_'];
-            file_num = isim;
+            file_num = sim_idx;
             filename_disk_fbp = [file_prefix 'v' sprintf('%03d', file_num) '.raw'];
             my_write_rawfile(filename_disk_fbp, disk_fbp_hu, 'int16');
 
             file_prefix = [files_bkg 'fbp_sharp_'];
-            file_num = isim;
+            file_num = sim_idx;
             filename_bkg_fbp = [file_prefix 'v' sprintf('%03d', file_num) '.raw'];
             my_write_rawfile(filename_bkg_fbp, bkg_fbp_hu, 'int16');
         end

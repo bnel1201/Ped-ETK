@@ -1,20 +1,21 @@
+% A set of defaults for quick testing, to specify user defined variables define them BEFORE calling this script or AFTER
 addpath(fileparts(mfilename('fullpath')))
 addpath('/home/brandon.nelson/Dev/PhantomSimulations/CT_simulator')
 if exist('homedir', 'var') == false %checks if setpath has been run
     setpath
 end
 % addpath('./configs')
-if exist('max_dose_level', 'var') == false
-    max_dose_level = 3e5
+if exist('reference_dose_level', 'var') == false
+    reference_dose_level = 3e5
 end
-I0_vector = max_dose_level; %[30 55 70 85 100]/100;
+I0_vector = reference_dose_level; %[30 55 70 85 100]/100;
 
 if exist('patient_diameters', 'var') == false
     patient_diameters = [112, 131, 151, 185, 216, 292]; %newborn, 8 yr-old, 18 year old
 end
 
 if exist('nsims', 'var') == false
-    nsims = 1
+    nsims = 2
 end
 
 if exist('aec_on', 'var') == false

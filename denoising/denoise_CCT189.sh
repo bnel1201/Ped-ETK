@@ -47,22 +47,24 @@ COMMENT
 # trained CNN3 weights applied on test set
 # adapted from </gpfs_projects/prabhat.kc/lowdosect/coderepo/DLIR_v1_public/traintest/nonGAN/demo_test.sh>
 # ----------------------------------------------------#
-MODEL_FOLDER=$1
-# MODEL_FOLDER='/gpfs_projects/prabhat.kc/lowdosect/transfers/transfers_4_spie/exps/exps/w8_exps_4_spie_dose/checkpoints/p96/augTrTaTdT/redcnn/hvd_cpt_for_mse_tv-fbd_wd_0.0_lr_1e-05_bs_64/'
+# specify the model of interest as the first input argument, else the default model below is taken
+MODEL_FOLDER=${1-'/gpfs_projects/prabhat.kc/lowdosect/transfers/transfers_4_spie/exps/exps/w8_exps_4_spie_dose/checkpoints/p96/augTrTaTdT/redcnn/hvd_cpt_for_mse_tv-fbd_wd_0.0_lr_1e-05_bs_64/'}
 
 PHANTOM=CCT189
-DOSELEVEL=I0_0300000
 # PHANTOM=CTP404
+
+DOSELEVEL=I0_0300000
+BASE_DIR=/home/brandon.nelson/Data/temp/
+# BASE_DIR=/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/
 orginal_dir=$(pwd)
 cd $(dirname $0)
-# on CTP404 Contrast Dependent MTF phantom
 for DIAMETER in 112 131 151 185 216 292
 do
    echo $DIAMETER
    for OBJ in disk bkg
    do
-   INPUT_FOLDER=/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/$PHANTOM/monochromatic/diameter"${DIAMETER}"mm/"${DOSELEVEL}"/$OBJ/
-   OUTPUT_FOLDER=/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/$PHANTOM/monochromatic/diameter"${DIAMETER}"mm/"${DOSELEVEL}"_processed/$OBJ/
+   INPUT_FOLDER="${BASE_DIR}"/$PHANTOM/monochromatic/diameter"${DIAMETER}"mm/"${DOSELEVEL}"/$OBJ/
+   OUTPUT_FOLDER="${BASE_DIR}"/$PHANTOM/monochromatic/diameter"${DIAMETER}"mm/"${DOSELEVEL}"_processed/$OBJ/
    
    NORM_TYPE='None'
    python SPIE2023_models/resolve_fly.py --m 'redcnn' --input-folder $INPUT_FOLDER --model-folder $MODEL_FOLDER \
@@ -70,8 +72,8 @@ do
    --normalization-type $NORM_TYPE --input-img-type 'raw' --specific-epoch --se-plot
 
    # reorganize output files for evaluation scripts
-   mkdir -p $OUTPUT_FOLDER/$OBJ
-   mv $OUTPUT_FOLDER/checkpoint-25/*.raw $OUTPUT_FOLDER/$OBJ/
+   mkdir -p $OUTPUT_FOLDER/
+   mv $OUTPUT_FOLDER/checkpoint-25/*.raw $OUTPUT_FOLDER/
    rm -r $OUTPUT_FOLDER/checkpoint-25
    done
 done

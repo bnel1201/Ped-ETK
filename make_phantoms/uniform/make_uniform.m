@@ -18,8 +18,8 @@ if exist('homedir', 'var') == false %checks if setpath has been run
 end
 addpath('./utils')
 addpath('./configs')
-if exist('max_dose_level', 'var') == false
-    max_dose_level = 3e5
+if exist('reference_dose_level', 'var') == false
+    reference_dose_level = 3e5
 end
 
 if exist('patient_diameters', 'var') == false

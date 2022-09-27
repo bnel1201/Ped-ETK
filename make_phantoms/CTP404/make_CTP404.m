@@ -36,12 +36,11 @@ mu_water = 0.2059 / 10;     % in mm-1
 ref_diameter = 200; % in mm, from /home/rxz4/ct_deeplearning/make_phantom/make_CCT189_wD45_B30.m line 81
 % ref_diameter = patient_diameters(1)
 aec_factors = exp(mu_water*patient_diameters)./exp(mu_water*ref_diameter);
-
-for idx=1:length(patient_diameters)
-    patient_diameter = patient_diameters(idx);
+ndiams = length(patient_diameters); 
+for diam_idx=1:ndiams
+    patient_diameter = patient_diameters(diam_idx);
     fov = 1.1*patient_diameter;
-    disp(sprintf('diameter: %d, FOV: %d [%d/%d]', patient_diameter, round(fov), idx, length(patient_diameters)))
-    aec_factor = aec_factors(idx);
+    aec_factor = aec_factors(diam_idx);
 
     ig = image_geom('nx', nx, 'fov', fov, 'down', down);
 
@@ -90,11 +89,15 @@ for idx=1:length(patient_diameters)
         else
             I0_afterbowtie=I0;            
         end        
-        proj = I0_afterbowtie .* exp(-sino);
-        for isim = batch      
-            disp(sprintf('simulation [%3.0d/%3.0d]', isim, length(batch)))
+        proj_noisefree = I0_afterbowtie .* exp(-sino);
+        for sim_idx = batch
+            total_idx = sim_idx+(diam_idx-1)*nsims;
+            total_sim = ndiams*nsims;
+            disp(sprintf('%s, diameter: %dmm (FOV: %dmm) [%d/%d], simulation: [%d/%d], Total: %3.2f%% [%d/%d]', mfilename, patient_diameter, round(fov), diam_idx, ndiams, sim_idx, nsims, total_idx/total_sim*100, total_idx, total_sim))
             if add_noise     
-                proj = poisson(proj); %This poisson generator respond to the seed number setby rand('sate',x');
+                proj = poisson(proj_noisefree); %This poisson generator respond to the seed number setby rand('sate',x');
+            else
+                proj = proj_noisefree;
             end
 
             proj = replace_zeros(proj);
@@ -104,7 +107,7 @@ for idx=1:length(patient_diameters)
             x_fbp_sharp = fbp2(sino_log, fg, 'window', 'hann205');
             x_fbp_sharp_hu = 1000*(x_fbp_sharp - mu_water)/mu_water + offset;
             file_prefix = [files_sharp 'fbp_sharp_'];
-            file_num = isim;
+            file_num = sim_idx;
             filename_fbp_sharp = [file_prefix 'v' sprintf('%03d', file_num) '.raw'];
             my_write_rawfile(filename_fbp_sharp, x_fbp_sharp_hu, 'int16');
         end
