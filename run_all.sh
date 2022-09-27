@@ -11,3 +11,8 @@ bash ../../ssh_node.sh "bash ./_1_run_MTF_analysis.sh; exit"
 
 # make plots
 bash ./_2_generate_MTF_plots.sh
+
+cd ..
+cd evaluation/NPS
+bash ../../ssh_node.sh "bash ./_1_run_NPS_analysis.sh; exit"
+bash ./_2_generate_NPS_plots.sh

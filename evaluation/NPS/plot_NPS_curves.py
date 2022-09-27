@@ -129,6 +129,6 @@ print(output_fname)
 
 # %%
 output_fname = 'results/plots/noise_curves.png'
-plot_all_noise_curves(base_dir, figsize=(14, 7))
-
+plot_all_noise_curves(base_dir, output_fname, figsize=(14, 7))
+print(output_fname)
 # %%
