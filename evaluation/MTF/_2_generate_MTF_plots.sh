@@ -1,29 +1,35 @@
 datadir=/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic/
+results_dir=../../results/MTF
+
+orginal_dir=$(pwd)
+cd $(dirname $0)
 ## plot ESF cirves
-output_fname=results/plots/esf_curve_comparison.png
+plots_dir=$results_dir/plots
+
+output_fname=$plots_dir/esf_curve_comparison.png
 python plot_esf_curves.py -d $datadir -o $output_fname
 ## plot MTF curves
 
 # plot fbp baseline mtf
-
-output_fname=results/plots/fbp_mtf_baseline.png
+output_fname=$plots_dir/fbp_mtf_baseline.png
 python plot_mtf_curves.py -d $datadir -o $output_fname
 
 # plot redcnn mtf
-output_fname=results/plots/mtf_redcnn.png
+output_fname=$plots_dir/mtf_redcnn.png
 python plot_mtf_curves.py -d $datadir -o $output_fname --processed
 
 ## plot MTF cutoff values
-
-output_fname=results/plots/mtf_cutoff_vals.png
+output_fname=$plots_dir/mtf_cutoff_vals.png
 python plot_mtf_cutoffs.py -d $datadir -o $output_fname
 
-output_fname=results/plots/mtf_cutoff_vals_processed.png
+output_fname=$plots_dir/mtf_cutoff_vals_processed.png
 python plot_mtf_cutoffs.py -d $datadir -o $output_fname --processed
 
-output_fname=results/plots/mtf_cutoff_vals_rel.png
+output_fname=$plots_dir/mtf_cutoff_vals_rel.png
 python plot_mtf_cutoffs_compare.py -d $datadir -o $output_fname
 
 # plot images
-
-python plot_images.py -o results/images
+images_dir=$results_dir/images
+python plot_images.py -o $images_dir
+bash ../utils/images_to_gif.sh $images_dir'/diameter*mm_image_comparison.png' $results_dir'/esf_comparison.gif'
+cd $orginal_dir

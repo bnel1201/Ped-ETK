@@ -1,4 +1,3 @@
-# %%
 import argparse
 from pathlib import Path
 import pandas as pd
@@ -25,8 +24,8 @@ def plot_1D_nps(fbp_dir, proc_dir, fig=None, ax=None):
     proc_nps_df.plot(ax=ax, x='spatial frequency [cyc/pix]', y=' magnitude', label='REDCNN')
 
 
-def plot_1D_nps_all_diams(base_dir, output_fname=None, **subplots_kwargs):
-    diam_dirs = sorted(list(base_dir.glob('diameter*')))
+def plot_1D_nps_all_diams(datadir, output_fname=None, **subplots_kwargs):
+    diam_dirs = sorted(list(datadir.glob('diameter*')))
     f, axs = plt.subplots(2, 3, dpi=300, **subplots_kwargs)
     for ax, patient_dir in zip(axs.flatten(), diam_dirs):
         fbp_dir = patient_dir / DOSELEVEL / 'NPS'
@@ -172,81 +171,101 @@ def plot_CT_bias(csv_fname, output_fname=None, fig=None, ax=None):
         plt.show()
     return fig, ax
 
-# %% [markdown]
-# Plot NPS Curves
-# %%
-base_dir = Path('/home/brandon.nelson/Data/temp/CCT189/monochromatic')
-output_fname = 'results/plots/1D_nps.png'
-plot_1D_nps_all_diams(base_dir, output_fname, sharex=True, sharey=True)
-print(output_fname)
 
-# %% [markdown]
-# Summarize CT number and noise vs. patient diameter
-# %%
-output_fname = 'results/diameter_summary.csv'
-csv_fname = write_results_to_csv(base_dir, output_fname, DOSELEVEL)
-print(csv_fname)
-fbp_summary_df, proc_summary_df = load_csv(csv_fname)
-fbp_summary_df, proc_summary_df
-# %%
-output_fname = 'results/plots/CT_number_noise_v_diameter.png'
-plot_CT_number_noise_v_diameter(fbp_summary_df, proc_summary_df, output_fname)
-print(output_fname)
-# %%
-output_fname = 'results/plots/relative_noise_vs_diameter.png'
-_, rel_denoise_ax = plot_relative_denoising(fbp_summary_df, proc_summary_df)
-print(output_fname)
-# %%
-output_fname = 'results/plots/noise_reduction_vs_diameter.png'
-_, noise_redux_ax = plot_noise_reduction(csv_fname, output_fname)
-print(output_fname)
-# %%
-output_fname = 'results/plots/CT_number_bias.png'
-plot_CT_bias(csv_fname, output_fname)
-print(output_fname)
+def plot_CT_bias_v_noise_reduction(csv_fname, output_fname=None):
+    bias_df = get_bias_df(csv_fname)
+    noise_reduction_df = get_noise_reduction_df(csv_fname)
+    f, ax = plt.subplots(figsize=(4,4))
+    patient_diameter = bias_df.index
+    im = ax.scatter(noise_reduction_df['mean noise (ROI std) [HU]'], bias_df['mean CT number [HU]'], c=patient_diameter)
+    ax.set_xlabel('Relative Noise Reduction [%]\n$|\sigma_{REDCNN} - \sigma_{FBP}| / \sigma_{FBP}\\times 100$')
+    ax.set_ylabel('CT Number Bias [HU]')
+    cbar = plt.colorbar(im, label='Patient Diameter [mm]')
+    f.tight_layout()
 
-# %%
-bias_df = get_bias_df(csv_fname)
-noise_reduction_df = get_noise_reduction_df(csv_fname)
-f, ax = plt.subplots(figsize=(4,4))
-patient_diameter = bias_df.index
-im = ax.scatter(noise_reduction_df['mean noise (ROI std) [HU]'], bias_df['mean CT number [HU]'], c=patient_diameter)
-ax.set_xlabel('Relative Noise Reduction [%]\n$|\sigma_{REDCNN} - \sigma_{FBP}| / \sigma_{FBP}\\times 100$')
-ax.set_ylabel('CT Number Bias [HU]')
-cbar = plt.colorbar(im, label='Patient Diameter [mm]')
-f.tight_layout()
+    if output_fname:
+        f.savefig(output_fname, dpi=600)
+        print(output_fname)
+    else:
+        f.show()
 
-output_fname = 'results/plots/bias_v_noise_reduction.png'
-f.savefig(output_fname, dpi=600)
-print(output_fname)
-# %%
 
-nps_csv_fname = 'results/diameter_1D_nps.csv'
-write_1D_nps_results_to_csv(base_dir, nps_csv_fname, DOSELEVEL)
-print(nps_csv_fname)
-
-fbp_nps, proc_nps = load_csv(nps_csv_fname)
-# %%
 def get_noise_level_from_nps(delfreq, mag): return np.sqrt(sum(delfreq*mag))
-# %%
-delfreq = fbp_nps['spatial frequency [cyc/pix]'].diff()[1]
-diameters = [int(d.split('diameter')[1].split('mm')[0]) for d in fbp_nps.columns[1:]]
-fbp_noise_levels = [get_noise_level_from_nps(delfreq, fbp_nps[d]) for d in fbp_nps.columns[1:]]
-proc_noise_levels = [get_noise_level_from_nps(delfreq, proc_nps[d]) for d in proc_nps.columns[1:]]
 
-nps_noise_levels = pd.DataFrame({'Patient Diameter [mm]': diameters, 'FBP': fbp_noise_levels, 'REDCNN': proc_noise_levels}).set_index('Patient Diameter [mm]')
-nps_noise_levels
-# %%
-fbp_summary_df, proc_summary_df = load_csv(csv_fname)
-fbp_summary_df.set_index('Patient Diameter [mm]', inplace=True)
-fbp_summary_df.pop('mean CT number [HU]')
-proc_summary_df.set_index('Patient Diameter [mm]', inplace=True)
-proc_summary_df.pop('mean CT number [HU]')
-roi_noise_levels = fbp_summary_df.join(proc_summary_df, rsuffix='_REDCNN-TV')
-roi_noise_levels.columns = [c + ' ROI' for c in nps_noise_levels.columns]
-nps_noise_levels.columns = [c + ' NPS' for c in nps_noise_levels.columns]
-# %%
-noise_levels_df = pd.concat((roi_noise_levels, nps_noise_levels), axis=1)
-noise_levels_df.columns = sorted(noise_levels_df.columns)
-noise_levels_df.to_csv('results/nps_vs_roi_noise_levels.csv')
-# %%
+
+def compare_NPS_noiselevel_and_ROI_measure(datadir, outdir):
+    nps_csv_fname = f'{outdir}/diameter_1D_nps.csv'
+    write_1D_nps_results_to_csv(datadir, nps_csv_fname, DOSELEVEL)
+
+    print(nps_csv_fname)
+
+    fbp_nps, proc_nps = load_csv(nps_csv_fname)
+
+    delfreq = fbp_nps['spatial frequency [cyc/pix]'].diff()[1]
+    diameters = [int(d.split('diameter')[1].split('mm')[0]) for d in fbp_nps.columns[1:]]
+    fbp_noise_levels = [get_noise_level_from_nps(delfreq, fbp_nps[d]) for d in fbp_nps.columns[1:]]
+    proc_noise_levels = [get_noise_level_from_nps(delfreq, proc_nps[d]) for d in proc_nps.columns[1:]]
+
+    nps_noise_levels = pd.DataFrame({'Patient Diameter [mm]': diameters, 'FBP': fbp_noise_levels, 'REDCNN': proc_noise_levels}).set_index('Patient Diameter [mm]')
+
+    fbp_summary_df, proc_summary_df = load_csv(f'{outdir}/diameter_summary.csv')
+    fbp_summary_df.set_index('Patient Diameter [mm]', inplace=True)
+    fbp_summary_df.pop('mean CT number [HU]')
+    proc_summary_df.set_index('Patient Diameter [mm]', inplace=True)
+    proc_summary_df.pop('mean CT number [HU]')
+    roi_noise_levels = fbp_summary_df.join(proc_summary_df, rsuffix='_REDCNN-TV')
+    roi_noise_levels.columns = [c + ' ROI' for c in nps_noise_levels.columns]
+    nps_noise_levels.columns = [c + ' NPS' for c in nps_noise_levels.columns]
+    noise_levels_df = pd.concat((roi_noise_levels, nps_noise_levels), axis=1)
+    noise_levels_df.columns = sorted(noise_levels_df.columns)
+    fname = f'{outdir}/nps_vs_roi_noise_levels.csv'
+    noise_levels_df.to_csv(fname)
+    print(fname)
+
+
+def main(datadir=None, outdir=None):
+    datadir = datadir or '/home/brandon.nelson/Data/temp/CCT189/monochromatic'
+    datadir = Path(datadir)
+    # patient_dirs = sorted(list(Path(datadir).glob('diameter*')))
+
+    plt.style.use('seaborn')
+    output_fname = f'{outdir}/plots/1D_nps.png'
+    plot_1D_nps_all_diams(datadir, output_fname, sharex=True, sharey=True)
+    print(output_fname)
+
+    output_fname = f'{outdir}/diameter_summary.csv'
+    csv_fname = write_results_to_csv(datadir, output_fname, DOSELEVEL)
+    print(csv_fname)
+    fbp_summary_df, proc_summary_df = load_csv(csv_fname)
+
+    output_fname = f'{outdir}/plots/CT_number_noise_v_diameter.png'
+    plot_CT_number_noise_v_diameter(fbp_summary_df, proc_summary_df, output_fname)
+    print(output_fname)
+
+    output_fname = f'{outdir}/plots/relative_noise_vs_diameter.png'
+    _, rel_denoise_ax = plot_relative_denoising(fbp_summary_df, proc_summary_df)
+    print(output_fname)
+
+    output_fname = f'{outdir}/plots/noise_reduction_vs_diameter.png'
+    _, noise_redux_ax = plot_noise_reduction(csv_fname, output_fname)
+    print(output_fname)
+
+    output_fname = f'{outdir}/plots/CT_number_bias.png'
+    plot_CT_bias(csv_fname, output_fname)
+    print(output_fname)
+
+
+    output_fname = f'{outdir}/plots/bias_v_noise_reduction.png'
+    plot_CT_bias_v_noise_reduction(csv_fname, output_fname)
+
+    compare_NPS_noiselevel_and_ROI_measure(datadir, outdir)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Plots 2D NPS images')
+    parser.add_argument('--datadir', '-d', default=None,
+                        help="directory containing different patient diameter CT simulations")
+    parser.add_argument('--output_dir','-o', required=False,
+                        help="Directory to save image files")
+    args = parser.parse_args()
+    main(args.datadir, outdir=args.output_dir)

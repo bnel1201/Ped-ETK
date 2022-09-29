@@ -1,34 +1,13 @@
-# %%
+import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
-import pandas as pd
+
+from utils.img_io import get_2D_nps_img, get_img
 
 np.random.seed(42)
 
 DOSELEVEL = 'I0_0300000'
-
-
-def imread(fname, sz=512, dtype=np.int16): return np.fromfile(open(fname), dtype=dtype, count=sz*sz).reshape(sz, sz)
-
-
-def get_2D_nps_img(nps_dir):
-    raw_fname=next(nps_dir.glob('2D_nps_*.raw'))
-    sz = int(raw_fname.stem.split('_')[-1])
-    return imread(raw_fname, sz=sz, dtype=np.float32)
-
-
-def get_img_sz(img_dir):
-    temp_df = pd.read_csv(img_dir.parents[1] / 'geometry_info.csv').T
-    ig = pd.DataFrame({col: [rows] for col, rows in zip(temp_df.iloc[0, :], temp_df.iloc[1, :])})
-    nx = int(ig.ny)
-    return nx
-
-
-def get_img(img_dir):
-    sz = get_img_sz(img_dir)
-    fname =  np.random.choice(list(img_dir.glob('*.raw')), 1)[0]
-    return imread(fname, sz=sz, dtype=np.int16)
 
 
 def get_display_settings(img, nstds=0.5):
@@ -82,10 +61,24 @@ def plot_noise_images(patient_dir, outdir=None):
         output_fname = outdir / f'{diam}_noise_comparison.png'
         f.savefig(output_fname, dpi=600)
         print(f'saved to: {output_fname}')
-# %%
-base_dir = Path('/home/brandon.nelson/Data/temp/CCT189/monochromatic')
-diam_dirs = sorted(list(base_dir.glob('diameter*')))
+    else:
+        f.show()
 
-for patient_dir in diam_dirs:
-    plot_noise_images(patient_dir, 'results/images')
-# %%
+
+def main(datadir=None, outdir=None):
+    datadir = datadir or '/home/brandon.nelson/Data/temp/CCT189/monochromatic'
+    patient_dirs = sorted(list(Path(datadir).glob('diameter*')))
+
+
+    for patient_dir in patient_dirs:
+        plot_noise_images(patient_dir, outdir)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Plots 2D NPS images')
+    parser.add_argument('--datadir', '-d', default=None,
+                        help="directory containing different patient diameter CT simulations")
+    parser.add_argument('--output_dir','-o', required=False,
+                        help="Directory to save image files")
+    args = parser.parse_args()
+    main(args.datadir, outdir=args.output_dir)

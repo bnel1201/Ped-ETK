@@ -1,3 +1,5 @@
 *.png
 .nfs*
+*.gif
+*.csv
 __pycache__

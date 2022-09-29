@@ -107,7 +107,7 @@ def image_comparison_with_profile(fbp_fname, proc_fname, outdir=None):
         f.show()
 
 
-def main(datadir=None, outdir=None, show_diff=False):
+def main(datadir=None, outdir=None):
     datadir = datadir or '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic/'
     patient_dirs = sorted(list(Path(datadir).glob('diameter*')))
 
