@@ -25,13 +25,15 @@ def get_mtf_results(patient_dir, mtfval=10, processed=False):
     df = clean_column_names(df)
     df = sort_HU_cols(df)
     HUs = [int(h.split(' HU')[0]) for h in df.columns[1:]]
-    mtf10 = df.iloc[1,1:].to_numpy()
-    return pd.DataFrame({'Contrast [HU]': HUs, f'{diameter}': mtf10})
-# %%
+    mtf = df.iloc[1,1:].to_numpy()
+    return pd.DataFrame({'Contrast [HU]': HUs, f'{diameter}': mtf})
+
+
 def merge_patient_diameters(patient_dirs, mtfval=10, processed=False):
-    mtf10 = get_mtf_results(patient_dirs[0], mtfval, processed=processed)
+    mtf = get_mtf_results(patient_dirs[0], mtfval, processed=processed)
     for idx in range(1, len(patient_dirs)):
-        other_mtf = get_mtf_results(patient_dirs[idx], mtfval)
-        mtf10=mtf10.merge(other_mtf, how='inner', on='Contrast [HU]')
-        mtf10 = mtf10.set_index('Contrast [HU]')
-    return mtf10
+        other_mtf = get_mtf_results(patient_dirs[idx], mtfval, processed=processed)
+        mtf=mtf.merge(other_mtf, how='inner', on='Contrast [HU]')
+        mtf = mtf.set_index('Contrast [HU]')
+    return mtf
+

@@ -186,8 +186,8 @@ def main():
 			lr_img = lr_img.astype(out_dtype)
 			cnn_output = (cnn_output).astype(out_dtype)
 			# if gt_available: util.plot2dlayers(gt_img)
-			util.plot2dlayers(lr_img)
-			util.plot2dlayers(cnn_output)
+			# util.plot2dlayers(lr_img)
+			# util.plot2dlayers(cnn_output)
 			# sys.exit()
 			# calculating global metrics when gt Images are available
 			print('img no', i)

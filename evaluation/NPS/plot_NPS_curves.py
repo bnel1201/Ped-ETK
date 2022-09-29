@@ -22,7 +22,7 @@ def plot_1D_nps(fbp_dir, proc_dir, fig=None, ax=None):
         fig, ax = plt.subplots()
     diam = fbp_dir.parents[1].stem
     fbp_nps_df.plot(ax=ax, x='spatial frequency [cyc/pix]', y=' magnitude', label='FBP', title=f'{diam}')
-    proc_nps_df.plot(ax=ax, x='spatial frequency [cyc/pix]', y=' magnitude', label='REDCNN-TV')
+    proc_nps_df.plot(ax=ax, x='spatial frequency [cyc/pix]', y=' magnitude', label='REDCNN')
 
 
 def plot_1D_nps_all_diams(base_dir, output_fname=None, **subplots_kwargs):
@@ -42,7 +42,7 @@ def plot_1D_nps_all_diams(base_dir, output_fname=None, **subplots_kwargs):
 
 
 def make_summary_df(fbp_stats_df, proc_stats_df):
-    return pd.DataFrame({'Series': ['FBP', 'REDCNN-TV'],
+    return pd.DataFrame({'Series': ['FBP', 'REDCNN'],
                          'noise mean [ROI std in HU]': [fbp_stats_df[' std [HU]'].mean(), proc_stats_df[' std [HU]'].mean()],
                          'noise std [ROI std in HU]': [fbp_stats_df[' std [HU]'].std(), proc_stats_df[' std [HU]'].std()]})
 
@@ -77,7 +77,7 @@ def plot_noise_curves(fbp_dir, proc_dir, fig=None, ax=None):
 
     color='blue'
     ax.plot(fbp_stats_df[' mean [HU]'], color=color, linestyle='-', label='FBP')
-    ax.plot(proc_stats_df[' mean [HU]'], color=color, linestyle='--', label='REDCNN-TV')
+    ax.plot(proc_stats_df[' mean [HU]'], color=color, linestyle='--', label='REDCNN')
     ax.tick_params(axis='y', labelcolor=color)
     ax.set_ylabel('mean [HU]', color=color)
     ax.set_title(diam)
@@ -85,7 +85,7 @@ def plot_noise_curves(fbp_dir, proc_dir, fig=None, ax=None):
     axtwin = ax.twinx()
     color='red'
     axtwin.plot(fbp_stats_df[' std [HU]'], color=color)
-    axtwin.plot(proc_stats_df[' std [HU]'], color=color, linestyle='--', label='REDCNN-TV')
+    axtwin.plot(proc_stats_df[' std [HU]'], color=color, linestyle='--', label='REDCNN')
     axtwin.set_ylabel('std [HU]', color=color)
     axtwin.tick_params(axis='y', labelcolor=color)
     axtwin.set_ylim(8, 32)
@@ -96,11 +96,11 @@ def plot_noise_curves(fbp_dir, proc_dir, fig=None, ax=None):
 def plot_CT_number_noise_v_diameter(fbp_summary_df, proc_summary_df, output_fname=None, **subplotkwargs):
     f, (ax0, ax1) = plt.subplots(1, 2, **subplotkwargs)
     fbp_summary_df.plot(ax=ax0, x='Patient Diameter [mm]', y='mean CT number [HU]', label='FBP',)
-    proc_summary_df.plot(ax=ax0, x='Patient Diameter [mm]', y='mean CT number [HU]', label='REDCNN-TV')
+    proc_summary_df.plot(ax=ax0, x='Patient Diameter [mm]', y='mean CT number [HU]', label='REDCNN')
     ax0.set_ylabel('CT Number [HU]')
 
     fbp_summary_df.plot(ax=ax1, x='Patient Diameter [mm]', y='mean noise (ROI std) [HU]', label='FBP')
-    proc_summary_df.plot(ax=ax1, x='Patient Diameter [mm]', y='mean noise (ROI std) [HU]', label='REDCNN-TV')
+    proc_summary_df.plot(ax=ax1, x='Patient Diameter [mm]', y='mean noise (ROI std) [HU]', label='REDCNN')
     ax1.set_ylabel('CT Noise (ROI std) [HU]')
     f.tight_layout()
     if output_fname:
@@ -116,7 +116,7 @@ def plot_relative_denoising(fbp_summary_df, proc_summary_df, output_fname=None, 
     relative_denoising_df*=100
     if fig is None or ax is None:
         fig, ax = plt.subplots(figsize=(4,4))
-    relative_denoising_df.plot(ax=ax, ylabel='Noise Level Relative to FBP [%]\n$\sigma_{REDCNNTV} / \sigma_{FBP} \\times 100$')
+    relative_denoising_df.plot(ax=ax, ylabel='Noise Level Relative to FBP [%]\n$\sigma_{REDCNN} / \sigma_{FBP} \\times 100$')
     ax.get_legend().remove()
     if output_fname:
         Path(output_fname).parent.mkdir(exist_ok=True, parents=True)
@@ -140,7 +140,7 @@ def plot_noise_reduction(csv_fname, output_fname=None, fig=None, ax=None):
 
     if fig is None or ax is None:
         fig, ax = plt.subplots(figsize=(4,4))
-    noise_reduction_df.plot(ax=ax, ylabel='Relative Noise Reduction [%]\n$|\sigma_{REDCNNTV} - \sigma_{FBP}| / \sigma_{FBP}\\times 100$')
+    noise_reduction_df.plot(ax=ax, ylabel='Relative Noise Reduction [%]\n$|\sigma_{REDCNN} - \sigma_{FBP}| / \sigma_{FBP}\\times 100$')
     ax.get_legend().remove()
     fig.tight_layout()
     if output_fname:
@@ -162,7 +162,7 @@ def plot_CT_bias(csv_fname, output_fname=None, fig=None, ax=None):
     bias_df = get_bias_df(csv_fname)
     if fig is None or ax is None:
         fig, ax = plt.subplots(figsize=(4,4))
-    bias_df.plot(ax=ax, ylabel='CT number bias [HU]\n$REDCNNTV - FBP$')
+    bias_df.plot(ax=ax, ylabel='CT number bias [HU]\n$REDCNN - FBP$')
     ax.get_legend().remove()
     fig.tight_layout()
     if output_fname:
@@ -211,7 +211,7 @@ noise_reduction_df = get_noise_reduction_df(csv_fname)
 f, ax = plt.subplots(figsize=(4,4))
 patient_diameter = bias_df.index
 im = ax.scatter(noise_reduction_df['mean noise (ROI std) [HU]'], bias_df['mean CT number [HU]'], c=patient_diameter)
-ax.set_xlabel('Relative Noise Reduction [%]\n$|\sigma_{REDCNNTV} - \sigma_{FBP}| / \sigma_{FBP}\\times 100$')
+ax.set_xlabel('Relative Noise Reduction [%]\n$|\sigma_{REDCNN} - \sigma_{FBP}| / \sigma_{FBP}\\times 100$')
 ax.set_ylabel('CT Number Bias [HU]')
 cbar = plt.colorbar(im, label='Patient Diameter [mm]')
 f.tight_layout()
@@ -234,7 +234,7 @@ diameters = [int(d.split('diameter')[1].split('mm')[0]) for d in fbp_nps.columns
 fbp_noise_levels = [get_noise_level_from_nps(delfreq, fbp_nps[d]) for d in fbp_nps.columns[1:]]
 proc_noise_levels = [get_noise_level_from_nps(delfreq, proc_nps[d]) for d in proc_nps.columns[1:]]
 
-nps_noise_levels = pd.DataFrame({'Patient Diameter [mm]': diameters, 'FBP': fbp_noise_levels, 'REDCNN-TV': proc_noise_levels}).set_index('Patient Diameter [mm]')
+nps_noise_levels = pd.DataFrame({'Patient Diameter [mm]': diameters, 'FBP': fbp_noise_levels, 'REDCNN': proc_noise_levels}).set_index('Patient Diameter [mm]')
 nps_noise_levels
 # %%
 fbp_summary_df, proc_summary_df = load_csv(csv_fname)

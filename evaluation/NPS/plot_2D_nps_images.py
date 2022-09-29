@@ -31,6 +31,14 @@ def get_img(img_dir):
     return imread(fname, sz=sz, dtype=np.int16)
 
 
+def get_display_settings(img, nstds=0.5):
+    nx = img.shape[0]
+    roi = img[nx//8:nx-nx//8, nx//8:nx-nx//8]
+    img_vmin = roi.mean() - nstds*roi.std()
+    img_vmax = roi.mean() + nstds*roi.std()
+    return img_vmin, img_vmax
+
+
 def plot_noise_images(patient_dir, outdir=None):
     fbp_nps_dir = patient_dir / DOSELEVEL / 'NPS'
     proc_nps_dir = patient_dir / (DOSELEVEL + '_processed') / 'NPS'
@@ -49,21 +57,19 @@ def plot_noise_images(patient_dir, outdir=None):
     f, axs = plt.subplots(2, 2, dpi=300,
                         gridspec_kw=dict(hspace=0, wspace=0), figsize=[figsize]*2)
 
-    nx = get_img_sz(fbp_img_dir)
-
-    nstds = 0.5
-    roi = fbp_img[nx//8:nx-nx//8, nx//8:nx-nx//8]
-    img_vmin = roi.mean() - nstds*roi.std()
-    img_vmax = roi.mean() + nstds*roi.std()
+    img_vmin, img_vmax = get_display_settings(fbp_img, nstds=0.5)
 
     axs[0, 0].imshow(fbp_img, cmap='gray', vmin=img_vmin, vmax=img_vmax)
     axs[0, 1].imshow(fbp_nps, cmap='gray')
+
+    img_vmin, img_vmax = get_display_settings(proc_img, nstds=0.5) # <--- remove this once bias issue is addressed in model BJN 2022-09-27
+
     axs[1, 0].imshow(proc_img, cmap='gray', vmin=img_vmin, vmax=img_vmax)
     axs[1, 1].imshow(proc_nps, cmap='gray')
     axs[0, 0].set_xlabel('Image')
     axs[0, 1].set_xlabel('2D NPS')
     axs[0, 0].set_ylabel('FBP')
-    axs[1, 0].set_ylabel('REDCNN-TV')
+    axs[1, 0].set_ylabel('REDCNN')
     [ax.xaxis.set_major_locator(plt.NullLocator()) for ax in axs.flatten()]
     [ax.yaxis.set_major_locator(plt.NullLocator()) for ax in axs.flatten()]
 

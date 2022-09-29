@@ -44,7 +44,7 @@ def write_results_to_csv(base_dir, output_fname, DOSELEVEL):
     fbp_summary_df = get_diameter_summary_df(diam_dirs, DOSELEVEL)
     proc_summary_df = get_diameter_summary_df(diam_dirs, DOSELEVEL + '_processed')
     fbp_summary_df['Series'] = 'FBP'
-    proc_summary_df['Series'] = 'REDCNN-TV'
+    proc_summary_df['Series'] = 'REDCNN'
     pd.concat((fbp_summary_df, proc_summary_df), axis=0).to_csv(output_fname, index=None)
     return output_fname
 
@@ -53,7 +53,7 @@ def write_1D_nps_results_to_csv(base_dir, output_fname, DOSELEVEL):
     fbp_nps_df = get_1D_NPS_for_all_diams(base_dir, DOSELEVEL)
     proc_nps_df = get_1D_NPS_for_all_diams(base_dir, DOSELEVEL+'_processed')
     fbp_nps_df['Series'] = 'FBP'
-    proc_nps_df['Series'] = 'REDCNN-TV'
+    proc_nps_df['Series'] = 'REDCNN'
     pd.concat((fbp_nps_df, proc_nps_df), axis=0).to_csv(output_fname)
 
 
