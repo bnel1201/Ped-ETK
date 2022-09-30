@@ -19,7 +19,7 @@ output_fname=$plots_dir/mtf_redcnn.png
 python plot_mtf_curves.py -d $datadir -o $output_fname --processed
 
 ## plot MTF cutoff values
-output_fname=$plots_dir/mtf_cutoff_vals.png
+output_fname=$plots_dir/mtf_cutoff_vals_baseline.png
 python plot_mtf_cutoffs.py -d $datadir -o $output_fname
 
 output_fname=$plots_dir/mtf_cutoff_vals_processed.png

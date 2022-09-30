@@ -12,37 +12,38 @@ proc_data_folder = '/gpfs_projects/rxz4/data/DLCT/phantom_sim/for_CT2020Conf/cct
 %%Data inputs
 all_recon_type = {'fbp_sharp','fbp_sharp_dl_sharp', 'fbp_sharp_dl_smooth', 'fbp_smooth', 'fbp_smooth_dl_sharp', 'fbp_smooth_dl_smooth'};% 
 
+% insert_info = read_phantom_info([parentfolder '/phantom_info_pix_idx.csv']);
+% ig = read_geometry_info([parentfolder '/geometry_info.csv']);
+% loc = phantom_info(2:end-1, 1:2);
+% nx = ig.nx;
+% dx = ig.dx;
+% fov = ig.fov;
+
+%%inserts info
+nx = 320;%256;
+dx = 0.664; %PixelSpacing
+fov = dx*nx;  
+d = 40;     % mm
+% insert_info [x_center, y_center, r, HU]
+insert_info = [...
+    d*cosd(45)  d*sind(45)    3/2  14;      % 3mm, 14 HU
+    -d*cosd(45)  d*sind(45)   5/2   7;      % 5 mm, 7 HU
+    -d*cosd(45) -d*sind(45)   7/2   5;      % 7 mm, 5 HU
+    d*cosd(45) -d*sind(45)   10/2   3;      % 10 mm, 3 HU
+    ];
+num_inserts = size(insert_info, 1);
+n_recon_option = length(all_recon_type);
+I0_vector = 3e5*[30 55 70 85 100]/100;
+%I0 = I0_vector(1);%6e5*0.6;;
+n_spfile = 200;
+n_safile = 100;
+n_reader = 10;
+n_train = 100;
+n_I0 = length(I0_vector);
+auc_all = zeros(num_inserts, n_recon_option, n_I0, n_reader);
+snr_all = zeros(num_inserts, n_recon_option, n_I0, n_reader);
+
 for idx_insert=1:4
-    % idx_insert = 1 %[1 2 3 4];
-    I0_vector = 3e5*[30 55 70 85 100]/100;
-    %I0 = I0_vector(1);%6e5*0.6;;
-    n_spfile = 200;
-    n_safile = 100;
-    n_reader = 10;
-    n_train = 100;
-    n_I0 = length(I0_vector);
-
-    % insert_info = read_phantom_info([parentfolder '/phantom_info_pix_idx.csv']);
-    % ig = read_geometry_info([parentfolder '/geometry_info.csv']);
-    % loc = phantom_info(2:end-1, 1:2);
-    % nx = ig.nx;
-    % dx = ig.dx;
-    % fov = ig.fov;
-
-    %%inserts info
-    nx = 320;%256;
-    dx = 0.664; %PixelSpacing
-    fov = dx*nx;  
-    d = 40;     % mm
-    % insert_info [x_center, y_center, r, HU]
-    insert_info = [...
-        d*cosd(45)  d*sind(45)    3/2  14;      % 3mm, 14 HU
-        -d*cosd(45)  d*sind(45)   5/2   7;      % 5 mm, 7 HU
-        -d*cosd(45) -d*sind(45)   7/2   5;      % 7 mm, 5 HU
-        d*cosd(45) -d*sind(45)   10/2   3;      % 10 mm, 3 HU
-        ];
-    num_inserts = size(insert_info, 1);
-
     % convert roi locations from mm to pixels (check these values against phantom_info_pix.csv)
     insert_centers = round(insert_info(:,1:2) * (nx/fov) + (nx+1)/2);
     insert_radii = insert_info(:,3) * (nx/fov);
@@ -78,13 +79,9 @@ for idx_insert=1:4
         return;
     end
 
-
-    n_recon_option = length(all_recon_type);
     n_sp = n_spfile;
     n_sa = n_safile*nroi;
 
-    auc_all = zeros(num_inserts, n_reader, n_recon_option, n_I0);
-    snr_all = zeros(num_inserts, n_reader, n_recon_option, n_I0);
 
     for iI = 1:n_I0
         iI
@@ -104,8 +101,7 @@ for idx_insert=1:4
                 folder_sp = [proc_data_folder I0_string  '/' fbp_string '/disk/' dl_string '/'];
                 folder_sa = [proc_data_folder I0_string  '/' fbp_string '/bkg/' dl_string '/'];
             end
-            
-            
+
             sp_img = zeros(nx, nx, n_spfile);
             sp_roi = zeros(roi_nx,roi_nx, n_sp);
             for i=1:n_spfile
@@ -144,22 +140,8 @@ for idx_insert=1:4
                     sa_roi(:,:,(i-1)*5+j) = img_crop - mean(img_crop(:));
                 end
             end
-
-
-    %detection
-    %preassign a larger training set and fix the test set
-    %           idx_sa = randperm(n_sa);
-    %           idx_sp = randperm(n_sp);
-    %           n_preset_sa = 300;
-    %           n_preset_sp = 140;
-    %           idx_sa_test = idx_sa(n_preset_sa+1:end);
-    %           idx_sp_test = idx_sp(n_preset_sp+1:end);
-
             for i=1:n_reader
                 % shuffle training data
-
-                %idx_sa1 = randperm(n_preset_sa);
-                %idx_sp1 = randperm(n_preset_sp);
                 idx_sa1 = randperm(n_sa);
                 idx_sp1 = randperm(n_sp);
 
@@ -172,10 +154,12 @@ for idx_insert=1:4
                 [auc(i), snr(i), chimg, tplimg, meanSP, meanSA, meanSig, kch, t_sp, t_sa] = ...
                     conv_LG_CHO_2d(sa_roi(:, :, idx_sa_tr), sp_roi(:, :, idx_sp_tr), ...
                     sa_roi(:, :, idx_sa_test), sp_roi(:, :, idx_sp_test), insert_r/1.5, 5, 0);
-
+                auc_all(idx_insert, k, iI, i) = auc(i);
+                snr_all(idx_insert, k, iI, i) = snr(i);
+                if auc(i) == 0
+                    error(sprintf('0 auc at lesion %d, I0 %d, recon %d, reader %d', idx_insert, iI, k, i))
+                end
             end
-            auc_all(idx_insert, :, k, iI) = auc;
-            snr_all(idx_insert, :, k, iI) = snr;
         end
     end
 end

@@ -69,9 +69,12 @@ for i=1:nfile
     for j=1:length(loc)
         %Crop the disk ROI
         disk_img = double(img(loc(j,1)+roi, loc(j,2)+roi)); %change from unit16 to double
-        expected_HU = disk_HUs(j);
+        expected_HU = round(disk_HUs(j));
         measured_HU = round(mean(mean(disk_img(floor(disk_radius):end-floor(disk_radius), floor(disk_radius):end-floor(disk_radius)))));
         disp(['     ' num2str(expected_HU) ' HU disk (actual: ' num2str(measured_HU) ' HU) [' num2str(j) '/' num2str(length(disk_HUs)) ']'])
+        if abs((measured_HU - expected_HU)/expected_HU) > 0.01
+            disp(sprintf('Warning: Measured Disk HUs (%d HU) do not match expected (%d HU)', measured_HU, expected_HU))
+        end
         %estimate the MTF
         [mtf, freq, esf] = MTF_from_disk_edge(disk_img);
 

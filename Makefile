@@ -1,6 +1,10 @@
 BASEDIR=/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic
 MTF_RESULTS=evaluation/MTF/results
 
+.PHONY : results
+results : 
+	bash evaluation/run_all_evaluations.sh
+
 .PHONY : phantoms
 phantoms : $(BASEDIR)/diameter112mm/I0_3000000/fbp_sharp/fbp_sharp_v001.raw
 	bash ssh_node.sh "cd make_phantoms; bash ./run_make_phantoms.sh; exit; cd .."
@@ -25,4 +29,4 @@ $(MTF_RESULTS)/plots/mtf_cutoff_vals_processed.png : $(BASEDIR)/diameter112mm/I0
 
 .PHONY : clean
 clean :
-	rm -f $(MTF_RESULTS)/plots/*.png
+	rm -rf results
