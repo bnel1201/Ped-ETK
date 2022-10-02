@@ -1,14 +1,16 @@
+datadir=${1-'/home/brandon.nelson/Data/temp/CCT189/monochromatic'}
+results_dir=${2-'../../results/NPS'}
+
 orginal_dir=$(pwd)
 cd $(dirname $0)
-input_dir=/home/brandon.nelson/Data/temp/CCT189/monochromatic
-results_dir=../../results/NPS
+
 
 # plot NPS curves
-python plot_NPS_curves.py -d $input_dir -o $results_dir
+python plot_NPS_curves.py -d $datadir -o $results_dir
 
 # plot images
 images_dir=$results_dir/images
-python plot_2D_nps_images.py -d $input_dir -o $images_dir
+python plot_2D_nps_images.py -d $datadir -o $images_dir
 
 bash ../utils/images_to_gif.sh $images_dir'/diameter*mm_noise_comparison.png' $results_dir'/nps_comparison.gif'
 cd $orginal_dir

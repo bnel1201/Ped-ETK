@@ -37,3 +37,9 @@ def merge_patient_diameters(patient_dirs, mtfval=10, processed=False):
         mtf = mtf.set_index('Contrast [HU]')
     return mtf
 
+
+def abs_HU(mtf_df, ascending=False):
+    mtf_df = mtf_df.reset_index()
+    mtf_df['Contrast [HU]'] = abs(mtf_df['Contrast [HU]'])
+    mtf_df.sort_values(by='Contrast [HU]', ascending=ascending, inplace=True)
+    return mtf_df.set_index('Contrast [HU]')

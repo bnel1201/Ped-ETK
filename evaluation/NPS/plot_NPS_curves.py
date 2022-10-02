@@ -7,21 +7,13 @@ import numpy as np
 from utils.csv_io import (get_stats_df,
                           write_results_to_csv,
                           load_csv,
-                          write_1D_nps_results_to_csv)
+                          write_1D_nps_results_to_csv,
+                          get_noise_reduction_df)
+from utils.nps_plot import plot_1D_nps
 
 DOSELEVEL = 'I0_0300000'
 
 plt.style.use('seaborn-talk')
-
-
-def plot_1D_nps(fbp_dir, proc_dir, fig=None, ax=None):
-    fbp_nps_df = pd.read_csv(fbp_dir / '1D_nps.csv')
-    proc_nps_df = pd.read_csv(proc_dir / '1D_nps.csv')
-    if ax is None or fig is None:
-        fig, ax = plt.subplots()
-    diam = fbp_dir.parents[1].stem
-    fbp_nps_df.plot(ax=ax, x='spatial frequency [cyc/pix]', y=' magnitude', label='FBP', title=f'{diam}')
-    proc_nps_df.plot(ax=ax, x='spatial frequency [cyc/pix]', y=' magnitude', label='REDCNN')
 
 
 def plot_1D_nps_all_diams(datadir, output_fname=None, **subplots_kwargs):
@@ -30,7 +22,9 @@ def plot_1D_nps_all_diams(datadir, output_fname=None, **subplots_kwargs):
     for ax, patient_dir in zip(axs.flatten(), diam_dirs):
         fbp_dir = patient_dir / DOSELEVEL / 'NPS'
         proc_dir = patient_dir / (DOSELEVEL + '_processed') / 'NPS'
+        diam = fbp_dir.parents[1].stem
         plot_1D_nps(fbp_dir, proc_dir, fig=f, ax=ax)
+        ax.set_title(f'{diam}')
     [ax.get_legend().remove() for ax in axs.flatten()[1:]]
     f.tight_layout()
     if output_fname:
@@ -125,13 +119,6 @@ def plot_relative_denoising(fbp_summary_df, proc_summary_df, output_fname=None, 
     return fig, ax
 
 
-def get_noise_reduction_df(csv_fname):
-    fbp_summary_df, proc_summary_df = load_csv(csv_fname)
-    fbp_summary_df.set_index('Patient Diameter [mm]', inplace=True)
-    proc_summary_df.set_index('Patient Diameter [mm]', inplace=True)
-    noise_reduction_df = abs((proc_summary_df - fbp_summary_df)/fbp_summary_df*100)
-    noise_reduction_df.pop('mean CT number [HU]')
-    return noise_reduction_df
 
 
 def plot_noise_reduction(csv_fname, output_fname=None, fig=None, ax=None):
@@ -226,7 +213,6 @@ def compare_NPS_noiselevel_and_ROI_measure(datadir, outdir):
 def main(datadir=None, outdir=None):
     datadir = datadir or '/home/brandon.nelson/Data/temp/CCT189/monochromatic'
     datadir = Path(datadir)
-    # patient_dirs = sorted(list(Path(datadir).glob('diameter*')))
 
     plt.style.use('seaborn')
     output_fname = f'{outdir}/plots/1D_nps.png'

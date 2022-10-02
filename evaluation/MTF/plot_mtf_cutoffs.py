@@ -1,7 +1,7 @@
 import argparse
 import matplotlib.pyplot as plt
 from pathlib import Path
-from utils.mtf_cutoffs import merge_patient_diameters
+from utils.mtf_cutoffs import merge_patient_diameters, abs_HU
 
 
 def main(datadir=None, output_fname=None, processed=False):
@@ -21,7 +21,6 @@ def main(datadir=None, output_fname=None, processed=False):
     ax1.set_ylim(ylim)
     ax1.get_legend().remove() 
 
-    # output_fname = 'mtf_cutoff_vals_processed.png'
     f.tight_layout()
     if output_fname is None:
         plt.show()

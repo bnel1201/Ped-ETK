@@ -1,5 +1,5 @@
-datadir=/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic/
-results_dir=../../results/MTF
+datadir=${1-'/home/brandon.nelson/Data/temp/CTP404/monochromatic'}
+results_dir=${2-'../../results/MTF'}
 
 orginal_dir=$(pwd)
 cd $(dirname $0)
@@ -26,7 +26,7 @@ output_fname=$plots_dir/mtf_cutoff_vals_processed.png
 python plot_mtf_cutoffs.py -d $datadir -o $output_fname --processed
 
 output_fname=$plots_dir/mtf_cutoff_vals_rel.png
-python plot_mtf_cutoffs_compare.py -d $datadir -o $output_fname
+python plot_mtf_cutoffs_compare.py -d $datadir -o $output_fname --contrasts "-200 -35 15 120 340"
 
 # plot images
 images_dir=$results_dir/images

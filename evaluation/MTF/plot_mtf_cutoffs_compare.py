@@ -1,13 +1,17 @@
 import argparse
-import matplotlib.pyplot as plt
 from pathlib import Path
-from utils.mtf_cutoffs import merge_patient_diameters
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+from utils.mtf_cutoffs import merge_patient_diameters, abs_HU
+from utils.csv_io import write_relative_sharpness_to_csv
 
 
 def plot_relative_cutoffs_by_contrast(mtf50_rel, mtf10_rel, output_fname=None):
-    plt.style.use('seaborn')
 
-    ylim = [0, 1.8]
+    ylim = [0.5, 1.5]
     f, (ax0, ax1) = plt.subplots(1, 2, figsize=(8, 4))
     mtf50_rel.plot(ax=ax0, kind='bar', ylabel='REDCNN 50% MTF / FBP 50% MTF')
     ax0.set_ylim(ylim)
@@ -25,30 +29,48 @@ def plot_relative_cutoffs_by_contrast(mtf50_rel, mtf10_rel, output_fname=None):
 
 
 def plot_relative_sharpness_by_diameter(mtf_baseline, mtf_proc, cutoff_val=50, contrasts=None, output_fname=None):
-    contrasts = contrasts or [15, 120, 340]
-    mtf_baseline_sub = mtf_baseline.filter(contrasts, axis=0)*10
-    mtf_baseline_sub.columns = [int(c.split('mm')[0]) for c in mtf_baseline_sub.columns]
 
-    mtf_proc_sub = mtf_proc.filter(contrasts, axis=0)*10
-    mtf_proc_sub.columns = [int(c.split('mm')[0]) for c in mtf_proc_sub.columns]
+    mtf_baseline.columns = [int(c.split('mm')[0]) for c in mtf_baseline.columns]
+    mtf_proc.columns = [int(c.split('mm')[0]) for c in mtf_proc.columns]
 
-    mtf_rel_sub = mtf_proc_sub / mtf_baseline_sub
+    if contrasts:
+        contrasts = list(map(abs, contrasts))
+        mtf_baseline = mtf_baseline.filter(items=contrasts, axis=0)
+        mtf_proc = mtf_proc.filter(items=contrasts, axis=0)
+    
+    mtf_baseline *= 10 #convert from 1/mm to 1/cm
+    mtf_proc *= 10
+
+    mtf_rel = mtf_proc / mtf_baseline
+
+    mtf_rel.sort_index(ascending=False, inplace=True)
 
     f, ax = plt.subplots(figsize=(4,4))
-    mtf_rel_sub.T.plot(ax=ax)
+    mtf_rel.T.plot(ax=ax)
     
     relative_sharpness_fname = Path(output_fname).parent / f'mtf{cutoff_val}_relative_sharpness.png' if output_fname else None
-    f, ax = plt.subplots(figsize=(4,4))
     ax.set_ylabel(f'Relative Sharpness\n(REDCNN {cutoff_val}% MTF / FBP {cutoff_val}% MTF')
+    ax.set_xlabel('Patient Diameter [mm]')
     f.tight_layout()
     if output_fname is None:
         plt.show()
     else:
-        Path(output_fname).parent.mkdir(exist_ok=True, parents=True)
         f.savefig(relative_sharpness_fname, dpi=600)
         print(f'File saved: {relative_sharpness_fname}')
+
+
+def plot_sharpness_heatmap(mtf_rel, cutoff_val=50, output_fname=None):
+    mtf_rel.columns = [int(c.split('mm')[0]) for c in mtf_rel.columns]
+    f, ax = plt.subplots()
+    sns.heatmap(mtf_rel.astype(float), annot=True, ax=ax,
+                cbar_kws=dict(label=f'Relative Sharpness\n(REDCNN {cutoff_val}% MTF / FBP {cutoff_val}% MTF'))
     ax.set_xlabel('Patient Diameter [mm]')
-    return ax
+    if output_fname is None:
+        plt.show()
+    else:
+        output_fname = Path(output_fname).parent / f'mtf{cutoff_val}_sharpness_heatmap.png'
+        f.savefig(output_fname, dpi=600)
+        print(f'File saved: {output_fname}')
 
 
 def main(datadir=None, output_fname=None, contrasts=None):
@@ -56,17 +78,25 @@ def main(datadir=None, output_fname=None, contrasts=None):
     patient_dirs = sorted(list(Path(datadir).glob('diameter*')))
 
     mtf50_baseline = merge_patient_diameters(patient_dirs, mtfval=50)
+    mtf50_baseline = abs_HU(mtf50_baseline)
     mtf50_proc = merge_patient_diameters(patient_dirs, mtfval=50, processed=True)
+    mtf50_proc = abs_HU(mtf50_proc)
 
     mtf10_baseline = merge_patient_diameters(patient_dirs, mtfval=10)
+    mtf10_baseline = abs_HU(mtf10_baseline)
     mtf10_proc = merge_patient_diameters(patient_dirs, mtfval=10, processed=True)
-
+    mtf10_proc = abs_HU(mtf10_proc)
+    
     mtf10_rel = mtf10_proc / mtf10_baseline
     mtf50_rel = mtf50_proc / mtf50_baseline
+    write_relative_sharpness_to_csv(mtf50_rel, mtf10_rel, Path(output_fname).parents[1] / 'relative_sharpness_values.csv')
     plot_relative_cutoffs_by_contrast(mtf50_rel, mtf10_rel, output_fname)
 
-    plot_relative_sharpness_by_diameter(mtf50_baseline, mtf50_proc, cutoff_val=50, contrasts=contrasts)
-    plot_relative_sharpness_by_diameter(mtf10_baseline, mtf10_proc, cutoff_val=10, contrasts=contrasts)
+    plot_relative_sharpness_by_diameter(mtf50_baseline, mtf50_proc, cutoff_val=50, contrasts=contrasts, output_fname=output_fname)
+    plot_relative_sharpness_by_diameter(mtf10_baseline, mtf10_proc, cutoff_val=10, contrasts=contrasts, output_fname=output_fname)
+
+    plot_sharpness_heatmap(mtf50_rel, cutoff_val=50, output_fname=output_fname)
+    plot_sharpness_heatmap(mtf10_rel, cutoff_val=10, output_fname=output_fname)
 
 
 if __name__ == '__main__':
@@ -75,7 +105,8 @@ if __name__ == '__main__':
                         help="directory containing different patient diameter CT simulations")
     parser.add_argument('--output_fname', '-o',
                         help="filename for the saved plot")
-    parser.add_argument('--contrasts', '-c',
+    parser.add_argument('--contrasts', '-c', nargs='+',
                         help="Contrast disks to include [list of integers: -1000, 15, 35, 120, 340, 990]")
     args = parser.parse_args()
-    main(args.datadir, output_fname=args.output_fname)
+    contrasts = list(map(int, args.contrasts[0].split(' '))) if args.contrasts else None
+    main(args.datadir, output_fname=args.output_fname, contrasts=contrasts)

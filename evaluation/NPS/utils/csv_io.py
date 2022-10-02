@@ -64,3 +64,12 @@ def load_csv(csv_fname):
     proc_summary_df = df[df['Series'] != 'FBP']
     proc_summary_df.pop('Series')
     return fbp_summary_df, proc_summary_df
+
+
+def get_noise_reduction_df(csv_fname):
+    fbp_summary_df, proc_summary_df = load_csv(csv_fname)
+    fbp_summary_df.set_index('Patient Diameter [mm]', inplace=True)
+    proc_summary_df.set_index('Patient Diameter [mm]', inplace=True)
+    noise_reduction_df = abs((proc_summary_df - fbp_summary_df)/fbp_summary_df*100)
+    noise_reduction_df.pop('mean CT number [HU]')
+    return noise_reduction_df

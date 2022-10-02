@@ -17,6 +17,7 @@ date: 2022-07-26
 |   |- MTF
 |   |- NPS
 |   |- utils
+|   |- run_all_evaluations.sh
 |- make_phantoms
 |   |- CCT189
 |   |- CTP404
@@ -26,6 +27,10 @@ date: 2022-07-26
 |- results
 |   |- MTF
 |   |- NPS
+
+## Evaluation
+
+`run_all_evaluations.sh` , the directory in which to save all results can be set at the top of this file with `results_dir=/path/to_results`. This can be either an absolute directory path or a relative path, *relative to `run_all_evaluations.sh`*.
 
 ## Tasks
 

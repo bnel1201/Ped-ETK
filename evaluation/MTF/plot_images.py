@@ -73,7 +73,7 @@ def imshow_with_profiles(fbp_fname, HUs, ax=None, colors=None):
                         arrowprops={'arrowstyle': '-', 'linewidth': 2, 'color': color})
     return ax
 
-def image_comparison_with_profile(fbp_fname, proc_fname, outdir=None):
+def image_comparison_with_profile(fbp_fname, proc_fname, outdir=None, ylim=None):
     
     HUs = [15, 120, 340]
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w', 'orange']
@@ -97,6 +97,7 @@ def image_comparison_with_profile(fbp_fname, proc_fname, outdir=None):
     ax1.set_title(f'{diam}')
 
     plot_patient_diameter_esf(fbp_df, proc_df, ax=ax2, colors=colors)
+    if ylim: ax2.set_ylim(ylim)
     if outdir:
         outdir = Path(outdir)
         outdir.mkdir(exist_ok=True, parents=True)
@@ -116,7 +117,7 @@ def main(datadir=None, outdir=None):
     for patient in patient_dirs:
         proc_fname = sorted(list(patient.glob('I0_*_processed/fbp_sharp/*.raw')))[0]
         fbp_fname = sorted(list(patient.glob('I0_*0/fbp_sharp/*.raw')))[0]
-        image_comparison_with_profile(fbp_fname, proc_fname, outdir)
+        image_comparison_with_profile(fbp_fname, proc_fname, outdir, ylim=[-20, 350])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Plots ESF Curves')

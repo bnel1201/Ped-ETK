@@ -4,6 +4,7 @@ import numpy as np
 from pathlib import Path
 
 from utils.img_io import get_2D_nps_img, get_img
+from utils.nps_plot import plot_1D_nps
 
 np.random.seed(42)
 
@@ -21,48 +22,56 @@ def get_display_settings(img, nstds=0.5):
 def plot_noise_images(patient_dir, outdir=None):
     fbp_nps_dir = patient_dir / DOSELEVEL / 'NPS'
     proc_nps_dir = patient_dir / (DOSELEVEL + '_processed') / 'NPS'
-
-    fbp_img_dir = patient_dir / DOSELEVEL / 'bkg'
-    proc_img_dir = patient_dir / (DOSELEVEL + '_processed') / 'bkg'
-
     fbp_nps = get_2D_nps_img(fbp_nps_dir)
     proc_nps = get_2D_nps_img(proc_nps_dir)
 
-    fbp_img = get_img(fbp_img_dir)
-    proc_img =  get_img(proc_img_dir)
+    fbp_img = get_img(patient_dir / DOSELEVEL / 'bkg')
+    proc_img =  get_img(patient_dir / (DOSELEVEL + '_processed') / 'bkg')
+
+    nps_lims = [0, 6000]
 
 
-    figsize=5
-    f, axs = plt.subplots(2, 2, dpi=300,
-                        gridspec_kw=dict(hspace=0, wspace=0), figsize=[figsize]*2)
+    figsize=4
+    fig = plt.figure(constrained_layout=False, figsize=[figsize*2, figsize])
+    gs1 = plt.GridSpec(2, 2, wspace=0, hspace=0, left=0.01, right=0.5,)
+    ax0 = fig.add_subplot(gs1[0, 0])
+    ax1 = fig.add_subplot(gs1[:, 1])
+    ax2 = fig.add_subplot(gs1[1, 0])
 
     img_vmin, img_vmax = get_display_settings(fbp_img, nstds=0.5)
+    ax0.imshow(fbp_img, cmap='gray', vmin=img_vmin, vmax=img_vmax)
+    ax0.set_ylabel('FBP')
+    im = ax1.imshow(np.concatenate((fbp_nps, proc_nps), axis=0), cmap='gray')
+    ax1.set_xlabel('2D NPS')
 
-    axs[0, 0].imshow(fbp_img, cmap='gray', vmin=img_vmin, vmax=img_vmax)
-    axs[0, 1].imshow(fbp_nps, cmap='gray')
-
+    plt.colorbar(im, ax=ax1, use_gridspec=True)
     img_vmin, img_vmax = get_display_settings(proc_img, nstds=0.5) # <--- remove this once bias issue is addressed in model BJN 2022-09-27
 
-    axs[1, 0].imshow(proc_img, cmap='gray', vmin=img_vmin, vmax=img_vmax)
-    axs[1, 1].imshow(proc_nps, cmap='gray')
-    axs[0, 0].set_xlabel('Image')
-    axs[0, 1].set_xlabel('2D NPS')
-    axs[0, 0].set_ylabel('FBP')
-    axs[1, 0].set_ylabel('REDCNN')
-    [ax.xaxis.set_major_locator(plt.NullLocator()) for ax in axs.flatten()]
-    [ax.yaxis.set_major_locator(plt.NullLocator()) for ax in axs.flatten()]
+    ax2.imshow(proc_img, cmap='gray', vmin=img_vmin, vmax=img_vmax)
+    ax2.set_xlabel('Image')
+    ax2.set_ylabel('REDCNN')
+
+    [ax.xaxis.set_major_locator(plt.NullLocator()) for ax in [ax0, ax1, ax2]]
+    [ax.yaxis.set_major_locator(plt.NullLocator()) for ax in [ax0, ax1, ax2]]
+
+    gs2 = fig.add_gridspec(wspace=0, hspace=0, left=0.65, right=0.95, bottom=0.2, top=0.8)
+    ax4 = fig.add_subplot(gs2[0])
+    plot_1D_nps(fbp_nps_dir, proc_nps_dir, fig=fig, ax=ax4)
+    ax4.set_ylim(nps_lims)
+    ax4.set_ylabel("magnitude")
+    ax4.set_title('NPS radial average')
 
     diam = patient_dir.stem
-    f.suptitle(diam)
+    fig.suptitle(diam)
 
     if outdir:
         outdir = Path(outdir)
         outdir.mkdir(exist_ok=True, parents=True)
         output_fname = outdir / f'{diam}_noise_comparison.png'
-        f.savefig(output_fname, dpi=600)
+        fig.savefig(output_fname, dpi=600)
         print(f'saved to: {output_fname}')
     else:
-        f.show()
+        fig.show()
 
 
 def main(datadir=None, outdir=None):
