@@ -25,13 +25,13 @@ def image_comparison_with_diff(fbp_fname, proc_fname, outdir=None):
 
     redcnn = imread(proc_fname)
     ax1.imshow(redcnn, cmap='gray')
-    ax1.set_xlabel('RedCNN')
+    ax1.set_xlabel('REDCNN')
     ax1.xaxis.set_major_locator(plt.NullLocator())
     ax1.yaxis.set_major_locator(plt.NullLocator())
     ax1.set_title(f'{diam}')
 
     im = ax2.imshow(redcnn - orig, cmap='gray')
-    ax2.set_xlabel('RedCNN - FBP')
+    ax2.set_xlabel('REDCNN - FBP')
     ax2.xaxis.set_major_locator(plt.NullLocator())
     ax2.yaxis.set_major_locator(plt.NullLocator())
     cbar_ax = plt.gcf().add_axes([0.91, 0.325, 0.02, 0.34])

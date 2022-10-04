@@ -44,7 +44,7 @@ for diam_idx=1:ndiams
 
     ig = image_geom('nx', nx, 'fov', fov, 'down', down);
 
-    patient_folder = [physics_type_folder '/diameter' num2str(patient_diameter) 'mm/'];
+    patient_folder = [physics_type_folder '/diameter' num2str(patient_diameter) 'mm/']
     if exist(patient_folder, 'dir') == false
         mkdir(patient_folder)
     end
@@ -70,9 +70,8 @@ for diam_idx=1:ndiams
         ii.offset = offset;
         write_image_info([patient_folder filesep 'image_info.csv'], ii);
         write_geometry_info([patient_folder filesep 'geometry_info.csv'], ig);
-        if ~exist(filename, 'file')
-            my_write_rawfile(filename, x_true_hu, 'int16');
-        end
+
+        my_write_rawfile(filename, x_true_hu, 'int16');
 
         % Get sinogram
         sino = ellipse_sino(sg, ell, 'oversample', 4);

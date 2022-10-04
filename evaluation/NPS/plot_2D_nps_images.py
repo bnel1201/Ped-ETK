@@ -1,7 +1,8 @@
 import argparse
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
-from pathlib import Path
 
 from utils.img_io import get_2D_nps_img, get_img
 from utils.nps_plot import plot_1D_nps
@@ -13,7 +14,8 @@ DOSELEVEL = 'I0_0300000'
 
 def get_display_settings(img, nstds=0.5):
     nx = img.shape[0]
-    roi = img[nx//8:nx-nx//8, nx//8:nx-nx//8]
+    xc = nx//2
+    roi = img[xc-nx//8:xc+nx//8, xc - nx//8:xc + nx//8]
     img_vmin = roi.mean() - nstds*roi.std()
     img_vmax = roi.mean() + nstds*roi.std()
     return img_vmin, img_vmax

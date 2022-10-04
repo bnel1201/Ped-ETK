@@ -10,15 +10,17 @@
             "justMyCode": true
         },
         {
-            "name": "Python: MTF with args",
+            "name": "Python: LCD with args",
             "type": "python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "-d",
-                "/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic/"
+                "-d", "/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CCT189/monochromatic",
+                "-n", "20",
+                "-o", "../../results/LCD/montage.png",
+                "-D", "112 292"
             ],
         }
     ]

@@ -8,6 +8,7 @@ import seaborn as sns
 from utils.mtf_cutoffs import merge_patient_diameters, abs_HU
 from utils.csv_io import write_relative_sharpness_to_csv
 
+plt.style.use('seaborn')
 
 def plot_relative_cutoffs_by_contrast(mtf50_rel, mtf10_rel, output_fname=None):
 

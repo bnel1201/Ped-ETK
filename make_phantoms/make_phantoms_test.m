@@ -8,8 +8,7 @@ nangles = 2320;
 patient_diameters = [112, 131, 151, 185, 216, 292]; %From TG204 table 3 ICRU74 
 aec_on = true; %automatic exposure control
 add_noise = false;
-reference_dose_level=3e6;
-basedataFolder = ['/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/'];
+basedataFolder = ['/home/brandon.nelson/Data/temp/'];
 offset = 1000; %needed for some models
 disp('Simulation series 1/2')
 disp('Now running CTP404 Multicontrast Phantom simulations...')
@@ -20,7 +19,7 @@ add_noise = true;
 reference_dose_level = 3e5;
 nangles = 580;
 add_noise = true;
-nsims = 200;
+nsims = 20;
 offset = 1000; %needed for some models
 disp('Simulation series 2/2')
 disp('Now running CCT189 low contrast detectability simulations...')

@@ -20,4 +20,9 @@ bash NPS/_2_generate_NPS_plots.sh $basedir/CCT189/monochromatic/ $results_dir/NP
 
 python plot_objective_iq_summary.py -d $results_dir -o $results_dir/objective_iq_summary.png
 
+# LCD
+bash ../ssh_node.sh "bash LCD/_1_run_LCD_analysis.sh; exit"
+
+bash LCD/_2_generate_LCD_plots.sh $basedir/CCT189/monochromatic/ $results_dir/LCD
+
 cd $orginal_dir
