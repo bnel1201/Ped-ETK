@@ -41,9 +41,9 @@ def append_adult_data_to_mtf_cutoff_data(mtf_results_dir, cutoff_val):
     adult_redcnn = scipy.io.loadmat(adult_mtf_dir / 'no_norm/redcnn/sharp_augTrTaTdT.mat')
     # These Contrast values are from PKC's poster located here: <S:\DIDSR\Research\DLIR Project\ConferencePresentations\ct_2022>
     redcnn_data = ped_redcnn.sort_values(by='Contrast [HU]').set_index('Contrast [HU]')
-    redcnn_data = redcnn_data.join(pd.DataFrame({'Contrast [HU]': [35, 120, 340, 990], '200mm (Adult Reference)': adult_redcnn[f'mtf{cutoff_val}_all'][::-1].squeeze()}).set_index('Contrast [HU]'))
+    redcnn_data = redcnn_data.join(pd.DataFrame({'Contrast [HU]': [35, 120, 340, 990], '150mm (Adult Reference)': adult_redcnn[f'mtf{cutoff_val}_all'][::-1].squeeze()}).set_index('Contrast [HU]'))
 
     adult_fbp = scipy.io.loadmat(adult_mtf_dir / 'sharp_fbp.mat')
     fbp_data = ped_fbp.sort_values(by='Contrast [HU]').set_index('Contrast [HU]')
-    fbp_data = fbp_data.join(pd.DataFrame({'Contrast [HU]': [35, 120, 340, 990], '200mm (Adult Reference)': adult_fbp[f'mtf{cutoff_val}_all'][::-1].squeeze()}).set_index('Contrast [HU]'))
+    fbp_data = fbp_data.join(pd.DataFrame({'Contrast [HU]': [35, 120, 340, 990], '150mm (Adult Reference)': adult_fbp[f'mtf{cutoff_val}_all'][::-1].squeeze()}).set_index('Contrast [HU]'))
     return fbp_data, redcnn_data

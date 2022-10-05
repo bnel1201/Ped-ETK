@@ -40,16 +40,24 @@ def plot_noise_images(patient_dir, outdir=None):
     ax1 = fig.add_subplot(gs1[:, 1])
     ax2 = fig.add_subplot(gs1[1, 0])
 
+    offset = 1000
+    lbl_loc = (15, 35)
+
     img_vmin, img_vmax = get_display_settings(fbp_img, nstds=0.5)
     ax0.imshow(fbp_img, cmap='gray', vmin=img_vmin, vmax=img_vmax)
+    ax0.annotate(f'ww: {img_vmax-img_vmin:2.0f} / wl: {(img_vmax+img_vmin)/2-offset:2.0f}', xy=lbl_loc, xycoords='data', bbox=dict(boxstyle='round', fc='white'))
     ax0.set_ylabel('FBP')
     im = ax1.imshow(np.concatenate((fbp_nps, proc_nps), axis=0), cmap='gray')
+    img_vmin, img_vmax = ax1.get_images()[0].get_clim()
+    ax1.annotate(f'ww: {img_vmax-img_vmin:2.0f} / wl: {(img_vmax+img_vmin)/2-offset:2.0f}', xy=list(map(lambda x: x/2, lbl_loc)), xycoords='data', bbox=dict(boxstyle='round', fc='white'))
     ax1.set_xlabel('2D NPS')
 
     plt.colorbar(im, ax=ax1, use_gridspec=True)
     img_vmin, img_vmax = get_display_settings(proc_img, nstds=0.5) # <--- remove this once bias issue is addressed in model BJN 2022-09-27
 
     ax2.imshow(proc_img, cmap='gray', vmin=img_vmin, vmax=img_vmax)
+    ax2.annotate(f'ww: {img_vmax-img_vmin:2.0f} / wl: {(img_vmax+img_vmin)/2-offset:2.0f}', xy=lbl_loc, xycoords='data', bbox=dict(boxstyle='round', fc='white'))
+
     ax2.set_xlabel('Image')
     ax2.set_ylabel('REDCNN')
 

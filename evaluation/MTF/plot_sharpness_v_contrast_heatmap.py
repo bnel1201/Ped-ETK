@@ -13,7 +13,6 @@ from utils.csv_io import append_adult_data_to_mtf_cutoff_data
 def plot_sharpness_heatmap(mtf_rel, cutoff_val, results_dir=None, ax=None):
 
     mtf_rel.columns = [int(c.split('mm')[0]) for c in mtf_rel.columns]
-    mtf_rel = mtf_rel[sorted(mtf_rel.columns)]
     mtf_rel.sort_index(ascending=False, inplace=True)
     if ax is None:
         f, ax = plt.subplots()
@@ -23,15 +22,15 @@ def plot_sharpness_heatmap(mtf_rel, cutoff_val, results_dir=None, ax=None):
     twiny = ax.twiny()
 
     fovs = np.round(mtf_rel.columns*1.1).astype(int).to_list()
-    fovs[mtf_rel.columns.to_list().index(200)] = 212 # this is calculated from dx*nx in </home/rxz4/ct_deeplearning/make_phantom/make_CCT189_wD45_B30.m>
+    fovs[mtf_rel.columns.to_list().index(150)] = 340 # From RZ, min FOV for adult scan protocol
     twiny.set_xticks(ax.get_xticks(), fovs)
     twiny.set_xlim(ax.get_xlim())
     twiny.set_xlabel("Recon FOV [mm]")
     nrows = len(mtf_rel)
-    rect = patches.Rectangle((4, 0.05), 1, nrows-0.1, linewidth=3, edgecolor='tab:blue', facecolor='none')
+    rect = patches.Rectangle((6, 0.05), 0.97, nrows-0.1, linewidth=3, edgecolor='tab:blue', facecolor='none')
     ax.annotate("Adult Reference",
-                xy=(4.75, nrows), xycoords='data',
-                xytext=(0.55, 0.025), textcoords='figure fraction',
+                xy=(6.75, nrows), xycoords='data',
+                xytext=(0.75, 0.025), textcoords='figure fraction',
                 color='tab:blue',
                 arrowprops=dict(facecolor='tab:blue', shrink=0.05), weight='bold')
     ax.add_patch(rect)
