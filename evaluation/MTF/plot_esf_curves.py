@@ -13,7 +13,7 @@ def main(datadir=None, output_fname=None):
     f, axs = plt.subplots(2, 3, figsize=(9,6), sharex=True, sharey=True,
                         gridspec_kw=dict(hspace=0.1, wspace=0.1))
     for idx, (patient_dir, ax) in enumerate(zip(patient_dirs, axs.flatten())):
-        cons = [f' {c} HU' for c in [15, 120, 340]]
+        cons = [f' {c} HU' for c in [-35]]
         fbp_df = load_esf_dataframe(patient_dir / 'I0_3000000' / 'fbp_sharp_v001_esf.csv')
         diameter = fbp_df['patient diameter [mm]'].unique()[0]
         fbp_df = fbp_df[cons]

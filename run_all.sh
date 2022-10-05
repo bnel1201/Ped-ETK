@@ -6,4 +6,4 @@ bash ssh_node.sh "bash make_phantoms/run_make_phantoms.sh; exit"
 bash ./denoising/run_denoising.sh
 
 # run evaluations
-bash ./evaluations/run_all_evaluations.sh
+bash ./evaluation/run_all_evaluations.sh

@@ -1,4 +1,5 @@
 *.png
+*.h5
 .nfs*
 *.gif
 *.csv

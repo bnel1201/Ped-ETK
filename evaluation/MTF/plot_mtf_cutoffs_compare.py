@@ -1,19 +1,12 @@
 import argparse
 from pathlib import Path
 
-import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-import matplotlib.patches as patches
-import seaborn as sns
-
 
 from utils.mtf_cutoffs import merge_patient_diameters, abs_HU
 from utils.csv_io import (write_relative_sharpness_to_csv,
-                          write_cutoffs_to_csv,
-                          append_adult_data_to_mtf_cutoff_data)
+                          write_cutoffs_to_csv)
 
-# plt.style.use('seaborn')
 
 def plot_relative_cutoffs_by_contrast(mtf50_rel, mtf10_rel, output_fname=None):
 
@@ -65,39 +58,6 @@ def plot_relative_sharpness_by_diameter(mtf_baseline, mtf_proc, cutoff_val=50, c
         print(f'File saved: {relative_sharpness_fname}')
 
 
-def plot_sharpness_heatmap(mtf_rel, cutoff_val, output_fname=None):
-
-    mtf_rel.columns = [int(c.split('mm')[0]) for c in mtf_rel.columns]
-    mtf_rel = mtf_rel[sorted(mtf_rel.columns)]
-    mtf_rel.sort_index(ascending=False, inplace=True)
-    f, ax = plt.subplots()
-    sns.heatmap(mtf_rel, annot=True, ax=ax,
-                cbar_kws=dict(label=f'Relative Sharpness\n(REDCNN {cutoff_val}% MTF / FBP {cutoff_val}% MTF'))
-    ax.set_xlabel('Patient Diameter [mm]')
-    twiny = ax.twiny()
-
-    fovs = np.round(mtf_rel.columns*1.1).astype(int).to_list()
-    fovs[mtf_rel.columns.to_list().index(200)] = 212 # this is calculated from dx*nx in 
-    twiny.set_xticks(ax.get_xticks(), fovs)
-    twiny.set_xlim(ax.get_xlim())
-    twiny.set_xlabel("Recon FOV [mm]")
-    nrows = len(mtf_rel)
-    rect = patches.Rectangle((4, 0.05), 1, nrows-0.1, linewidth=3, edgecolor='tab:blue', facecolor='none')
-    ax.annotate("Adult Reference",
-                xy=(4.75, nrows), xycoords='data',
-                xytext=(0.575, 0.025), textcoords='figure fraction',
-                color='tab:blue',
-                arrowprops=dict(facecolor='tab:blue', shrink=0.05), weight='bold')
-    ax.add_patch(rect)
-
-    if output_fname is None:
-        plt.show()
-    else:
-        output_fname = Path(output_fname).parent / f'mtf{cutoff_val}_sharpness_heatmap.png'
-        f.savefig(output_fname, dpi=600)
-        print(f'File saved: {output_fname}')
-
-
 def main(datadir=None, output_fname=None, contrasts=None):
     datadir = datadir or '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic/'
     patient_dirs = sorted(list(Path(datadir).glob('diameter*')))
@@ -125,16 +85,6 @@ def main(datadir=None, output_fname=None, contrasts=None):
 
         plot_relative_sharpness_by_diameter(mtf50_baseline, mtf50_proc, cutoff_val=50, contrasts=contrasts, output_fname=output_fname)
         plot_relative_sharpness_by_diameter(mtf10_baseline, mtf10_proc, cutoff_val=10, contrasts=contrasts, output_fname=output_fname)
-
-    fbp_data, redcnn_data = append_adult_data_to_mtf_cutoff_data(mtf_results_dir, 50)
-    mtf50_rel = redcnn_data / fbp_data
-    mtf50_rel = mtf50_rel[mtf50_rel.index.isin(contrasts)]
-    plot_sharpness_heatmap(mtf50_rel, cutoff_val=50, output_fname=output_fname)
-
-    fbp_data, redcnn_data = append_adult_data_to_mtf_cutoff_data(mtf_results_dir, 10)
-    mtf10_rel = redcnn_data / fbp_data
-    mtf10_rel = mtf10_rel[mtf10_rel.index.isin(contrasts)]
-    plot_sharpness_heatmap(mtf10_rel, cutoff_val=10, output_fname=output_fname)
 
 
 if __name__ == '__main__':

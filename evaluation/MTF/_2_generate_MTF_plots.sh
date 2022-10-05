@@ -29,6 +29,7 @@ python plot_mtf_cutoffs.py -d $datadir -o $output_fname --processed
 output_fname=$plots_dir/mtf_cutoff_vals_rel.png
 python plot_mtf_cutoffs_compare.py -d $datadir -o $output_fname --contrasts "15 35 120 200 340 990 1000"
 
+python plot_sharpness_v_contrast_heatmap.py -d $results_dir
 # plot images
 images_dir=$results_dir/images
 python plot_images.py -o $images_dir
