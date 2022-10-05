@@ -10,17 +10,16 @@
             "justMyCode": true
         },
         {
-            "name": "Python: LCD with args",
+            "name": "Python: MTF cutoffs with args",
             "type": "python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "-d", "/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CCT189/monochromatic",
-                "-n", "20",
-                "-o", "../../results/LCD/montage.png",
-                "-D", "112 292"
+                "-d", "/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic",
+                "-o", "results/MTF/plots/mtf_cutoff_vals_rel.png",
+                "--contrasts", "15 35 120 200 340 990 1000"
             ],
         }
     ]

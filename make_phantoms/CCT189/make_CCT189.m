@@ -58,7 +58,8 @@ for diam_idx=1:ndiams
             mkdir(files_bkg);
         end
 
-        relative_lesion_diameter = 0.4;
+        relative_lesion_diameter = 0.01335;
+        relative_lesion_location = 0.4
         disk_ell = CCT189(patient_diameter, mu_water, relative_lesion_diameter);
         disk_true = ellipse_im(ig, disk_ell, 'oversample', 4, 'rot', 0);
         disk_true_hu = 1000*(disk_true - mu_water)/mu_water + offset;

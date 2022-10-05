@@ -24,6 +24,7 @@ def main(results_dir, output_fname):
     dose_levels = f['dose_levels'][:]
     # lesion_HUs = f['insert_HUs']
     lesion_HUs = [14, 7, 5, 3]
+    lesion_radii_mm = [3, 5, 7, 10]
     lesion_radii_pix = [2.30, 3.99, 5.57, 7.97]
     recon_types = list(map(lambda x: x.decode('UTF-8'), f['recon_types'][:]))
     nreaders = f['readers'][:]
@@ -39,7 +40,7 @@ def main(results_dir, output_fname):
         ax.errorbar(diameters, auc_mean[dose_idx, recon_idx, lesion_idx, :],
                     yerr=auc_std[dose_idx, recon_idx, lesion_idx, :],
                     label='FBP')
-        ax.set_title(f'{lesion_HUs[lesion_idx]} HU disk\n ({lesion_radii_pix[lesion_idx]} pixel radius)')
+        ax.set_title(f'{lesion_HUs[lesion_idx]} HU disk\n ({lesion_radii_mm[lesion_idx]} mm diameter)')
     [ax.set_xlabel('Patient Diameter [mm]') for ax in axs]
     axs[0].set_ylabel('Detectability AUC')
 

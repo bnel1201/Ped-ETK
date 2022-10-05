@@ -1,4 +1,4 @@
-function ell = CCT189(patient_diameter, attenuation_coefficient, relative_lesion_diameter)
+function ell = CCT189(patient_diameter, attenuation_coefficient, relative_lesion_diameter, relative_lesion_location)
     % creates CATPHAN 600 low contrast detectability module but
     % with options for variable patient diameter and lesion diameter
     % ======= 
@@ -11,18 +11,26 @@ function ell = CCT189(patient_diameter, attenuation_coefficient, relative_lesion
     end
 
     if exist('relative_lesion_diameter', 'var') == false
-        relative_lesion_diameter = 0.4;
+        relative_lesion_diameter = 0.01335;
+    end
+
+    if exist('relative_lesion_location', 'var') == false
+        relative_lesion_location = 0.4;
     end
 
     if exist('attenuation_coefficient', 'var') == false
         attenuation_coefficient = 0.2;
     end
 
-    d = relative_lesion_diameter*patient_diameter / 2;
-    ell = [0 0 patient_diameter/2 patient_diameter/2 0 attenuation_coefficient;                                  % water
-    d*cosd(45)  d*sind(45)   3/2  3/2 0 14/1000*attenuation_coefficient;     % 3mm, 14 HU
-   -d*cosd(45)  d*sind(45)   5/2  5/2 0 7/1000*attenuation_coefficient;     % 5 mm, 7 HU
-   -d*cosd(45) -d*sind(45)   7/2  7/2 0 5/1000*attenuation_coefficient;     % 7 mm, 5 HU
-    d*cosd(45) -d*sind(45)  10/2 10/2 0 3/1000*attenuation_coefficient;     % 10 mm, 3 HU
+    p = patient_diameter;
+    r = relative_lesion_diameter * patient_diameter/2 * [3/2 5/2 7/2 10/2];
+    d = relative_lesion_location * patient_diameter / 2;
+
+    % d = relative_lesion_diameter*patient_diameter / 2;
+    ell = [0 0 p/2 p/2 0 attenuation_coefficient;                                  % water
+    d*cosd(45)  d*sind(45)   r(1)  r(1) 0 14/1000*attenuation_coefficient;     % 3mm, 14 HU
+   -d*cosd(45)  d*sind(45)   r(2)  r(2) 0 7/1000*attenuation_coefficient;     % 5 mm, 7 HU
+   -d*cosd(45) -d*sind(45)   r(3)  r(3) 0 5/1000*attenuation_coefficient;     % 7 mm, 5 HU
+    d*cosd(45) -d*sind(45)   r(4)  r(4) 0 3/1000*attenuation_coefficient;     % 10 mm, 3 HU
     ];
 end
