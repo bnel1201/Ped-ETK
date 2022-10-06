@@ -1,5 +1,6 @@
 import argparse
 from pathlib import Path
+from tkinter import HORIZONTAL
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -119,14 +120,23 @@ def plot_relative_denoising(fbp_summary_df, proc_summary_df, output_fname=None, 
     return fig, ax
 
 
-
-
 def plot_noise_reduction(csv_fname, output_fname=None, fig=None, ax=None):
     noise_reduction_df = get_noise_reduction_df(csv_fname)
+
+    # noise_reduction_df.loc[len(noise_reduction_df.index)] = [200, 45.5730] #add adult reference data
 
     if fig is None or ax is None:
         fig, ax = plt.subplots(figsize=(4,4))
     noise_reduction_df.plot(ax=ax, ylabel='Relative Noise Reduction [%]\n$|\sigma_{REDCNN} - \sigma_{FBP}| / \sigma_{FBP}\\times 100$')
+    ax.plot(200, 45.5730, marker='*', markersize=10, color='black')
+    ax.annotate('Adult Reference\n(340 mm FOV)', xy=(200, 50), horizontalalignment='center', arrowprops=dict(arrowstyle='->'), 
+                bbox=dict(boxstyle='round', fc='white'), color='black')
+    fovs = np.round(noise_reduction_df.index*1.1).astype(int).to_list()
+    # fovs.append(340) # From RZ, min FOV for adult scan protocol
+    twiny = ax.twiny()
+    twiny.set_xticks(np.linspace(min(fovs), max(fovs), 5).astype(int))
+    twiny.set_xlim(ax.get_xlim())
+    twiny.set_xlabel("Recon FOV [mm]")
     ax.get_legend().remove()
     fig.tight_layout()
     if output_fname:
@@ -213,24 +223,26 @@ def compare_NPS_noiselevel_and_ROI_measure(datadir, outdir):
 def main(datadir=None, outdir=None):
     datadir = datadir or '/home/brandon.nelson/Data/temp/CCT189/monochromatic'
     datadir = Path(datadir)
-
-    plt.style.use('seaborn')
+    
     output_fname = f'{outdir}/plots/1D_nps.png'
-    plot_1D_nps_all_diams(datadir, output_fname, sharex=True, sharey=True)
-    print(output_fname)
+    
+    with plt.style.context('seaborn'):
+   
+        plot_1D_nps_all_diams(datadir, output_fname, sharex=True, sharey=True)
+        print(output_fname)
 
-    output_fname = f'{outdir}/diameter_summary.csv'
-    csv_fname = write_results_to_csv(datadir, output_fname, DOSELEVEL)
-    print(csv_fname)
-    fbp_summary_df, proc_summary_df = load_csv(csv_fname)
+        output_fname = f'{outdir}/diameter_summary.csv'
+        csv_fname = write_results_to_csv(datadir, output_fname, DOSELEVEL)
+        print(csv_fname)
+        fbp_summary_df, proc_summary_df = load_csv(csv_fname)
 
-    output_fname = f'{outdir}/plots/CT_number_noise_v_diameter.png'
-    plot_CT_number_noise_v_diameter(fbp_summary_df, proc_summary_df, output_fname)
-    print(output_fname)
+        output_fname = f'{outdir}/plots/CT_number_noise_v_diameter.png'
+        plot_CT_number_noise_v_diameter(fbp_summary_df, proc_summary_df, output_fname)
+        print(output_fname)
 
-    output_fname = f'{outdir}/plots/relative_noise_vs_diameter.png'
-    _, rel_denoise_ax = plot_relative_denoising(fbp_summary_df, proc_summary_df)
-    print(output_fname)
+        output_fname = f'{outdir}/plots/relative_noise_vs_diameter.png'
+        _, rel_denoise_ax = plot_relative_denoising(fbp_summary_df, proc_summary_df)
+        print(output_fname)
 
     output_fname = f'{outdir}/plots/noise_reduction_vs_diameter.png'
     _, noise_redux_ax = plot_noise_reduction(csv_fname, output_fname)
