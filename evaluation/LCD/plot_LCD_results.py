@@ -1,8 +1,21 @@
 import argparse
 from pathlib import Path
 
+import numpy as np
+import scipy.io
 import matplotlib.pyplot as plt
 import h5py
+
+
+def load_adult_ref_data(basedir=None, dose_idx=-1):
+    basedir = basedir or Path('/gpfs_projects/prabhat.kc/lowdosect/transfers/transfers_4_spie/exps/quant_analysis/mita_lcd/results/95d_2_75d_2_25d_p96_no_norm/no_norm/redcnn/augTrTaTdT/')
+    auc_means = []
+    auc_stds = []
+    for i in range(4):
+        data = scipy.io.loadmat(basedir / f'_idx_{i+1}.mat')
+        auc_means.append(data['auc_all'][:].mean(axis=0)[1, dose_idx]) #get last dose level (highest)
+        auc_stds.append(data['auc_all'][:].std(axis=0)[1, dose_idx]) # according to line 124 of </gpfs_projects/prabhat.kc/lowdosect/transfers/transfers_4_spie/exps/quant_analysis/mita_lcd/mita_lcd_plot_ct_poster.m> 0th index is fbp, 1st is DLIR
+    return auc_means, auc_stds
 
 
 def main(results_dir, output_fname):
@@ -17,7 +30,6 @@ def main(results_dir, output_fname):
     h5file = f'{results_dir}/LCD_results.h5'
 
     f = h5py.File(h5file, 'r')
-    f.keys()
     auc = f['auc'][:]
     snr = f['snr'][:]
     diameters = f['patient_diameters'][:]
@@ -32,24 +44,44 @@ def main(results_dir, output_fname):
 
     auc_mean, auc_std = auc.mean(axis=0), auc.std(axis=0)
     snr_mean, snr_std = snr.mean(axis=0), auc.std(axis=0)
-    auc_mean.shape
+
+    adult_auc_means, adult_auc_stds = load_adult_ref_data()
+
     dose_idx=0
     recon_idx=recon_types.index('fbp')
-    fig, axs = plt.subplots(1, 4, figsize=(9,3), sharex=True, sharey=True)
-    for lesion_idx, ax in zip(range(auc_mean.shape[-1]), axs.flatten()):
+    lesion_idxs = [0, 1, 3, 2]
+    fig, axs = plt.subplots(2, 2, figsize=(6,6), sharex=True, sharey=True)
+    subplot_idx = 0
+    for lesion_idx, ax in zip(lesion_idxs , axs.flatten()):
         ax.errorbar(diameters, auc_mean[dose_idx, recon_idx, lesion_idx, :],
                     yerr=auc_std[dose_idx, recon_idx, lesion_idx, :],
                     label='FBP')
-        ax.set_title(f'{lesion_HUs[lesion_idx]} HU disk\n ({lesion_radii_mm[lesion_idx]} mm diameter)')
-    [ax.set_xlabel('Patient Diameter [mm]') for ax in axs]
-    axs[0].set_ylabel('Detectability AUC')
+        ax.errorbar([200], adult_auc_means[lesion_idx],
+                    yerr=adult_auc_stds[lesion_idx],
+                    fmt='*', markersize=10,
+                    color='black', label='Adult Reference\n(340 mm FOV)')
+        ax.set_title(f'{lesion_radii_mm[lesion_idx]} mm diameter\n{lesion_HUs[lesion_idx]} HU disk')
+        fovs = np.round(diameters*1.1).astype(int)
+        twiny = ax.twiny()
+        twiny.set_xlim(ax.get_xlim())
+        twiny.set_xticks(np.linspace(min(fovs), max(fovs), 5).astype(int))
+        if subplot_idx < 2:
+            twiny.set_xlabel("Recon FOV [mm]")
+        else:
+            ax.set_xlabel('Patient Diameter [mm]')
+            twiny.set_xticklabels([])
+        if not subplot_idx % 2:
+            ax.set_ylabel('Detectability AUC')
+        twiny.grid(False)
+        subplot_idx+=1
 
     recon_idx=recon_types.index('dl_REDCNN')
-    for lesion_idx, ax in zip(range(auc_mean.shape[-1]), axs.flatten()):
+    for lesion_idx, ax in zip(lesion_idxs, axs.flatten()):
         ax.errorbar(diameters, auc_mean[dose_idx, recon_idx, lesion_idx, :],
         yerr=auc_std[dose_idx, recon_idx, lesion_idx, :],
         label='REDCNN')
-    axs[0].legend()
+        if lesion_idx==0:
+            ax.legend()
     fig.tight_layout()
     if output_fname:
         Path(output_fname).parent.mkdir(exist_ok=True, parents=True)

@@ -1,14 +1,16 @@
 import argparse
 from pathlib import Path
+from telnetlib import DO
 
 import matplotlib.pyplot as plt
 
 from utils.img_io import imshow_disk_comparison
 
+
 def main(datadir=None, output_fname=None, diams=[112, 292], n_avg=20):
     datadir = datadir or '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CCT189/monochromatic'
     datadir = Path(datadir)
-
+    diams = diams or [112, 292]
     f, axs = plt.subplots(len(diams), 2, gridspec_kw=dict(wspace=0, hspace=0), figsize=(4, 2*len(diams)))
     for idx, d in enumerate(diams):
         patient = datadir / f'diameter{d}mm'
@@ -34,4 +36,5 @@ if __name__ == '__main__':
                         help="Patient diameters to include [list of integers: 112 131 151 185 216 292], default is 112 292")
     args = parser.parse_args()
     diams = list(map(int, args.diameters[0].split(' '))) if args.diameters else None
-    main(args.datadir, n_avg=int(args.n_avg), diams=diams, output_fname=args.output_fname)
+    n_avg = int(args.n_avg) if args.n_avg else None
+    main(args.datadir, n_avg=n_avg, diams=diams, output_fname=args.output_fname)

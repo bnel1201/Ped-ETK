@@ -132,7 +132,7 @@ def plot_noise_reduction(csv_fname, output_fname=None, fig=None, ax=None):
     ax.annotate('Adult Reference\n(340 mm FOV)', xy=(200, 50), horizontalalignment='center', arrowprops=dict(arrowstyle='->'), 
                 bbox=dict(boxstyle='round', fc='white'), color='black')
     fovs = np.round(noise_reduction_df.index*1.1).astype(int).to_list()
-    # fovs.append(340) # From RZ, min FOV for adult scan protocol
+
     twiny = ax.twiny()
     twiny.set_xticks(np.linspace(min(fovs), max(fovs), 5).astype(int))
     twiny.set_xlim(ax.get_xlim())
@@ -159,6 +159,16 @@ def plot_CT_bias(csv_fname, output_fname=None, fig=None, ax=None):
     if fig is None or ax is None:
         fig, ax = plt.subplots(figsize=(4,4))
     bias_df.plot(ax=ax, ylabel='CT number bias [HU]\n$REDCNN - FBP$')
+
+    ax.plot(200, 50, marker='*', markersize=10, color='black')
+    fovs = np.round(bias_df.index*1.1).astype(int).to_list()
+
+    twiny = ax.twiny()
+    twiny.set_xticks(np.linspace(min(fovs), max(fovs), 5).astype(int))
+    twiny.set_xlim(ax.get_xlim())
+    twiny.set_xlabel("Recon FOV [mm]")
+    ax.annotate('Adult Reference\n(340 mm FOV)', xy=(200, 40), horizontalalignment='center', arrowprops=dict(arrowstyle='->'), 
+            bbox=dict(boxstyle='round', fc='white'), color='black')
     ax.get_legend().remove()
     fig.tight_layout()
     if output_fname:

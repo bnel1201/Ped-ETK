@@ -55,4 +55,5 @@ if __name__ == '__main__':
     parser.add_argument('--n_avg','-n', required=False,
                         help="Number of images to average when showing LCD images")
     args = parser.parse_args()
-    main(args.datadir, n_avg=int(args.n_avg), output_dir=args.output_dir)
+    n_avg = int(args.n_avg) if args.n_avg else None
+    main(args.datadir, n_avg=n_avg, output_dir=args.output_dir)

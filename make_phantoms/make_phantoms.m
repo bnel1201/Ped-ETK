@@ -17,7 +17,7 @@ run('./CTP404/make_CTP404.m')
 
 % CCT189 for NPS and LCD
 add_noise = true;
-reference_dose_level = 3e5;
+reference_dose_level = 3e5*[30 55 70 85 100]/100;
 nangles = 580;
 add_noise = true;
 nsims = 200;

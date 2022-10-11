@@ -7,7 +7,7 @@ def load_esf_dataframe(mtf_csv_fname):
     mtf_csv_fname = Path(mtf_csv_fname)
     df = pd.read_csv(mtf_csv_fname)
     index = 'distance [mm]'
-    HUs = sorted([int(h.split(' HU')[0]) for h in df.columns[1:-1]])
+    HUs = sorted([int(h.split(' HU')[0]) for h in df.columns[1:]])
     cols = [index]
     cols += [f' {h} HU' for h in HUs]
     df = df[cols]

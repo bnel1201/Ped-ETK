@@ -49,6 +49,11 @@ for diam_idx=1:ndiams
         mkdir(patient_folder)
     end
 
+    close all;
+    sg.plot(ig)
+    hold off; titlef('Scanner FOV = %g mm, Recon FOV = %g mm', round(2*sg.rfov), round(fov)); hold on;
+    saveas(gcf, fullfile(patient_folder, 'image_geometry.png'))
+
     for I0=I0_vector
         I0_string = ['I0_' sprintf('%07d', I0)];
 

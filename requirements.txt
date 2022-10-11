@@ -2,4 +2,4 @@ matplotlib
 seaborn
 numpy
 pandas
-ffmpeg-python
+h5py

@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
 import numpy as np
 
 from utils.img_io import get_2D_nps_img, get_img
@@ -12,13 +13,22 @@ np.random.seed(42)
 DOSELEVEL = 'I0_0300000'
 
 
-def get_display_settings(img, nstds=0.5):
+def get_central_roi(img, r=8):
     nx = img.shape[0]
     xc = nx//2
-    roi = img[xc-nx//8:xc+nx//8, xc - nx//8:xc + nx//8]
-    img_vmin = roi.mean() - nstds*roi.std()
-    img_vmax = roi.mean() + nstds*roi.std()
+    return img[xc-nx//r:xc+nx//r, xc - nx//r:xc + nx//r]
+
+
+def get_display_settings(img, nstds=0.5):
+    roi = get_central_roi(img)
+    img_vmin = roi.mean() - nstds/2*roi.std()
+    img_vmax = roi.mean() + nstds/2*roi.std()
     return img_vmin, img_vmax
+
+
+def get_std_noise(img, r=8):
+    roi = get_central_roi(img, r=r)
+    return roi.std()
 
 
 def plot_noise_images(patient_dir, outdir=None):
@@ -32,7 +42,6 @@ def plot_noise_images(patient_dir, outdir=None):
 
     nps_lims = [0, 6000]
 
-
     figsize=4
     fig = plt.figure(constrained_layout=False, figsize=[figsize*2, figsize])
     gs1 = plt.GridSpec(2, 2, wspace=0, hspace=0, left=0.01, right=0.5,)
@@ -41,23 +50,26 @@ def plot_noise_images(patient_dir, outdir=None):
     ax2 = fig.add_subplot(gs1[1, 0])
 
     offset = 1000
-    lbl_loc = (15, 35)
+    lbl_loc = (20, 35)
+    ww_stds = 4
 
-    img_vmin, img_vmax = get_display_settings(fbp_img, nstds=0.5)
+    img_vmin, img_vmax = get_display_settings(fbp_img, nstds=ww_stds)
     ax0.imshow(fbp_img, cmap='gray', vmin=img_vmin, vmax=img_vmax)
-    ax0.annotate(f'ww: {img_vmax-img_vmin:2.0f} / wl: {(img_vmax+img_vmin)/2-offset:2.0f}', xy=lbl_loc, xycoords='data', bbox=dict(boxstyle='round', fc='white'))
+    noise_lvl = get_std_noise(fbp_img)
+    ax0.annotate(f'ww: {img_vmax-img_vmin:2.0f} / wl: {(img_vmax+img_vmin)/2-offset:2.0f}\nStd Noise: {noise_lvl:2.0f} HU', xy=lbl_loc, xycoords='data', bbox=dict(boxstyle='round', fc='white'))
+    ax0.text(240, 250, 6*" ", bbox=dict(boxstyle='circle', fill=False, linestyle='--', edgecolor='gold'))
     ax0.set_ylabel('FBP')
     im = ax1.imshow(np.concatenate((fbp_nps, proc_nps), axis=0), cmap='gray')
-    img_vmin, img_vmax = ax1.get_images()[0].get_clim()
-    ax1.annotate(f'ww: {img_vmax-img_vmin:2.0f} / wl: {(img_vmax+img_vmin)/2-offset:2.0f}', xy=list(map(lambda x: x/2, lbl_loc)), xycoords='data', bbox=dict(boxstyle='round', fc='white'))
     ax1.set_xlabel('2D NPS')
-
     plt.colorbar(im, ax=ax1, use_gridspec=True)
-    img_vmin, img_vmax = get_display_settings(proc_img, nstds=0.5) # <--- remove this once bias issue is addressed in model BJN 2022-09-27
+
+    proc_bias = get_central_roi(proc_img).mean() - offset
+    img_vmin += proc_bias
+    img_vmax += proc_bias
 
     ax2.imshow(proc_img, cmap='gray', vmin=img_vmin, vmax=img_vmax)
-    ax2.annotate(f'ww: {img_vmax-img_vmin:2.0f} / wl: {(img_vmax+img_vmin)/2-offset:2.0f}', xy=lbl_loc, xycoords='data', bbox=dict(boxstyle='round', fc='white'))
-
+    noise_lvl = get_std_noise(proc_img)
+    ax2.annotate(f'ww: {img_vmax-img_vmin:2.0f} / wl: {(img_vmax+img_vmin)/2-offset:2.0f}\nStd Noise: {noise_lvl:2.0f} HU', xy=lbl_loc, xycoords='data', bbox=dict(boxstyle='round', fc='white'))
     ax2.set_xlabel('Image')
     ax2.set_ylabel('REDCNN')
 
