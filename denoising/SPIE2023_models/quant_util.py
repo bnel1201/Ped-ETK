@@ -125,7 +125,7 @@ def renormalize(cnn_output, lr_img, normalization_type=None):
 		#if np.min(cnn_output)<0: cnn_output += (-np.min(cnn_output))
 	#elif(normalization_type=='unity'):
 	#	cnn_output = util.normalize_data_ab(img_min, img_max, cnn_output)
-	else:
+	elif(normalization_type=='same_max_min'):
 		#if np.min(cnn_output)<0: cnn_output += (-np.min(cnn_output))
 		cnn_output = util.normalize_data_ab(img_min, img_max, cnn_output)
 

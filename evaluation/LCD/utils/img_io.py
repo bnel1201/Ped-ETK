@@ -76,8 +76,8 @@ def imshow_disk_comparison(patient, n_avg=20, output_dir=None, f=None, axs=None)
     proc_noise_lvl = get_std_noise(sorted(list(patient.glob(f'{DOSELEVEL}_processed/disk/*.raw'))), nx=nx, offset=offset)
 
     
-    h5file = f'../../results/LCD/LCD_results.h5'
-    # h5file = f'results/LCD/LCD_results.h5'
+    # h5file = f'../../results/LCD/LCD_results.h5'
+    h5file = f'results/LCD/LCD_results.h5'
     lesion_locs = pd.read_csv(patient/'phantom_info_pix_idx.csv').iloc[1:, :]
     nx = get_img_sz(patient / 'geometry_info.csv')
     h5f = h5py.File(h5file, 'r')

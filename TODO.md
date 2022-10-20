@@ -1,7 +1,16 @@
 # TODOs
-
+- [ ] Address HU accuracy issue (investigate models with normalization and make sure that normalization is correct)
+- [ ] Could Tensorboard help with interactive image inspection? to quickly check for bias and issues while training?
 - [ ] Add multiple dose levels to LCD study (RZ from 10/5 meeting)
+  - [ ] (check what sims are left to complete)
+  - [ ] make test script with fewers sims and diameters to quickly iterate through pipeline to make sure everything is working
+  - [ ] Eventually swap out matlab components for octave
   - [ ] consider splitting this into multiple nodes to speed up
 - [ ] Add HU accuracy using sensitometry module from CTP404 to get multiple HU levels
   - [ ]  requires that MTF results be performed with noise (discuss with Rongping) 
 - [ ] Check that I'm using the correct model and dose level results for the adult reference data (seems to high)
+- [ ] Start paper draft
+- [ ] Prepare IQ Phantom results for [AAPM Abstract](https://www.aapm.org/meetings/default.asp)
+  - [ ] due March 2023
+- [ ] Update [Ped DLIR Wiki](https://fda.sharepoint.com/sites/CDRH-OSEL-DIDSR/DIDSR%20Wiki/Medical%20Imaging%20and%20Diagnostics/Pediatric%20DLIR/Home_PedDLIR.aspx)
+- [ ] Switch lab notebook to markdown with remote on DIDSR github with private repo

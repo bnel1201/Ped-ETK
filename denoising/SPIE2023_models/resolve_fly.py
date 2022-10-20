@@ -1,9 +1,8 @@
-
+import matplotlib.pyplot as plt
 import argparse, os
 from pathlib import Path
 import glob
 import numpy as np 
-from skimage.transform import rescale, resize
 from skimage.metrics import structural_similarity as compare_ssim
 import natsort
 import cv2
@@ -12,7 +11,6 @@ import pandas as pd
 import torch
 from torchvision.transforms import ToTensor
 import util
-import sys
 
 import quant_util
 import io_func
@@ -183,9 +181,18 @@ def main():
 			# Renormalize CNN output and change back to original data type	
 			# print('cnn min/max', np.min(cnn_output), np.max(cnn_output), cnn_output.dtype)	    
 			cnn_output = quant_util.renormalize(cnn_output, lr_img, normalization_type=normalization_type)
+
+
+			# f, (ax0, ax1) = plt.subplots(1, 2, gridspec_kw=dict(hspace=0, wspace=0), figsize=(13, 4))
+			# offset=1000
+			# ax0.imshow(np.concatenate((lr_img, cnn_output), axis=1), cmap='gray', vmin=-20+offset, vmax=20+offset)
+			# im = ax1.imshow(cnn_output - lr_img, cmap='gray')
+			# cbar = plt.colorbar(im, label='Bias')
+
 			lr_img = lr_img.astype(out_dtype)
 			cnn_output = (cnn_output).astype(out_dtype)
 			# if gt_available: util.plot2dlayers(gt_img)
+
 			# util.plot2dlayers(lr_img)
 			# util.plot2dlayers(cnn_output)
 			# sys.exit()

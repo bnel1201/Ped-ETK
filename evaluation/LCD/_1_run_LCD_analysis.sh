@@ -8,6 +8,6 @@ basedir=/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom
 orginal_dir=$(pwd)
 cd $(dirname $0)
 
-matlab -nodesktop -nodisplay -r "basedir='${basedir}';run('./main_lcd_catphanSim.m'); exit"
+echo matlab -nodesktop -nodisplay -r "basedir='${basedir}';run('./main_lcd_catphanSim.m'); exit"
 
 cd $orginal_dir

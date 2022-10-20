@@ -72,7 +72,7 @@ for i=1:nfile
         expected_HU = round(disk_HUs(j));
         measured_HU = round(mean(mean(disk_img(floor(disk_radius):end-floor(disk_radius), floor(disk_radius):end-floor(disk_radius)))));
         disp(['     ' num2str(expected_HU) ' HU disk (actual: ' num2str(measured_HU) ' HU) [' num2str(j) '/' num2str(length(disk_HUs)) ']'])
-        if abs((measured_HU - expected_HU)/expected_HU) > 0.01
+        if abs(measured_HU - expected_HU) > 10 %error threshold in HU
             disp(sprintf('Warning: Measured Disk HUs (%d HU) do not match expected (%d HU)', measured_HU, expected_HU))
         end
         %estimate the MTF
