@@ -66,7 +66,7 @@ def get_std_noise(fnames, nx, offset=0):
 
 DOSELEVEL = 'I0_0300000'
 
-def imshow_disk_comparison(patient, n_avg=20, output_dir=None, f=None, axs=None):
+def imshow_disk_comparison(patient, h5file, n_avg=20, output_dir=None, f=None, axs=None):
 
     nx = get_img_sz(patient / 'geometry_info.csv')
     offset = get_image_offset(patient / 'image_info.csv')
@@ -75,9 +75,7 @@ def imshow_disk_comparison(patient, n_avg=20, output_dir=None, f=None, axs=None)
     fbp_noise_lvl = get_std_noise(sorted(list(patient.glob(f'{DOSELEVEL}/disk/*.raw'))), nx=nx, offset=offset)
     proc_noise_lvl = get_std_noise(sorted(list(patient.glob(f'{DOSELEVEL}_processed/disk/*.raw'))), nx=nx, offset=offset)
 
-    
-    # h5file = f'../../results/LCD/LCD_results.h5'
-    h5file = f'results/LCD/LCD_results.h5'
+    # h5file = f'results/LCD/LCD_results.h5'
     lesion_locs = pd.read_csv(patient/'phantom_info_pix_idx.csv').iloc[1:, :]
     nx = get_img_sz(patient / 'geometry_info.csv')
     h5f = h5py.File(h5file, 'r')

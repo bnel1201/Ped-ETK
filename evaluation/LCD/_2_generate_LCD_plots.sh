@@ -12,11 +12,15 @@ python plot_LCD_results.py -d $results_dir -o $results_dir/plots/lcd_v_diameter.
 # plot images
 images_dir=$results_dir/images
 n_avg=10
-python plot_LCD_images.py -d $datadir -n $n_avg -o $images_dir
+python plot_LCD_images.py $results_dir/LCD_results.h5 \
+                          -d $datadir \
+                          -n $n_avg \
+                          -o $images_dir
 
 bash ../utils/images_to_gif.sh $images_dir'/diameter*mm_lcd_comparison.png' $results_dir'/lcd_comparison.gif'
 
-python plot_image_montage.py -d $datadir \
+python plot_image_montage.py $results_dir/LCD_results.h5 \
+                             -d $datadir \
                              -n $n_avg \
                              -o $results_dir/montage.png \
                              -D "112 292"

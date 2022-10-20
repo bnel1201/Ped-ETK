@@ -34,7 +34,7 @@ def imshow_true_image(patient, output_dir=None):
         f.show()
 
 
-def main(datadir=None, n_avg=20, output_dir=None):
+def main(h5file, datadir=None, n_avg=20, output_dir=None):
     datadir = datadir or '/home/brandon.nelson/Data/temp/CCT189/monochromatic'
     patient_dirs = sorted(list(Path(datadir).glob('diameter*')))
 
@@ -43,11 +43,12 @@ def main(datadir=None, n_avg=20, output_dir=None):
     imshow_true_image(patient_dirs[0], output_dir)
 
     for patient_dir in patient_dirs:
-        imshow_disk_comparison(patient_dir, n_avg=n_avg, output_dir=output_dir)
+        imshow_disk_comparison(patient_dir, h5file, n_avg=n_avg, output_dir=output_dir)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Plots LCD images from CCT189')
+    parser.add_argument('h5file', help="LCD_results.h5 file")
     parser.add_argument('--datadir', '-d', default=None,
                         help="directory containing different patient diameter CT simulations")
     parser.add_argument('--output_dir','-o', required=False,
@@ -56,4 +57,4 @@ if __name__ == '__main__':
                         help="Number of images to average when showing LCD images")
     args = parser.parse_args()
     n_avg = int(args.n_avg) if args.n_avg else None
-    main(args.datadir, n_avg=n_avg, output_dir=args.output_dir)
+    main(args.h5file, args.datadir, n_avg=n_avg, output_dir=args.output_dir)
