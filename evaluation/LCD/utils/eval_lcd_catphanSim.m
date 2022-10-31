@@ -10,7 +10,9 @@ insert_info = read_phantom_info(fullfile(base_data_folder, 'diameter112mm', 'pha
 insert_info(:, end) = insert_info(:, end)/insert_info(1, end)*1000; insert_info = insert_info(2:end, [1 2 3 6]);
 num_inserts = size(insert_info, 1);
 n_recon_option = 2;
-I0_vector = 3e5;
+if ~exist('I0_vector', 'var')
+    I0_vector = 3e5;
+end
 diameter_dirs = dir(base_data_folder); diameter_dirs=diameter_dirs(3:end)
 n_diameters = length(diameter_dirs)
 
@@ -67,13 +69,13 @@ for diam_idx=1:n_diameters
                 insert_centers = round(insert_info(:,1:2));
                 insert_radii = insert_info(:,3);
                 % select insert
-                center_x = insert_centers(idx_insert, 1);
-                center_y = nx-insert_centers(idx_insert, 2);
-                insert_r = insert_radii(5-idx_insert); %due to matlab coordinate system, the order is reversed.
+                center_x = nx - insert_centers(idx_insert, 2) + 1;
+                center_y = insert_centers(idx_insert, 1);
+                insert_r = insert_radii(idx_insert); %due to matlab coordinate system, the order is reversed.
                 crop_r = ceil(3*max(insert_radii));
                 % get roi
-                sp_crop_xfov = center_x + [-crop_r:crop_r]; %signal present crop xfov
-                sp_crop_yfov = center_y + [-crop_r:crop_r];
+                sp_crop_yfov = center_x + [-crop_r:crop_r]; %signal present crop xfov
+                sp_crop_xfov = center_y + [-crop_r:crop_r];
                 roi_nx = 2*crop_r + 1;
 
                 sa_center_x = [center_x center_x center_x center_x-crop_r center_x+crop_r];
@@ -82,21 +84,53 @@ for diam_idx=1:n_diameters
                 sa_crop_xfov = zeros(nroi, roi_nx);
                 sa_crop_yfov = zeros(nroi, roi_nx);
                 for i=1:nroi
-                    sa_crop_xfov(i,:) = sa_center_x(i) + [-crop_r:crop_r];
-                    sa_crop_yfov(i,:) = sa_center_y(i) + [-crop_r:crop_r];
+                    sa_crop_yfov(i,:) = sa_center_x(i) + [-crop_r:crop_r];
+                    sa_crop_xfov(i,:) = sa_center_y(i) + [-crop_r:crop_r];
                 end
                 %check roi
                 true_fname = fullfile(data_folder, 'true_disk.raw');
                 fid = fopen(true_fname);
                 xtrue = fread(fid,[nx nx],'int16') - offset;
                 fclose(fid);
-                % figure(1); imshow(xtrue(sp_crop_xfov, sp_crop_yfov), [0 15]);
+                
+% %                 title("expected: "+num2str(expected_HU)+"HU / measured: "+num2str(measured_HU)+"HU")
                 % figure(1); imshow(xtrue, [0 15]);
+                
+                expected_HU = round(insert_info(idx_insert, 4));
+                expected_area = pi*insert_r^2;
+                true_roi = xtrue(sp_crop_xfov, sp_crop_yfov);
+                measured_roi = true_roi(true_roi >= expected_HU/2);
+                measured_area = numel(measured_roi);
+                area_error = measured_area - expected_area;
+                if abs(area_error) > 10 % fix phantom such that this area is under 17
+                    error("Error: Measured ROI area does not agree with expected value!")
+                end
+                rel_area_error = abs(area_error)/expected_area;
+                if abs(area_error)/expected_area > 0.05
+                    error("Error: Measured ROI area does not agree with expected value!")
+                end
+                measured_HU = mean(measured_roi);
+                HU_error = measured_HU - expected_HU;
+                if abs(HU_error) > 4
+                    error("Error: Measured ROI HU does not match expected!")
+                end
 
-                actual_insert_HU = xtrue(center_x, center_y)
-                if(actual_insert_HU ~= round(insert_info(idx_insert, 4)))
+                actual_insert_HU = xtrue(center_y, center_x);
+                if actual_insert_HU ~= expected_HU
                     disp('Warning: geometric mismatch! Quit.')
                     return;
+                end
+
+                measured_HU = mean(circle_roi(xtrue, center_x, center_y, insert_r));
+                HU_error = measured_HU - expected_HU;
+                if abs(HU_error) > 4
+                    error("Error: True disk HU does not match expected!")
+                end
+
+                measured_area = numel(circle_roi(xtrue, center_x, center_y, insert_r));
+                area_error = measured_area - expected_area;
+                if abs(area_error) > 5
+                    error("Error: True ROI area does not agree with expected value!")
                 end
 
                 n_sp = n_spfile;
@@ -146,6 +180,9 @@ for diam_idx=1:n_diameters
                     idx_sp_test = idx_sp1(n_train+1:end);
 
                     % run LG CHO
+                    if string(recon_option) == "fbp" && I0 == 300000 && fov > 200
+                        disp('stop here')
+                    end
                     [auc(i), snr(i), chimg, tplimg, meanSP, meanSA, meanSig, kch, t_sp, t_sa] = ...
                         conv_LG_CHO_2d(sa_roi(:, :, idx_sa_tr), sp_roi(:, :, idx_sp_tr), ...
                         sa_roi(:, :, idx_sa_test), sp_roi(:, :, idx_sp_test), insert_r/1.5, 5, 0);
@@ -155,6 +192,28 @@ for diam_idx=1:n_diameters
                         error(sprintf('0 auc at lesion %d, I0 %d, recon %d, reader %d', idx_insert, iI, k, i))
                     end
                 end
+                
+                figure(1);
+                set(gcf,'Position',[100 100 750 750])
+                subplot(2, 2, 1)
+                disp('stop here')
+                imshow(xtrue, [-2, 15]);
+                rectplot(center_x, center_y, insert_r);
+                title("expected: "+num2str(expected_HU)+"HU / measured: "+num2str(round(measured_HU,1))+"HU")
+                subplot(2, 2, 2)
+                imshow(meanSP, [-2 15]);
+                title("Mean SP, AUC:" + num2str(auc(i),3))
+                subplot(2, 2, 3)
+                imshow(tplimg,[0, max(tplimg(:))], 'Colormap', hot(256))
+                title("Learned MO Template")
+                subplot(2, 2, 4)
+                ha = imshow(true_roi,[-2 15], 'Colormap', gray(256));
+                hold on; hb = imshow(tplimg,[0 max(tplimg(:))], 'Colormap', hot(256)); hb.AlphaData=0.4; hold off
+                title("Template Overlay on Truth ROI")
+                if string(recon_option) == "fbp" && I0 == 300000 && fov > 200
+                    saveas(gcf, "debug/bjn/lcd_"+num2str(expected_HU)+".png")
+                end
+                % figure(1); imshow(meanSA, [])
             end
         end
     end

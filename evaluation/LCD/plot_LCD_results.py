@@ -1,3 +1,4 @@
+# %%
 import argparse
 from pathlib import Path
 
@@ -91,11 +92,102 @@ def main(results_dir, output_fname):
         fig.show()
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plots ESF Curves')
-    parser.add_argument('--datadir', '-d', default=None,
-                        help="directory containing LCD_results.h5 file")
-    parser.add_argument('--output_fname','-o', required=False,
-                        help="Output filename")
-    args = parser.parse_args()
-    main(args.datadir, args.output_fname)
+# if __name__ == '__main__':
+#     parser = argparse.ArgumentParser(description='Plots ESF Curves')
+#     parser.add_argument('--datadir', '-d', default=None,
+#                         help="directory containing LCD_results.h5 file")
+#     parser.add_argument('--output_fname','-o', required=False,
+#                         help="Output filename")
+#     args = parser.parse_args()
+#     main(args.datadir, args.output_fname)
+# %%
+results_dir = '../../results/LCD'
+h5file = f'{results_dir}/LCD_results.h5'
+
+f = h5py.File(h5file, 'r')
+auc = f['auc'][:]
+snr = f['snr'][:]
+diameters = f['patient_diameters'][:].astype(int)
+dose_levels = f['dose_levels'][:]
+# lesion_HUs = f['insert_HUs']
+lesion_HUs = [14, 7, 5, 3]
+lesion_radii_mm = [3, 5, 7, 10]
+lesion_radii_pix = [2.30, 3.99, 5.57, 7.97]
+recon_types = list(map(lambda x: x.decode('UTF-8'), f['recon_types'][:]))
+nreaders = f['readers'][:]
+f.close()
+
+auc_mean, auc_std = auc.mean(axis=0), auc.std(axis=0)
+snr_mean, snr_std = snr.mean(axis=0), auc.std(axis=0)
+
+adult_auc_means, adult_auc_stds = load_adult_ref_data()
+
+dose_idx=0
+recon_idx=recon_types.index('fbp')
+lesion_idxs = [0, 1, 3, 2]
+# %%
+import seaborn as sns
+import numpy as np
+plt.style.use('seaborn')
+fbp_idx = recon_types.index('fbp')
+cnn_idx = recon_types.index('dl_REDCNN')
+diam_idx = [0, 2, -1]
+# diameters[diam_idx]
+fig, axs = plt.subplots(2, 2, figsize=(6,6), sharex=True, sharey=True)
+subplot_idx = 0
+dose_levels_pct = np.ceil(dose_levels / dose_levels.max()*100)
+for lesion_idx, ax in zip(lesion_idxs , axs.flatten()):
+    auc_mean_diff = auc_mean[:, cnn_idx, lesion_idx, diam_idx]-auc_mean[:, fbp_idx, lesion_idx, diam_idx]
+    auc_std_diff = auc_std[:, cnn_idx, lesion_idx, diam_idx]-auc_mean[:, fbp_idx, lesion_idx, diam_idx]
+
+    if subplot_idx > 1:
+        ax.set_xlabel('Dose Level [%]')
+    for d in diam_idx:
+        # ax.errorbar(dose_levels, auc_mean_diff[:, d], yerr=auc_std_diff[:, d], label=f'{diameters[d]}')
+        ax.plot(dose_levels_pct, auc_mean_diff[:, d], label=f'{diameters[d]:0.0f} mm')
+        ax.set_title(f'{lesion_radii_mm[lesion_idx]} mm diameter\n{lesion_HUs[lesion_idx]} HU disk')
+        if not subplot_idx % 2:
+            ax.set_ylabel('Difference in Detectability\nREDCNN - FBP [AUC]')
+    if subplot_idx < 1:
+        ax.legend()
+    subplot_idx+=1
+fig.tight_layout()
+fig.savefig(Path(results_dir) / 'auc_diffs_.png', dpi=600)
+# %%
+import seaborn as sns
+import numpy as np
+fbp_idx = recon_types.index('fbp')
+cnn_idx = recon_types.index('dl_REDCNN')
+# diam_idx = [0, 2, -1]
+# diameters[diam_idx]
+
+output_dir = Path(results_dir) / 'LCD_v_dose'
+output_dir.mkdir(exist_ok=True, parents=True)
+
+for diam_idx, d in enumerate(diameters):
+    fig, axs = plt.subplots(2, 2, figsize=(6,6), sharex=True, sharey=True)
+    subplot_idx = 0
+    dose_levels_pct = np.ceil(dose_levels / dose_levels.max()*100)
+    for lesion_idx, ax in zip(lesion_idxs , axs.flatten()):
+
+        if subplot_idx > 1:
+            ax.set_xlabel('Dose Level [%]')
+        # for d in diam_idx:
+        ax.errorbar(dose_levels_pct, auc_mean[:, fbp_idx, lesion_idx, diam_idx], yerr=auc_std[:, fbp_idx, lesion_idx, diam_idx], label=f'FBP {diameters[diam_idx]:0.0f} mm')
+        ax.errorbar(dose_levels_pct, auc_mean[:, cnn_idx, lesion_idx, diam_idx], yerr=auc_std[:, cnn_idx, lesion_idx, diam_idx], label=f'REDCNN {diameters[diam_idx]:0.0f} mm')
+        ax.errorbar([100], adult_auc_means[lesion_idx],
+                    yerr=adult_auc_stds[lesion_idx],
+                    fmt='*', markersize=10,
+                    color='black', label='Adult Reference\n(340 mm FOV)')
+        # ax.plot(dose_levels_pct, auc_mean_diff[:, d], label=f'{diameters[d]:0.0f} mm')
+        ax.set_title(f'{lesion_radii_mm[lesion_idx]} mm diameter\n{lesion_HUs[lesion_idx]} HU disk')
+        if not subplot_idx % 2:
+            ax.set_ylabel('Detectability AUC')
+        if subplot_idx < 1:
+            ax.legend()
+        subplot_idx+=1
+        ax.set_ylim([0.4, 1])
+    output_fname = output_dir / f'LCD_v_dose_diameter_{d}mm.png'
+    fig.suptitle(f'Patient Diameter: {diameters[diam_idx]:0.0f} mm (FOV: {diameters[diam_idx]*1.1:0.0f} mm)')
+    fig.savefig(output_fname, dpi=600) 
+# %%

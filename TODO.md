@@ -6,6 +6,7 @@
 - [ ] Could Tensorboard help with interactive image inspection? to quickly check for bias and issues while training? (Prabhat has it for model training, should get his help to make sure I'm using it appropriately when I'm ready to train models.)
 - [ ] Add multiple dose levels to LCD study (RZ from 10/5 meeting)
   - [ ] (check what sims are left to complete), I think they're all done but I need to run denoisng on all of them
+  - [ ] Extend LCD analysis to multiple dose levels
 - [ ] make test script with fewer sims and diameters to quickly iterate through pipeline to make sure everything is working (i.e. add tests before porting to octave, Julia, different computer etc... Can use FBP for tests since that behaves in a known way)
 - [ ] Eventually swap out matlab components for octave
 - [ ] consider splitting this into multiple nodes to speed up

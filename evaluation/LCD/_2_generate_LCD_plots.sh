@@ -8,6 +8,8 @@ cd $(dirname $0)
 
 # plot LCD curves
 python plot_LCD_results.py -d $results_dir -o $results_dir/plots/lcd_v_diameter.png
+plots_dir=$results_dir'/LCD_v_dose'
+bash ../utils/images_to_gif.sh $plots_dir'/LCD_v_dose_diameter_*mm.png' $results_dir'/lcd_v_dose_comparison.gif'
 
 # plot images
 images_dir=$results_dir/images
@@ -17,7 +19,7 @@ python plot_LCD_images.py $results_dir/LCD_results.h5 \
                           -n $n_avg \
                           -o $images_dir
 
-bash ../utils/images_to_gif.sh $images_dir'/diameter*mm_lcd_comparison.png' $results_dir'/lcd_comparison.gif'
+bash ../utils/images_to_gif.sh $images_dir'/diameter*mm_lcd_comparison.png' $results_dir'/lcd_image_comparison.gif'
 
 python plot_image_montage.py $results_dir/LCD_results.h5 \
                              -d $datadir \

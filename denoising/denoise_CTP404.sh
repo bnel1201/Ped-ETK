@@ -42,11 +42,6 @@ command line arguments:
                         .txt format inside the output-folder.
 COMMENT
 
-
-# ----------------------------------------------------#
-# trained CNN3 weights applied on test set
-# adapted from </gpfs_projects/prabhat.kc/lowdosect/coderepo/DLIR_v1_public/traintest/nonGAN/demo_test.sh>
-# ----------------------------------------------------#
 MODEL_FOLDER=$1
 
 orginal_dir=$(pwd)
@@ -54,19 +49,22 @@ cd $(dirname $0)
 # on CTP404 Contrast Dependent MTF phantom
 for DIAMETER in 112 131 151 185 216 292
 do
-   echo $DIAMETER
-   INPUT_FOLDER=/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic/diameter"${DIAMETER}"mm/I0_3000000/fbp_sharp/
-   OUTPUT_FOLDER=/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic/diameter"${DIAMETER}"mm/I0_3000000_processed/
+   for DOSELEVEL in 3000000
+   do
+      echo $DIAMETER $DOSELEVEL
+      INPUT_FOLDER=/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic/diameter"${DIAMETER}"mm/I0_"${DOSELEVEL}"/fbp_sharp/
+      OUTPUT_FOLDER=/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic/diameter"${DIAMETER}"mm/I0_"${DOSELEVEL}"_processed/
 
-   NORM_TYPE='None'
-   python SPIE2023_models/resolve_fly.py --m 'redcnn' --input-folder $INPUT_FOLDER --model-folder $MODEL_FOLDER \
-   --output-folder $OUTPUT_FOLDER \
-   --normalization-type $NORM_TYPE --input-img-type 'raw' --specific-epoch --se-plot
+      NORM_TYPE='None'
+      python SPIE2023_models/resolve_fly.py --m 'redcnn' --input-folder $INPUT_FOLDER --model-folder $MODEL_FOLDER \
+      --output-folder $OUTPUT_FOLDER \
+      --normalization-type $NORM_TYPE --input-img-type 'raw' --specific-epoch --se-plot
 
-   # reorganize output files for evaluation scripts
-   mkdir -p $OUTPUT_FOLDER/fbp_sharp
-   mv $OUTPUT_FOLDER/checkpoint-25/*.raw $OUTPUT_FOLDER/fbp_sharp/
-   rm -r $OUTPUT_FOLDER/checkpoint-25
+      # reorganize output files for evaluation scripts
+      mkdir -p $OUTPUT_FOLDER/fbp_sharp
+      mv $OUTPUT_FOLDER/checkpoint-25/*.raw $OUTPUT_FOLDER/fbp_sharp/
+      rm -r $OUTPUT_FOLDER/checkpoint-25
+   done
 done
 
 cd $orginal_dir

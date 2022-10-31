@@ -9,6 +9,14 @@ results :
 phantoms : $(BASEDIR)/diameter112mm/I0_3000000/fbp_sharp/fbp_sharp_v001.raw
 	bash ssh_node.sh "cd make_phantoms; bash ./run_make_phantoms.sh; exit; cd .."
 
+.PHONY : denoise
+denoise :
+	bash denoising/run_denoising.sh
+
+.PHONY : all
+all : 
+	make phantoms denoise results
+
 .PHONY : plots
 plots : $(MTF_RESULTS)/plots/fbp_mtf_baseline.png $(MTF_RESULTS)/plots/mtf_redcnn.png $(MTF_RESULTS)/plots/mtf_cutoff_vals.png $(MTF_RESULTS)/plots/mtf_cutoff_vals_processed.png
 

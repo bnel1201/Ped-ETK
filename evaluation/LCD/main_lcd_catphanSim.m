@@ -11,6 +11,7 @@ end
 %%Data inputs
 all_recon_type = {'fbp','dl_REDCNN'};
 
+I0_vector = 3e5*[30 55 70 85 100]/100;
 run('utils/eval_lcd_catphanSim.m')
 
 exit
