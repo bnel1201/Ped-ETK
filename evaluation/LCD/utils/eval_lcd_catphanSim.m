@@ -4,16 +4,16 @@ if ~exist('homedir', 'var') %checks if setpath has been run
 end
 
 addpath([dirname(fileparts(mfilename('fullpath')), 2) '/utils'])
+diameter_dirs = dir(base_data_folder); diameter_dirs=diameter_dirs(3:end)
 
 %%inserts info
-insert_info = read_phantom_info(fullfile(base_data_folder, 'diameter112mm', 'phantom_info_pix_idx.csv'));
+insert_info = read_phantom_info(fullfile(base_data_folder, diameter_dirs(1).name, 'phantom_info_pix_idx.csv'));
 insert_info(:, end) = insert_info(:, end)/insert_info(1, end)*1000; insert_info = insert_info(2:end, [1 2 3 6]);
 num_inserts = size(insert_info, 1);
 n_recon_option = 2;
 if ~exist('I0_vector', 'var')
     I0_vector = 3e5;
 end
-diameter_dirs = dir(base_data_folder); diameter_dirs=diameter_dirs(3:end)
 n_diameters = length(diameter_dirs)
 
 inserts_list = round(insert_info(:, 4))
@@ -117,8 +117,7 @@ for diam_idx=1:n_diameters
 
                 actual_insert_HU = xtrue(center_y, center_x);
                 if actual_insert_HU ~= expected_HU
-                    disp('Warning: geometric mismatch! Quit.')
-                    return;
+                    error('Warning: geometric mismatch! Quit.')
                 end
 
                 measured_HU = mean(circle_roi(xtrue, center_x, center_y, insert_r));
@@ -157,7 +156,7 @@ for diam_idx=1:n_diameters
                 for i=1:n_safile
                     filenum = i;
                     filenum_string = ['v' sprintf('%03d', filenum)];
-                    filename = fullfile(folder_sp, ['fbp_sharp' '_' filenum_string '.raw']);
+                    filename = fullfile(folder_sa, ['fbp_sharp' '_' filenum_string '.raw']);
 
                     fid = fopen(filename);
                     im_current = fread(fid, [nx, nx], 'int16') - offset;
@@ -194,7 +193,7 @@ for diam_idx=1:n_diameters
                 end
                 
                 figure(1);
-                set(gcf,'Position',[100 100 750 750])
+                set(gcf,'Position',[100 100 800 800])
                 subplot(2, 2, 1)
                 disp('stop here')
                 imshow(xtrue, [-2, 15]);
