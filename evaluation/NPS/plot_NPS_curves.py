@@ -19,20 +19,19 @@ plt.style.use('seaborn-talk')
 
 def plot_1D_nps_all_diams(datadir, output_fname=None, **subplots_kwargs):
     diam_dirs = sorted(list(datadir.glob('diameter*')))
-    f, axs = plt.subplots(2, 3, dpi=300, **subplots_kwargs)
+    n_rows = len(diam_dirs) // 3
+    f, axs = plt.subplots(n_rows, 3, dpi=300, **subplots_kwargs)
     for ax, patient_dir in zip(axs.flatten(), diam_dirs):
         fbp_dir = patient_dir / DOSELEVEL / 'NPS'
         proc_dir = patient_dir / (DOSELEVEL + '_processed') / 'NPS'
         diam = fbp_dir.parents[1].stem
         plot_1D_nps(fbp_dir, proc_dir, fig=f, ax=ax)
         ax.set_title(f'{diam}')
-    [ax.get_legend().remove() for ax in axs.flatten()[1:]]
+    [ax.get_legend().remove() for ax, d in zip(axs.flatten()[1:], diam_dirs)]
     f.tight_layout()
     if output_fname:
         Path(output_fname).parent.mkdir(exist_ok=True, parents=True)
         f.savefig(output_fname, dpi=600)
-    else:
-        plt.show()
 
 
 def make_summary_df(fbp_stats_df, proc_stats_df):
@@ -100,8 +99,6 @@ def plot_CT_number_noise_v_diameter(fbp_summary_df, proc_summary_df, output_fnam
     if output_fname:
         Path(output_fname).parent.mkdir(exist_ok=True, parents=True)
         f.savefig(output_fname, dpi=600)
-    else:
-        plt.show()
 
 
 def plot_relative_denoising(fbp_summary_df, proc_summary_df, output_fname=None, fig=None, ax=None):
@@ -115,8 +112,6 @@ def plot_relative_denoising(fbp_summary_df, proc_summary_df, output_fname=None, 
     if output_fname:
         Path(output_fname).parent.mkdir(exist_ok=True, parents=True)
         fig.savefig(output_fname, dpi=600)
-    else:
-        plt.show()
     return fig, ax
 
 
@@ -142,8 +137,6 @@ def plot_noise_reduction(csv_fname, output_fname=None, fig=None, ax=None):
     if output_fname:
         Path(output_fname).parent.mkdir(exist_ok=True, parents=True)
         fig.savefig(output_fname, dpi=600)
-    else:
-        plt.show()
     return fig, ax
 
 
@@ -174,8 +167,6 @@ def plot_CT_bias(csv_fname, output_fname=None, fig=None, ax=None):
     if output_fname:
         Path(output_fname).parent.mkdir(exist_ok=True, parents=True)
         fig.savefig(output_fname, dpi=600)
-    else:
-        plt.show()
     return fig, ax
 
 
@@ -193,8 +184,6 @@ def plot_CT_bias_v_noise_reduction(csv_fname, output_fname=None):
     if output_fname:
         f.savefig(output_fname, dpi=600)
         print(output_fname)
-    else:
-        f.show()
 
 
 def get_noise_level_from_nps(delfreq, mag): return np.sqrt(sum(delfreq*mag))

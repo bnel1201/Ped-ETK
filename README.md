@@ -5,6 +5,15 @@ date: 2022-07-26
 
 ## Introduction
 
+## Defining an Experiment
+
+Simulation experiments are meant to do the following:
+1. generate phantoms and perform CT simulations
+2. perform DLIR denoising
+3. run objective image quality evaluation
+
+These three components are defined in your `experiment`, which is a directory containing 
+
 ## Explanation of Directory Structure
 
 |- denoising
@@ -47,3 +56,7 @@ make phantoms
 <!-- ```bash
 make denoise
 ``` -->
+
+## FAQS
+
+1. `ffmpeg` not found or my gifs are not being generated. --> `sudo apt-get install ffmpeg` 

@@ -38,4 +38,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     diams = list(map(int, args.diameters[0].split(' '))) if args.diameters else None
     n_avg = int(args.n_avg) if args.n_avg else None
-    main(args.h5file, args.datadir, n_avg=n_avg, diams=diams, output_fname=args.output_fname)
+    main(args.h5file, datadir=args.datadir, n_avg=n_avg, diams=diams, output_fname=args.output_fname)

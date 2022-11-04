@@ -6,7 +6,7 @@ addpath('/home/brandon.nelson/Dev/PhantomSimulations/CT_simulator')
 if ~exist('homedir', 'var') %checks if setpath has been run
     setpath
 end
-addpath('utils')
+% addpath('utils')
 addpath([dirname(fileparts(mfilename('fullpath')), 2) '/utils'])
 
 if ~exist('folder_path', 'var')

@@ -7,7 +7,9 @@ import pandas as pd
 from utils.esf_plot import plot_patient_diameter_esf, load_esf_dataframe
 
 
-def imread(fname, sz=512): return np.fromfile(open(fname), dtype=np.int16, count=sz*sz).reshape(sz, sz)
+def imread(fname, sz=None):
+    sz = sz or int(pd.read_csv(Path(fname).parents[2] / 'geometry_info.csv').columns[1])
+    return np.fromfile(open(fname), dtype=np.int16, count=sz*sz).reshape(sz, sz)
 
 
 def image_comparison_with_diff(fbp_fname, proc_fname, outdir=None):

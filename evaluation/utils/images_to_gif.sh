@@ -1,5 +1,7 @@
-inputs=${1-'results/images/diameter*mm_image_comparison.png'}
+inputs=${1-'results/MTF/images/diameter*mm_image_comparison.png'}
 output_file=${2-'results/esf_comparison.gif'}
+
+
 /usr/bin/ffmpeg -f image2 \
                 -pattern_type glob \
                 -framerate 0.7 \

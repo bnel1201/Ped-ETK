@@ -32,6 +32,6 @@ python plot_mtf_cutoffs_compare.py -d $datadir -o $output_fname --contrasts "15 
 python plot_sharpness_v_contrast_heatmap.py -d $results_dir
 # plot images
 images_dir=$results_dir/images
-python plot_images.py -o $images_dir
+python plot_images.py -d $datadir -o $images_dir
 bash ../utils/images_to_gif.sh $images_dir'/diameter*mm_image_comparison.png' $results_dir'/esf_comparison.gif'
 cd $orginal_dir

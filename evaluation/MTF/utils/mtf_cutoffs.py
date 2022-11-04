@@ -25,7 +25,7 @@ def get_mtf_results(patient_dir, mtfval=10, processed=False):
     df = clean_column_names(df)
     df = sort_HU_cols(df)
     HUs = [int(h.split(' HU')[0]) for h in df.columns[1:]]
-    mtf = df.iloc[1,1:].to_numpy()
+    mtf = df.iloc[0,1:].to_numpy()
     return pd.DataFrame({'Contrast [HU]': HUs, f'{diameter}': mtf})
 
 

@@ -1,7 +1,10 @@
 %contrast-dependent MTF from catphan scans
-clear all;
+% clear all;
 addpath('utils')
-basedir = '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/'; %see ../../make_phantoms/make_phantoms.m
+if ~exist('basedir', 'var')
+    disp('basedir not specified, using defaults')
+    basedir = '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/'; %see ../../make_phantoms/make_phantoms.m
+end
 
 datadir = fullfile(basedir, 'CTP404/monochromatic/');
 dose_level = 'I0_3000000';

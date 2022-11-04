@@ -19,7 +19,7 @@ nodes=("062" "077" "081" "083" "085" "089"\
 RANDOM=$$$(date +%s)
 cur_dir=$(pwd)
 cmd=""
-if [ "${val:0:4}" != "node" ]; then
+if [ $val == openhpc ]; then
     selectednode=${nodes[ $RANDOM % ${#nodes[@]} ]}
     echo entering node"${selectednode}"
     cmd+="ssh -X node${selectednode} -t cd ${cur_dir};"

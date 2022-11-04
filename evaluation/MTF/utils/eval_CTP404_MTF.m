@@ -82,10 +82,11 @@ for i=1:nfile
         dist_vector = ig.dx*(0:length(esf)-1);
 
         if j == 1
+            clear mtf_data esf_data
             mtf_data(1, :) = freq_vector;
             esf_data(1, :) = dist_vector;
         end
-        if length(mtf) ~= length(mtf_data)
+        if length(mtf) ~= length(mtf_data) | length(freq_vector) ~= length(mtf_data)
             mtf_data(j + 1, :) = interp1(freq_vector, mtf, mtf_data(1, :)); % <-- double check this later... meant to account for slight differences in array length from MTF_from_disk_edge due to rounding errors
         else
             mtf_data(j + 1, :) = mtf;

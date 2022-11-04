@@ -1,28 +1,41 @@
-basedir=/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies
-results_dir=../results
+BASE_DIR=${1-/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/main}
+RESULTS_DIR=${2-../results}
 
 # Do Not Edit Below
+RESULTS_DIR=$(realpath $RESULTS_DIR)
 cd $(dirname $0)
-results_dir=$(realpath $results_dir)
 orginal_dir=$(pwd)
 
 # MTF
-bash ../ssh_node.sh "bash MTF/_1_run_MTF_analysis.sh; exit"
-
-bash MTF/_2_generate_MTF_plots.sh $basedir/CTP404/monochromatic/ $results_dir/MTF
+cmd="bash MTF/_1_run_MTF_analysis.sh ${BASE_DIR}"
+if [ $(hostname) == openhpc ]; then
+    bash ../ssh_node.sh "$cmd; exit"
+else
+echo $cmd
+    $cmd
+fi
+bash MTF/_2_generate_MTF_plots.sh $BASE_DIR/CTP404/monochromatic/ $RESULTS_DIR/MTF
 
 # NPS
-bash ../ssh_node.sh "bash NPS/_1_run_NPS_analysis.sh; exit"
-
-bash NPS/_2_generate_NPS_plots.sh $basedir/CCT189/monochromatic/ $results_dir/NPS
+cmd="bash NPS/_1_run_NPS_analysis.sh ${BASE_DIR}"
+if [ $(hostname) == openhpc ]; then
+    bash ../ssh_node.sh "$cmd; exit"
+else
+    $cmd
+fi
+bash NPS/_2_generate_NPS_plots.sh $BASE_DIR/CCT189/monochromatic/ $RESULTS_DIR/NPS
 
 # Objective Image Quality Summary
 
-python plot_objective_iq_summary.py -d $results_dir -o $results_dir/objective_iq_summary.png
+python plot_objective_iq_summary.py -d $RESULTS_DIR -o $RESULTS_DIR/objective_iq_summary.png
 
 # LCD
-bash ../ssh_node.sh "bash LCD/_1_run_LCD_analysis.sh; exit"
-
-bash LCD/_2_generate_LCD_plots.sh $basedir/CCT189/monochromatic/ $results_dir/LCD
+cmd="bash LCD/_1_run_LCD_analysis.sh ${BASE_DIR} ${RESULTS_DIR}/LCD"
+if [ $(hostname) == openhpc ]; then
+    bash ../ssh_node.sh "$cmd; exit"
+else
+    $cmd
+fi
+bash LCD/_2_generate_LCD_plots.sh $BASE_DIR/CCT189/monochromatic $RESULTS_DIR/LCD
 
 cd $orginal_dir

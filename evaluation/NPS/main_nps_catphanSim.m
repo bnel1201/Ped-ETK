@@ -1,8 +1,10 @@
 %NPS measures from catphan scans
 % clear all;
 addpath('utils')
-% basedir = '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/'; %see ../../make_phantoms/make_phantoms.m
-% basedir = '/home/brandon.nelson/Data/temp'
+if ~exist('basedir', 'var')
+    disp('basedir not specified, using defaults')
+    basedir = '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/'; %see ../../make_phantoms/make_phantoms.m
+end
 
 datadir = fullfile(basedir, 'CCT189/monochromatic/')
 dose_level = 'I0_0300000';
@@ -26,4 +28,4 @@ for idx=1:length(diams)
     run('utils/eval_CCT189_NPS.m')
 end
 
-exit
+% exit
