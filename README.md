@@ -122,3 +122,6 @@ bash evaluation/run_all_evaluations.sh $BASE_DIR $RESULTS_DIR
 ## FAQS
 
 1. `ffmpeg` not found or my gifs are not being generated. --> `sudo apt-get install ffmpeg`
+2. CUDA vs no CUDA for inference?
+   - with --cuda inference takes `1 m 57 seconds`
+   - without inference takes `5 m 49s`
