@@ -33,7 +33,8 @@ Top priority, making sure all results are there and are consistent (reliable/rob
 
 ## longterm
 
-- [ ] dockerize
+- [ ] dockerize want to move away from matlab but it is available on Docker [matlab container info](https://www.mathworks.com/help/cloudcenter/ug/matlab-container-on-docker-hub.html)
+- [ ] add graphical user interface such as [streamlit](https://streamlit.io)
 - [X] make test script with fewer sims and diameters to quickly iterate through pipeline to make sure everything is working (i.e. add tests before porting to octave, Julia, different computer etc... Can use FBP for tests since that behaves in a known way)
 - [ ] Could Tensorboard help with interactive image inspection? to quickly check for bias and issues while training? (Prabhat has it for model training, should get his help to make sure I'm using it appropriately when I'm ready to train models.)
 - [ ] Eventually swap out matlab components for octave

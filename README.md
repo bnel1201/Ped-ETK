@@ -5,6 +5,35 @@ author: Brandon John Nelson
 email: Brandon.Nelson@fda.hhs.gov
 ---
 
+## Installation
+
+0. Currently, this package requires an active matlab install
+1. install [conda](https://www.anaconda.com/products/distribution#linux) (or [mamba](https://mamba.readthedocs.io/en/latest/installation.html))
+2. make a virtual environment and load the required dependencies:
+
+   ```bash
+   conda create -n DLIR --file requirements.txt -y
+   ```
+
+   then activate it
+
+   ```bash
+   conda activate DLIR
+   ```
+
+3. test installation:
+   - using make:
+
+   ```bash
+   make tests
+   ```
+
+   - or using shell script:
+
+   ```bash
+   bash run_all.sh experiments/test
+   ```
+
 ## Introduction
 
 This pipeline enables automatic assessment of the generalizability of objective image quality in noise reduction algorithms in pediatric populations with a focus on pretrained deep-learning-based noise reduction and reconstruction algorithms.
