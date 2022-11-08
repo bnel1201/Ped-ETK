@@ -1,8 +1,9 @@
 import argparse
 from pathlib import Path
-from tkinter import HORIZONTAL
+
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 import numpy as np
 
 from utils.csv_io import (get_stats_df,
@@ -14,7 +15,8 @@ from utils.nps_plot import plot_1D_nps
 
 DOSELEVEL = 'I0_0300000'
 
-plt.style.use('seaborn-talk')
+sns.set_style("darkgrid")
+# sns.set_context("talk")
 
 
 def plot_1D_nps_all_diams(datadir, output_fname=None, **subplots_kwargs):

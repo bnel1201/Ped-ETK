@@ -4,6 +4,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
+
 from utils.mtf_plot import plot_patient_diameter_mtf
 
 
@@ -65,7 +67,8 @@ def main(datadir=None, output_fname=None, processed=False):
     datadir = Path(datadir)
     patient_dirs = sorted(list(datadir.glob('diameter*')))
 
-    plt.style.use('seaborn')
+    sns.set_style("darkgrid")
+    sns.set_context("talk")
     f, axs = plt.subplots(2, 3, figsize=(9, 7), sharex='col', sharey='row',
                         gridspec_kw=dict(hspace=0.1, wspace=0.1))
     for patient_dir, ax in zip(patient_dirs, axs.flatten()):

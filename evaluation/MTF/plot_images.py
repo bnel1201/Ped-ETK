@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 import pandas as pd
+import seaborn as sns
 
 from utils.esf_plot import plot_patient_diameter_esf, load_esf_dataframe
 
@@ -114,7 +115,8 @@ def main(datadir=None, outdir=None):
     datadir = datadir or '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic/'
     patient_dirs = sorted(list(Path(datadir).glob('diameter*')))
 
-    plt.style.use('seaborn')
+    sns.set_style("darkgrid")
+    sns.set_context("talk")
 
     for patient in patient_dirs:
         proc_fname = sorted(list(patient.glob('I0_*_processed/fbp_sharp/*.raw')))[0]

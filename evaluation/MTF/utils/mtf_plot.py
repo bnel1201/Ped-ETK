@@ -2,7 +2,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from pathlib import Path
 
-def plot_patient_diameter_mtf(mtf_csv_fname:str|Path, patient_diameter:str=None, ax=None):
+
+def plot_patient_diameter_mtf(mtf_csv_fname, patient_diameter:str=None, ax=None):
     if ax is None:
         f, ax = plt.subplots()
     

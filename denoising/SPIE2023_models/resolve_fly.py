@@ -147,7 +147,9 @@ def main():
 		# ====================================
 		# Denoising all LD images from Test Set
 		# =====================================
-		for i in range(len(lr_img_names)):
+		n_images = len(lr_img_names)
+		disp_increment = 20 #n_images // 10
+		for i in range(n_images):
 			if args.input_img_type=='dicom':
 				lr_img = io_func.pydicom_imread(lr_img_names[i])
 				if gt_available: gt_img = io_func.pydicom_imread(gt_img_names[i])
@@ -157,7 +159,7 @@ def main():
 			else:
 				lr_img = io_func.imageio_imread(lr_img_names[i])
 				if gt_available: gt_img = io_func.imageio_imread(gt_img_names[i])
-			print('LR filename:', lr_img_names[i])
+
 		
 			if gt_available: gt_min, gt_max = np.min(gt_img), np.max(gt_img)
 			lr_h, lr_w = lr_img.shape
@@ -165,7 +167,7 @@ def main():
 
 			model_in_lr_img, _ = util.img_pair_normalization(lr_img, lr_img, normalization_type=normalization_type)
 			#print('gt min/max', np.min(gt_img), np.max(gt_img), gt_img.dtype)
-			print('lr min/max', np.min(lr_img), np.max(lr_img), lr_img.dtype)
+
 			#sys.exit()
 			#CNN hd part
 			img_to_tensor = ToTensor()
@@ -197,7 +199,7 @@ def main():
 			# util.plot2dlayers(cnn_output)
 			# sys.exit()
 			# calculating global metrics when gt Images are available
-			print('img no', i)
+
 			if gt_available:
 				gt_img = gt_img.astype(out_dtype)
 				cnn_max, cnn_min = max(np.max(gt_img), np.max(cnn_output)), min(np.min(gt_img), np.min(cnn_output))
@@ -219,8 +221,10 @@ def main():
 				print('cnn/ld psnr', cnn_psnr, lr_psnr)
 				print('gt min/max', np.min(gt_img), np.max(gt_img), gt_img.dtype)
 			
-			print('lr min/max', np.min(lr_img), np.max(lr_img), lr_img.dtype)
-			print('cnn min/max', np.min(cnn_output), np.max(cnn_output), cnn_output.dtype)
+			if i % disp_increment == 0:
+				print(f'[{i:3.0f}/{n_images:3.0f}] LR filename:', lr_img_names[i])
+				print('lr min/max', np.min(lr_img), np.max(lr_img), lr_img.dtype)
+				print('cnn min/max', np.min(cnn_output), np.max(cnn_output), cnn_output.dtype)
 			
 			# ==========================================================		    
 			# saving feed forward results from specific epoch (if true)

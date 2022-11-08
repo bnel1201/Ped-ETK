@@ -1,7 +1,8 @@
 import argparse
 from pathlib import Path
-
+import seaborn as sns
 import matplotlib.pyplot as plt
+
 from utils.esf_plot import plot_patient_diameter_esf, load_esf_dataframe
 
 
@@ -9,7 +10,8 @@ def main(datadir=None, output_fname=None):
     datadir = datadir or '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic/'
     patient_dirs = sorted(list(Path(datadir).glob('diameter*')))
 
-    plt.style.use('seaborn')
+    sns.set_style("darkgrid")
+    # sns.set_context("talk")
     f, axs = plt.subplots(2, 3, figsize=(9,6), sharex=True, sharey=True,
                         gridspec_kw=dict(hspace=0.1, wspace=0.1))
     for idx, (patient_dir, ax) in enumerate(zip(patient_dirs, axs.flatten())):

@@ -14,7 +14,7 @@ denoise :
 
 .PHONY : all
 all : 
-	make phantoms denoise results
+	bash run_all.sh experiments/main
 
 # .PHONY : plots
 # plots : $(MTF_RESULTS)/plots/fbp_mtf_baseline.png $(MTF_RESULTS)/plots/mtf_redcnn.png $(MTF_RESULTS)/plots/mtf_cutoff_vals.png $(MTF_RESULTS)/plots/mtf_cutoff_vals_processed.png

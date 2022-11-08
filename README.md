@@ -123,5 +123,6 @@ bash evaluation/run_all_evaluations.sh $BASE_DIR $RESULTS_DIR
 
 1. `ffmpeg` not found or my gifs are not being generated. --> `sudo apt-get install ffmpeg`
 2. CUDA vs no CUDA for inference?
-   - with --cuda inference takes `1 m 57 seconds`
-   - without inference takes `5 m 49s`
+`denoising/SPIE2023_models/resolve_fly.py` chould detect whether CUDA is installed and functioning (using `torch.cuda/is_available()`), if it is it will automatically use gpu inference which should improve inference
+   - with --cuda inference takes `1 m 57 s`
+   - without inference takes `5 m 49 s`

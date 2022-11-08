@@ -1,13 +1,17 @@
 import argparse
-import matplotlib.pyplot as plt
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 from utils.mtf_cutoffs import merge_patient_diameters, abs_HU
 
 
 def main(datadir=None, output_fname=None, processed=False):
     datadir = datadir or '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic/'
     patient_dirs = sorted(list(Path(datadir).glob('diameter*')))
-    plt.style.use('seaborn')
+    sns.set_style("darkgrid")
+    # sns.set_context("talk")
 
     ylim = [0, 13]
     f, (ax0, ax1) = plt.subplots(1, 2, figsize=(8, 4))

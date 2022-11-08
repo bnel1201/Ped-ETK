@@ -6,7 +6,8 @@ import seaborn as sns
 from NPS.utils.csv_io import get_noise_reduction_df
 from MTF.utils.csv_io import load_csv as load_mtf_csv
 
-plt.style.use('seaborn-talk')
+sns.set_style("darkgrid")
+# sns.set_context("talk")
 
 def plot_sharpness_heatmap(mtf_rel, cutoff_val=50, ax=None):
     if ax is None:

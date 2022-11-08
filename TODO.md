@@ -1,5 +1,12 @@
 # TODOs
 
+## converting to RST
+
+### LCD module
+
+- [ ] change input  of LCD module to be more flexible, they should just be a mask (truth mask) or pixel coordinates of the signal known exactly
+- [ ] add additional filters so users can switch between LGO and Gabor, etc...
+
 ## make it work
 
 Top priority, making sure all results are there and are consistent (reliable/robust)
@@ -22,8 +29,8 @@ Top priority, making sure all results are there and are consistent (reliable/rob
 
 ## make it fast
 
-- [ ] gpu inference
-- [ ] paralleize phantom generation
+- [X] gpu inference
+- [ ] parallelize phantom generation
 
 ## immediate
 

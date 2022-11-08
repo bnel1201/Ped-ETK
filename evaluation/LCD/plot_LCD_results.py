@@ -153,7 +153,8 @@ def main(results_dir):
     recon_idx=recon_types.index('fbp')
     lesion_idxs = [0, 1, 3, 2]
 
-    plt.style.use('seaborn')
+    sns.set_style("darkgrid")
+    # sns.set_context("talk")
     fbp_idx = recon_types.index('fbp')
     cnn_idx = recon_types.index('dl_REDCNN')
     diam_idx = [0, 2, -1]
