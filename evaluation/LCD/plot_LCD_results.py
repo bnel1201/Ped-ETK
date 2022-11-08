@@ -144,10 +144,13 @@ def main(results_dir):
     adult_h5file = '/home/brandon.nelson/Data/temp/CCT189/rz_results/LCD_results.h5'
     with h5py.File(adult_h5file, 'r') as f:
         adult_auc = f['auc'][:]
+        adult_snr = f['snr'][:]
     if adult_auc.shape[0] != 10:
         adult_auc = adult_auc.transpose([2, 0, 1, 3])
+        adult_snr = adult_snr.transpose([2, 0, 1, 3])
     adult_dose_level_pct = [30, 55, 70, 85, 100]
     adult_auc_means, adult_auc_stds = adult_auc.mean(axis=0), adult_auc.std(axis=0)
+    adult_snr_means, adult_snr_stds = adult_snr.mean(axis=0), adult_snr.std(axis=0)
     # %%
     # dose_idx=0
     recon_idx=recon_types.index('fbp')
@@ -157,19 +160,20 @@ def main(results_dir):
     # sns.set_context("talk")
     fbp_idx = recon_types.index('fbp')
     cnn_idx = recon_types.index('dl_REDCNN')
+    ## auc diff
     diam_idx = [0, 2, -1]
     fig, axs = plt.subplots(2, 2, figsize=(6,6), sharex=True, sharey=True)
     subplot_idx = 0
     dose_levels_pct = np.ceil(dose_levels / dose_levels.max()*100)
     for lesion_idx, ax in zip(lesion_idxs , axs.flatten()):
         auc_mean_diff = auc_mean[:, cnn_idx, lesion_idx, diam_idx]-auc_mean[:, fbp_idx, lesion_idx, diam_idx]
-        auc_std_diff = auc_std[:, cnn_idx, lesion_idx, diam_idx]-auc_mean[:, fbp_idx, lesion_idx, diam_idx]
+        auc_std_diff = np.sqrt(auc_std[:, cnn_idx, lesion_idx, diam_idx]**2 + auc_std[:, fbp_idx, lesion_idx, diam_idx]**2) # <-- I think you do pythagorean add (sqrt(std1^2 + std2^2))
 
         if subplot_idx > 1:
             ax.set_xlabel('Dose Level [%]')
         for d in diam_idx:
-            # ax.errorbar(dose_levels, auc_mean_diff[:, d], yerr=auc_std_diff[:, d], label=f'{diameters[d]}')
-            ax.plot(dose_levels_pct, auc_mean_diff[:, d], label=f'{diameters[d]:0.0f} mm')
+            ax.errorbar(dose_levels_pct, auc_mean_diff[:, d], yerr=auc_std_diff[:, d], label=f'{diameters[d]}')
+            # ax.plot(dose_levels_pct, auc_mean_diff[:, d], label=f'{diameters[d]:0.0f} mm')
             ax.set_title(f'{lesion_radii_mm[lesion_idx]} mm diameter\n{lesion_HUs[lesion_idx]} HU disk')
             if not subplot_idx % 2:
                 ax.set_ylabel('Difference in Detectability\nREDCNN - FBP [AUC]')
@@ -180,13 +184,38 @@ def main(results_dir):
     output_fname = Path(results_dir) / 'auc_diffs_.png'
     fig.savefig(output_fname, dpi=600)
     print(f"filed saved: {output_fname}")
+    ## snr diff
+    fig, axs = plt.subplots(2, 2, figsize=(6,6), sharex=True, sharey=True)
+    subplot_idx = 0
+    dose_levels_pct = np.ceil(dose_levels / dose_levels.max()*100)
+    for lesion_idx, ax in zip(lesion_idxs , axs.flatten()):
+        snr_mean_diff = snr_mean[:, cnn_idx, lesion_idx, diam_idx]-snr_mean[:, fbp_idx, lesion_idx, diam_idx]
+        snr_std_diff = np.sqrt(snr_std[:, cnn_idx, lesion_idx, diam_idx]**2 + snr_std[:, fbp_idx, lesion_idx, diam_idx]**2) # <-- I think you do pythagorean add (sqrt(std1^2 + std2^2))
+
+        # auc_std_diff = auc_std[:, cnn_idx, lesion_idx, diam_idx]-auc_std[:, fbp_idx, lesion_idx, diam_idx]
+
+        if subplot_idx > 1:
+            ax.set_xlabel('Dose Level [%]')
+        for d in diam_idx:
+            ax.errorbar(dose_levels_pct, snr_mean_diff[:, d], yerr=snr_std_diff[:, d], label=f'{diameters[d]}')
+            # ax.plot(dose_levels_pct, snr_mean_diff[:, d], label=f'{diameters[d]:0.0f} mm')
+            ax.set_title(f'{lesion_radii_mm[lesion_idx]} mm diameter\n{lesion_HUs[lesion_idx]} HU disk')
+            if not subplot_idx % 2:
+                ax.set_ylabel('Difference in AUC SNR\nREDCNN - FBP [AUC SNR]')
+        if subplot_idx < 1:
+            ax.legend()
+        subplot_idx+=1
+    fig.tight_layout()
+    output_fname = Path(results_dir) / 'auc_snr_diffs_.png'
+    fig.savefig(output_fname, dpi=600)
+    print(f"filed saved: {output_fname}")
 
     fbp_idx = recon_types.index('fbp')
     cnn_idx = recon_types.index('dl_REDCNN')
 
-    output_dir = Path(results_dir) / 'plots'
+ ## auc
+    output_dir = Path(results_dir) / 'plots' / 'auc'
     output_dir.mkdir(exist_ok=True, parents=True)
-
     for diam_idx, d in enumerate(diameters):
         fig, axs = plt.subplots(2, 2, figsize=(6,6), sharex=True, sharey=True)
         subplot_idx = 0
@@ -196,25 +225,60 @@ def main(results_dir):
             if subplot_idx > 1:
                 ax.set_xlabel('Dose Level [%]')
             # for d in diam_idx:
-            ax.errorbar(dose_levels_pct, auc_mean[:, fbp_idx, lesion_idx, diam_idx], yerr=auc_std[:, fbp_idx, lesion_idx, diam_idx], label=f'FBP {diameters[diam_idx]:0.0f} mm')
-            ax.errorbar(dose_levels_pct, auc_mean[:, cnn_idx, lesion_idx, diam_idx], yerr=auc_std[:, cnn_idx, lesion_idx, diam_idx], label=f'REDCNN {diameters[diam_idx]:0.0f} mm')
+            ax.errorbar(dose_levels_pct, auc_mean[:, fbp_idx, lesion_idx, diam_idx], yerr=auc_std[:, fbp_idx, lesion_idx, diam_idx], label=f'FBP')
+            ax.errorbar(dose_levels_pct, auc_mean[:, cnn_idx, lesion_idx, diam_idx], yerr=auc_std[:, cnn_idx, lesion_idx, diam_idx], label=f'REDCNN')
             ax.errorbar(adult_dose_level_pct , adult_auc_means[:, fbp_idx, lesion_idx],
                         yerr=adult_auc_stds[:, fbp_idx, lesion_idx],
                         fmt='--', markersize=10,
-                        color='black', label='Adult FBP Reference\n(212 mm FOV)')
+                        color='black', label='Adult FBP\n(212 mm FOV)')
             ax.errorbar(adult_dose_level_pct , adult_auc_means[:, cnn_idx, lesion_idx],
                         yerr=adult_auc_stds[:, cnn_idx, lesion_idx],
                         fmt='--', markersize=10,
-                        color='gray', label='Adult REDCNN Reference\n(212 mm FOV)')
+                        color='gray', label='Adult REDCNN\n(212 mm FOV)')
             # ax.plot(dose_levels_pct, auc_mean_diff[:, d], label=f'{diameters[d]:0.0f} mm')
             ax.set_title(f'{lesion_radii_mm[lesion_idx]} mm diameter\n{lesion_HUs[lesion_idx]} HU disk')
             if not subplot_idx % 2:
                 ax.set_ylabel('Detectability AUC')
             if subplot_idx < 1:
-                ax.legend()
+                ax.legend(loc = 'lower right', fontsize=6)
             subplot_idx+=1
-            ax.set_ylim([0.4, 1])
-        output_fname = output_dir / f'LCD_v_dose_diameter_{d}mm.png'
+            ax.set_ylim([0.65, 1])
+        output_fname = output_dir / f'AUC_v_dose_diameter_{d}mm.png'
+        fig.suptitle(f'Patient Diameter: {diameters[diam_idx]:0.0f} mm (FOV: {diameters[diam_idx]*1.1:0.0f} mm)')
+        fig.savefig(output_fname, dpi=600)
+        print(f"filed saved: {output_fname}")
+    
+     ## snr
+    output_dir = Path(results_dir) / 'plots' / 'snr'
+    output_dir.mkdir(exist_ok=True, parents=True)
+    for diam_idx, d in enumerate(diameters):
+        fig, axs = plt.subplots(2, 2, figsize=(6,6), sharex=True, sharey=True)
+        subplot_idx = 0
+        dose_levels_pct = np.ceil(dose_levels / dose_levels.max()*100)
+        for lesion_idx, ax in zip(lesion_idxs , axs.flatten()):
+
+            if subplot_idx > 1:
+                ax.set_xlabel('Dose Level [%]')
+            # for d in diam_idx:
+            ax.errorbar(dose_levels_pct, snr_mean[:, fbp_idx, lesion_idx, diam_idx], yerr=snr_std[:, fbp_idx, lesion_idx, diam_idx], label=f'FBP')
+            ax.errorbar(dose_levels_pct, snr_mean[:, cnn_idx, lesion_idx, diam_idx], yerr=snr_std[:, cnn_idx, lesion_idx, diam_idx], label=f'REDCNN')
+            ax.errorbar(adult_dose_level_pct , adult_snr_means[:, fbp_idx, lesion_idx],
+                        yerr=adult_snr_stds[:, fbp_idx, lesion_idx],
+                        fmt='--', markersize=10,
+                        color='black', label='Adult FBP\n(212 mm FOV)')
+            ax.errorbar(adult_dose_level_pct , adult_snr_means[:, cnn_idx, lesion_idx],
+                        yerr=adult_snr_stds[:, cnn_idx, lesion_idx],
+                        fmt='--', markersize=10,
+                        color='gray', label='Adult REDCNN\n(212 mm FOV)')
+            # ax.plot(dose_levels_pct, auc_mean_diff[:, d], label=f'{diameters[d]:0.0f} mm')
+            ax.set_title(f'{lesion_radii_mm[lesion_idx]} mm diameter\n{lesion_HUs[lesion_idx]} HU disk')
+            if not subplot_idx % 2:
+                ax.set_ylabel('AUC SNR')
+            if subplot_idx < 1:
+                ax.legend(loc = 'lower right', fontsize=6)
+            subplot_idx+=1
+            ax.set_ylim([-1, 9])
+        output_fname = output_dir / f'AUC_SNR_v_dose_diameter_{d}mm.png'
         fig.suptitle(f'Patient Diameter: {diameters[diam_idx]:0.0f} mm (FOV: {diameters[diam_idx]*1.1:0.0f} mm)')
         fig.savefig(output_fname, dpi=600)
         print(f"filed saved: {output_fname}")

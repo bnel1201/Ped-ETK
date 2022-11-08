@@ -1,4 +1,4 @@
-datadir=${1-'/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/old_results/CCT189/monochromatic'}
+datadir=${1-'/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/main/CCT189/monochromatic'}
 results_dir=${2-'results/LCD'}
 
 results_dir=$(realpath $results_dir)
@@ -8,9 +8,10 @@ cd $(dirname $0)
 
 
 # plot LCD curves
-plots_dir=$results_dir/plots
 python plot_LCD_results.py $results_dir
-bash ../utils/images_to_gif.sh $plots_dir/'LCD_v_dose_diameter_*mm.png' $results_dir'/lcd_v_dose_comparison.gif'
+plots_dir=$results_dir/plots
+bash ../utils/images_to_gif.sh $plots_dir/'auc/AUC_v_dose_diameter_*mm.png' $results_dir'/auc_v_dose_comparison.gif'
+bash ../utils/images_to_gif.sh $plots_dir/'snr/AUC_SNR_v_dose_diameter_*mm.png' $results_dir'/snr_v_dose_comparison.gif'
 
 # plot images
 images_dir=$results_dir/images
