@@ -10,9 +10,6 @@
 % 6.2 lp/cm. They matches pretty well the commercial filters.
 
 % Derived from </home/rxz4/ct_deeplearning/make_phantom/make_CTP189_wD45_B30.m>
-
-% Run path setup
-
 %% Set parameters
 run('../configs/SiemensSomatomDefinitionAS.m')
 
@@ -33,18 +30,31 @@ if ~exist(physics_type_folder, 'dir')
 end
 
 mu_water = 0.2059 / 10;     % in mm-1
-ref_diameter = 200; % in mm, from /home/rxz4/ct_deeplearning/make_phantom/make_CCT189_wD45_B30.m line 81
-% ref_diameter = patient_diameters(1)
-aec_factors = exp(mu_water*patient_diameters)./exp(mu_water*ref_diameter);
+if ~exist('reference_diameter', 'var')
+    reference_diameter = 150; % in mm, from /home/rxz4/ct_deeplearning/make_phantom/make_CCT189_wD45_B30.m line 81
+end
+if ~any(patient_diameters == reference_diameter)
+    patient_diameters = [reference_diameter patient_diameters]
+end
+if ~exist('reference_fov', 'var')
+    reference_fov = 340
+end
+aec_factors = exp(mu_water*patient_diameters)./exp(mu_water*reference_diameter);
 ndiams = length(patient_diameters); 
 for diam_idx=1:ndiams
     patient_diameter = patient_diameters(diam_idx);
-    fov = 1.1*patient_diameter;
+
+    if patient_diameter == reference_diameter
+        fov = reference_fov;
+        % patient_folder = [physics_type_folder '/reference_diameter' num2str(patient_diameter) 'mm/']
+    else
+        fov = 1.1*patient_diameter;
+    end
+    patient_folder = [physics_type_folder '/diameter' num2str(patient_diameter) 'mm/']
     aec_factor = aec_factors(diam_idx);
 
     ig = image_geom('nx', nx, 'fov', fov, 'down', down);
 
-    patient_folder = [physics_type_folder '/diameter' num2str(patient_diameter) 'mm/']
     if exist(patient_folder, 'dir') == false
         mkdir(patient_folder)
     end

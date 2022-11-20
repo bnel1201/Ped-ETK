@@ -4,6 +4,8 @@
 
 ### LCD module
 
+Building upon the existing [DIDSR MO repo](https://github.com/DIDSR/VICTRE_MO)
+
 - [ ] change input  of LCD module to be more flexible, they should just be a mask (truth mask) or pixel coordinates of the signal known exactly
 - [ ] add additional filters so users can switch between LGO and Gabor, etc...
 
@@ -23,6 +25,8 @@ Top priority, making sure all results are there and are consistent (reliable/rob
 
 ## make it right
 
+- [X] replace adult reference to be adult size and adult FOV (CCT189 200mm 340mm FOV; CTP404 150mm 340mm FOV) From Rongping: "The reference images I created was based on 340mm FOV (pixel size of 340/512=0.66). I think I set the pixel size to be 0.66, if I remembered correctly"
+- [ ] Consider saving out all generated CT simulation data in a database of CSV file so its easy to see what images were simulated in terms of: patient diameter, FOV, scanner, recon details, this would be saved out in the results folder under a  "simulation heading". Currently I have the Reference adult scans undergo the same processing but have a different FOV and a change the directory name, but this couples the phantom generation + CT sim with the analysis, ideally these would be decoupled which could be accomplished if I saved out all of this info and then in my analysis I could select which scans I want to use as baseline reference
 - [ ] add unit tests and error checking to ensure inputs are correct
 - [ ] code clean-up and improved documentation
 - [ ] matlab -> octave + python

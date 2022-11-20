@@ -21,6 +21,8 @@ do
                                      aec_on=${aec_on};\
                                      add_noise=${add_noise};\
                                      reference_dose_level=${reference_dose_level};\
+                                     reference_diameter=${reference_diameter};\
+                                     reference_fov=${reference_fov};\
                                      offset=${offset};\
                                      run('./${phantom}/make_${phantom}.m');\
                                      exit;"

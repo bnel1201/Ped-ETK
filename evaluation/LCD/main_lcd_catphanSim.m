@@ -2,12 +2,12 @@
 addpath('utils')
 if ~exist('basedir', 'var')
     disp('basedir not specified, using defaults')
-    basedir = '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/'; %see ../../make_phantoms/make_phantoms.m
+    basedir = '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/test'; %see ../../make_phantoms/make_phantoms.m
 end
 
 if ~exist('resultsdir', 'var')
     disp('resultsdir not specified, using defaults')
-    resultsdir = '/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/results'; %see ../../make_phantoms/make_phantoms.m
+    resultsdir = '/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/test/results'; %see ../../make_phantoms/make_phantoms.m
 end
 
 base_data_folder = fullfile(basedir, 'CCT189/monochromatic/');

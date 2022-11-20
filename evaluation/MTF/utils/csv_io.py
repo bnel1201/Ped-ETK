@@ -28,7 +28,7 @@ def load_csv(csv_fname):
     return mtf50_rel, mtf10_rel
 
 
-def append_adult_data_to_mtf_cutoff_data(mtf_results_dir, cutoff_val):
+def append_adult_data_to_mtf_cutoff_data(mtf_results_dir, cutoff_val, reference_diameter=150):
     ped_data = pd.read_csv(Path(mtf_results_dir) / f'mtf{cutoff_val}.csv')
     ped_fbp = ped_data[ped_data['Series'] == 'FBP Baseline']
     ped_redcnn = ped_data[ped_data['Series'] == 'REDCNN']
@@ -37,13 +37,19 @@ def append_adult_data_to_mtf_cutoff_data(mtf_results_dir, cutoff_val):
     ped_fbp.pop('Series')
     ped_fbp.pop('%MTF cutoff')
 
-    adult_mtf_dir = Path('/gpfs_projects/prabhat.kc/lowdosect/transfers/transfers_4_spie/exps/quant_analysis/mtf/results/matfiles')
-    adult_redcnn = scipy.io.loadmat(adult_mtf_dir / 'no_norm/redcnn/sharp_augTrTaTdT.mat')
+    # adult_mtf_dir = Path('/gpfs_projects/prabhat.kc/lowdosect/transfers/transfers_4_spie/exps/quant_analysis/mtf/results/matfiles')
+    # adult_redcnn = scipy.io.loadmat(adult_mtf_dir / 'no_norm/redcnn/sharp_augTrTaTdT.mat')
     # These Contrast values are from PKC's poster located here: <S:\DIDSR\Research\DLIR Project\ConferencePresentations\ct_2022>
     redcnn_data = ped_redcnn.sort_values(by='Contrast [HU]').set_index('Contrast [HU]')
-    redcnn_data = redcnn_data.join(pd.DataFrame({'Contrast [HU]': [35, 120, 340, 990], '150mm (Adult Reference)': adult_redcnn[f'mtf{cutoff_val}_all'][::-1].squeeze()}).set_index('Contrast [HU]'))
+    adult_redcnn = redcnn_data.pop(f'{reference_diameter}mm')
+    redcnn_data = redcnn_data.join(adult_redcnn)
+    redcnn_data.rename(columns={f'{reference_diameter}mm':f'{reference_diameter}mm (Adult Reference)'}, inplace=True)
+    # redcnn_data = redcnn_data.join(pd.DataFrame({'Contrast [HU]': [35, 120, 340, 990], '150mm (Adult Reference)': adult_redcnn[f'mtf{cutoff_val}_all'][::-1].squeeze()}).set_index('Contrast [HU]'))
 
-    adult_fbp = scipy.io.loadmat(adult_mtf_dir / 'sharp_fbp.mat')
+    # adult_fbp = scipy.io.loadmat(adult_mtf_dir / 'sharp_fbp.mat')
     fbp_data = ped_fbp.sort_values(by='Contrast [HU]').set_index('Contrast [HU]')
-    fbp_data = fbp_data.join(pd.DataFrame({'Contrast [HU]': [35, 120, 340, 990], '150mm (Adult Reference)': adult_fbp[f'mtf{cutoff_val}_all'][::-1].squeeze()}).set_index('Contrast [HU]'))
+    adult_fbp = fbp_data.pop(f'{reference_diameter}mm')
+    fbp_data = fbp_data.join(adult_fbp)
+    fbp_data.rename(columns={f'{reference_diameter}mm':f'{reference_diameter}mm (Adult Reference)'}, inplace=True)
+    # fbp_data = fbp_data.join(pd.DataFrame({'Contrast [HU]': [35, 120, 340, 990], '150mm (Adult Reference)': adult_fbp[f'mtf{cutoff_val}_all'][::-1].squeeze()}).set_index('Contrast [HU]'))
     return fbp_data, redcnn_data

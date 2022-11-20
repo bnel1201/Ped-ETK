@@ -4,7 +4,7 @@ if ~exist('homedir', 'var') %checks if setpath has been run
 end
 
 addpath([dirname(fileparts(mfilename('fullpath')), 2) '/utils'])
-diameter_dirs = dir(base_data_folder); diameter_dirs=diameter_dirs(3:end)
+diameter_dirs = dir([base_data_folder 'diameter*mm']);
 
 %%inserts info
 insert_info = read_phantom_info(fullfile(base_data_folder, diameter_dirs(1).name, 'phantom_info_pix_idx.csv'));
@@ -76,8 +76,8 @@ for diam_idx=1:n_diameters
                 insert_centers = round(insert_info(:,1:2));
                 insert_radii = insert_info(:,3);
                 % select insert
-                center_x = insert_centers(idx_insert, 1);
-                center_y = nx - insert_centers(idx_insert, 2) + 1;
+                center_x = insert_centers(idx_insert, 1) +1 ;
+                center_y = nx - insert_centers(idx_insert, 2);
                 insert_r = insert_radii(idx_insert); %due to matlab coordinate system, the order is reversed.
                 crop_r = ceil(3*max(insert_radii));
                 % get roi
@@ -110,7 +110,7 @@ for diam_idx=1:n_diameters
                     error('Error: Measured ROI area does not agree with expected value!')
                 end
                 rel_area_error = abs(area_error)/expected_area;
-                if abs(area_error)/expected_area > 0.1
+                if rel_area_error > 0.15
                     error('Error: Measured ROI area does not agree with expected value!')
                 end
                 measured_HU = mean(measured_roi);
@@ -120,19 +120,19 @@ for diam_idx=1:n_diameters
                 end
 
                 actual_insert_HU = xtrue(center_x, center_y);
-                if actual_insert_HU ~= expected_HU
+                if abs(actual_insert_HU - expected_HU) > 1
                     error('Warning: geometric mismatch! Quit.')
                 end
 
                 measured_HU = mean(circle_roi(xtrue, center_x, center_y, insert_r));
                 HU_error = measured_HU - expected_HU;
-                if abs(HU_error) > 4
+                if abs(HU_error) > 5
                     error('Error: True disk HU does not match expected!')
                 end
 
                 measured_area = numel(circle_roi(xtrue, center_x, center_y, insert_r));
                 area_error = measured_area - expected_area;
-                if abs(area_error) > 5
+                if abs(area_error) > 8
                     error('Error: True ROI area does not agree with expected value!')
                 end
 

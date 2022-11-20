@@ -111,7 +111,7 @@ def make_auc_heatmap_grid(h5file, recon_type='fbp'):
     f.suptitle(recon_type)
     return f, axs
 
-def main(results_dir):
+def main(results_dir, reference_diameter=200):
     """
     Dimensions of AUC results array are [reader num, dose level, recon option, inserts num, patient diameter] 
     These are reversed from matlab which is F index, but Python is C indexed
@@ -141,16 +141,26 @@ def main(results_dir):
     # load adults results
     # adult_h5file = f'{results_dir}/adult_ref_LCD_results.h5' # <-old indexing method
     # adult_h5file = '/home/brandon.nelson/Data/temp/CCT189/rz_results/LCD_results_orig.h5'
-    adult_h5file = '/home/brandon.nelson/Data/temp/CCT189/rz_results/LCD_results.h5'
-    with h5py.File(adult_h5file, 'r') as f:
-        adult_auc = f['auc'][:]
-        adult_snr = f['snr'][:]
-    if adult_auc.shape[0] != 10:
-        adult_auc = adult_auc.transpose([2, 0, 1, 3])
-        adult_snr = adult_snr.transpose([2, 0, 1, 3])
-    adult_dose_level_pct = [30, 55, 70, 85, 100]
-    adult_auc_means, adult_auc_stds = adult_auc.mean(axis=0), adult_auc.std(axis=0)
-    adult_snr_means, adult_snr_stds = adult_snr.mean(axis=0), adult_snr.std(axis=0)
+    # adult_h5file = '/home/brandon.nelson/Data/temp/CCT189/rz_results/LCD_results.h5'
+    # with h5py.File(adult_h5file, 'r') as f:
+    #     adult_auc = f['auc'][:]
+    #     adult_snr = f['snr'][:]
+    # if adult_auc.shape[0] != 10:
+    #     adult_auc = adult_auc.transpose([2, 0, 1, 3])
+    #     adult_snr = adult_snr.transpose([2, 0, 1, 3])
+    # adult_dose_level_pct = [30, 55, 70, 85, 100]
+    # adult_auc_means, adult_auc_stds = adult_auc.mean(axis=0), adult_auc.std(axis=0)
+    # adult_snr_means, adult_snr_stds = adult_snr.mean(axis=0), adult_snr.std(axis=0)
+    ref_idx = np.where(diameters==reference_diameter)[0][0]
+    adult_diameter = diameters[ref_idx]
+    diameters = np.delete(diameters, ref_idx)
+    adult_auc_means, adult_auc_stds = auc_mean[:, :, :, ref_idx], auc_std[:, :, :, ref_idx]
+    adult_snr_means, adult_snr_stds = snr_mean[:, :, :, ref_idx], snr_std[:, :, :, ref_idx]
+    auc_mean, auc_std = np.delete(auc_mean, ref_idx, -1), np.delete(auc_std, ref_idx, -1)
+    snr_mean, snr_std = np.delete(snr_mean, ref_idx, -1), np.delete(snr_std, ref_idx, -1)
+   
+
+    # ***Be sure to remove the ref_idx from auc and snr mean!!! <----***
     # %%
     # dose_idx=0
     recon_idx=recon_types.index('fbp')
@@ -162,12 +172,16 @@ def main(results_dir):
     cnn_idx = recon_types.index('dl_REDCNN')
     ## auc diff
     diam_idx = [0, 2, -1]
+    diam_idx = range(len(diameters))
     fig, axs = plt.subplots(2, 2, figsize=(6,6), sharex=True, sharey=True)
     subplot_idx = 0
     dose_levels_pct = np.ceil(dose_levels / dose_levels.max()*100)
     for lesion_idx, ax in zip(lesion_idxs , axs.flatten()):
         auc_mean_diff = auc_mean[:, cnn_idx, lesion_idx, diam_idx]-auc_mean[:, fbp_idx, lesion_idx, diam_idx]
         auc_std_diff = np.sqrt(auc_std[:, cnn_idx, lesion_idx, diam_idx]**2 + auc_std[:, fbp_idx, lesion_idx, diam_idx]**2) # <-- I think you do pythagorean add (sqrt(std1^2 + std2^2))
+
+        # auc_mean_diff = auc_mean[:, cnn_idx, lesion_idx, diam_idx]/auc_mean[:, fbp_idx, lesion_idx, diam_idx]
+        # auc_std_diff = np.sqrt((auc_std[:, cnn_idx, lesion_idx, diam_idx]/auc_mean[:, cnn_idx, lesion_idx, diam_idx])**2 + (auc_std[:, fbp_idx, lesion_idx, diam_idx]/auc_mean[:, fbp_idx, lesion_idx, diam_idx])**2) # <-- I think you do pythagorean add (sqrt(std1^2 + std2^2))
 
         if subplot_idx > 1:
             ax.set_xlabel('Dose Level [%]')
@@ -191,6 +205,9 @@ def main(results_dir):
     for lesion_idx, ax in zip(lesion_idxs , axs.flatten()):
         snr_mean_diff = snr_mean[:, cnn_idx, lesion_idx, diam_idx]-snr_mean[:, fbp_idx, lesion_idx, diam_idx]
         snr_std_diff = np.sqrt(snr_std[:, cnn_idx, lesion_idx, diam_idx]**2 + snr_std[:, fbp_idx, lesion_idx, diam_idx]**2) # <-- I think you do pythagorean add (sqrt(std1^2 + std2^2))
+
+        # snr_mean_diff = snr_mean[:, cnn_idx, lesion_idx, diam_idx]/snr_mean[:, fbp_idx, lesion_idx, diam_idx]
+        # snr_std_diff = np.sqrt((snr_std[:, cnn_idx, lesion_idx, diam_idx]/snr_mean[:, cnn_idx, lesion_idx, diam_idx])**2 + (snr_std[:, fbp_idx, lesion_idx, diam_idx]/snr_mean[:, fbp_idx, lesion_idx, diam_idx])**2) # <-- I think you do pythagorean add (sqrt(std1^2 + std2^2))
 
         # auc_std_diff = auc_std[:, cnn_idx, lesion_idx, diam_idx]-auc_std[:, fbp_idx, lesion_idx, diam_idx]
 
@@ -227,11 +244,11 @@ def main(results_dir):
             # for d in diam_idx:
             ax.errorbar(dose_levels_pct, auc_mean[:, fbp_idx, lesion_idx, diam_idx], yerr=auc_std[:, fbp_idx, lesion_idx, diam_idx], label=f'FBP')
             ax.errorbar(dose_levels_pct, auc_mean[:, cnn_idx, lesion_idx, diam_idx], yerr=auc_std[:, cnn_idx, lesion_idx, diam_idx], label=f'REDCNN')
-            ax.errorbar(adult_dose_level_pct , adult_auc_means[:, fbp_idx, lesion_idx],
+            ax.errorbar(dose_levels_pct , adult_auc_means[:, fbp_idx, lesion_idx],
                         yerr=adult_auc_stds[:, fbp_idx, lesion_idx],
                         fmt='--', markersize=10,
                         color='black', label='Adult FBP\n(212 mm FOV)')
-            ax.errorbar(adult_dose_level_pct , adult_auc_means[:, cnn_idx, lesion_idx],
+            ax.errorbar(dose_levels_pct, adult_auc_means[:, cnn_idx, lesion_idx],
                         yerr=adult_auc_stds[:, cnn_idx, lesion_idx],
                         fmt='--', markersize=10,
                         color='gray', label='Adult REDCNN\n(212 mm FOV)')
@@ -262,11 +279,11 @@ def main(results_dir):
             # for d in diam_idx:
             ax.errorbar(dose_levels_pct, snr_mean[:, fbp_idx, lesion_idx, diam_idx], yerr=snr_std[:, fbp_idx, lesion_idx, diam_idx], label=f'FBP')
             ax.errorbar(dose_levels_pct, snr_mean[:, cnn_idx, lesion_idx, diam_idx], yerr=snr_std[:, cnn_idx, lesion_idx, diam_idx], label=f'REDCNN')
-            ax.errorbar(adult_dose_level_pct , adult_snr_means[:, fbp_idx, lesion_idx],
+            ax.errorbar(dose_levels_pct , adult_snr_means[:, fbp_idx, lesion_idx],
                         yerr=adult_snr_stds[:, fbp_idx, lesion_idx],
                         fmt='--', markersize=10,
                         color='black', label='Adult FBP\n(212 mm FOV)')
-            ax.errorbar(adult_dose_level_pct , adult_snr_means[:, cnn_idx, lesion_idx],
+            ax.errorbar(dose_levels_pct , adult_snr_means[:, cnn_idx, lesion_idx],
                         yerr=adult_snr_stds[:, cnn_idx, lesion_idx],
                         fmt='--', markersize=10,
                         color='gray', label='Adult REDCNN\n(212 mm FOV)')

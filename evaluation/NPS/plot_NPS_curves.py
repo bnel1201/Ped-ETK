@@ -117,18 +117,19 @@ def plot_relative_denoising(fbp_summary_df, proc_summary_df, output_fname=None, 
     return fig, ax
 
 
-def plot_noise_reduction(csv_fname, output_fname=None, fig=None, ax=None):
+def plot_noise_reduction(csv_fname, output_fname=None, fig=None, ax=None, reference_diameter=200):
     noise_reduction_df = get_noise_reduction_df(csv_fname)
 
     # noise_reduction_df.loc[len(noise_reduction_df.index)] = [200, 45.5730] #add adult reference data
-
+    adult_df = noise_reduction_df[noise_reduction_df.index==reference_diameter]
+    ped_df = noise_reduction_df[noise_reduction_df.index!=reference_diameter]
     if fig is None or ax is None:
         fig, ax = plt.subplots(figsize=(4,4))
-    noise_reduction_df.plot(ax=ax, ylabel='Relative Noise Reduction [%]\n$|\sigma_{REDCNN} - \sigma_{FBP}| / \sigma_{FBP}\\times 100$')
-    ax.plot(200, 45.5730, marker='*', markersize=10, color='black')
+    ped_df.plot(ax=ax, ylabel='Relative Noise Reduction [%]\n$|\sigma_{REDCNN} - \sigma_{FBP}| / \sigma_{FBP}\\times 100$')
+    adult_df.plot(ax=ax, marker='*', markersize=10, color='black')
     ax.annotate('Adult Reference\n(340 mm FOV)', xy=(200, 50), horizontalalignment='center', arrowprops=dict(arrowstyle='->'), 
                 bbox=dict(boxstyle='round', fc='white'), color='black')
-    fovs = np.round(noise_reduction_df.index*1.1).astype(int).to_list()
+    fovs = np.round(ped_df.index*1.1).astype(int).to_list()
 
     twiny = ax.twiny()
     twiny.set_xticks(np.linspace(min(fovs), max(fovs), 5).astype(int))
