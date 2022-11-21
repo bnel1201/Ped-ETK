@@ -7,12 +7,21 @@ MODEL_FOLDER=${2-'/gpfs_projects/prabhat.kc/lowdosect/transfers/transfers_4_spie
 orginal_dir=$(pwd)
 cd $(dirname $0)
 
-for PHANTOM in $BASE_DIR/C*
+for PHANTOM in $BASE_DIR/*
     do
     for DIAMETER in $PHANTOM/monochromatic/*
     do
-        for DOSELEVEL in $DIAMETER/I0*0/
+        dosedir=${DIAMETER}/
+        contents=$(basename $DIAMETER)
+        if [ ${contents:0:8} == diameter ]; then
+            dosedir=$DIAMETER/I0*0/
+        fi
+        for DOSELEVEL in $dosedir
         do
+            contents=$(basename $DOSELEVEL)
+            if [ ${contents:0:2} != I0 ]; then
+                continue
+            fi
             DOSELEVEL=${DOSELEVEL:0:-1}
             if [ $(basename $PHANTOM) == CCT189 ]; then
                 for OBJ in disk bkg

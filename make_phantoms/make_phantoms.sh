@@ -3,7 +3,7 @@ cd $(dirname $0)
 
 BASE_DIR=${1-/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/}
 experiment_dir=${2-../experiments/main}
-
+source $experiment_dir/protocol 
 n_experiments=$(ls $experiment_dir/*.phantom | wc -l) 
 sim_num=0
 for sim in $experiment_dir/*.phantom
