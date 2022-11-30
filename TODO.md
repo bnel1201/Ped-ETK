@@ -22,6 +22,9 @@ Top priority, making sure all results are there and are consistent (reliable/rob
 - [X] Then make every piece modular by figuring out the min requirements for each (LCD and MTF both expect disk centers and radii), all require directories with raw images
 - [X] The. I want everything accessible via config files. I want to be able to quickly add lower dose levels and see how that changes detect ability
 - [ ] Add representative anthropomorphic phantom noise reduction results
+  - [ ] MSE against ground truth phantom
+  - [ ] noise reduction vs fbp for a given dose level
+  - [ ] organize by age and size (join data into csv for easy comparison)
 
 ## make it right
 
