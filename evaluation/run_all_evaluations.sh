@@ -38,4 +38,8 @@ else
 fi
 bash LCD/_2_generate_LCD_plots.sh $BASE_DIR/CCT189/monochromatic $RESULTS_DIR/LCD
 
+# Anthropomorphic phantoms
+
+bash anthro_mse/_1_run_anthro_mse_analysis.sh $BASE_DIR/anthropomorphic $RESULTS_DIR/anthropomorphic
+
 cd $orginal_dir

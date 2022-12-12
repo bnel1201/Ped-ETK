@@ -1,42 +1,23 @@
-# %%
+import argparse
+import re
 from pathlib import Path
-import pandas as pd
-import numpy as np
 import os
 
-BASE_DIR = Path('/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/anthropomorphic_phantom_studies/main/phantoms')
-BASE_DIR.mkdir(exist_ok=True, parents=True)
-GENERAL_PARAMS_FILE = os.path.abspath(Path('anthro_phantom.par'))
-XCAT_dir = Path('/gpfs_projects/brandon.nelson/XCAT/XCAT_V2_LINUX/')
+import pandas as pd
+import numpy as np
+
+XCAT_dir = '/gpfs_projects/brandon.nelson/XCAT/XCAT_V2_LINUX/'
+XCAT_MODELFILES_DIR='/gpfs_projects/brandon.nelson/XCAT/modelfiles'
 XCAT = 'dxcat2_linux_64bit'
 
-XCAT_MODELFILES_DIR=Path('/gpfs_projects/brandon.nelson/XCAT/modelfiles')
 
-# %%
-ped_phantoms = pd.read_csv('selected_xcat_peds.csv')
-peds_codes = ped_phantoms['Code #']
+XCAT_MODELFILES_DIR = Path(XCAT_MODELFILES_DIR)
 
-def get_diameter_from_age(age, units='mm'):
-    """
-    input: age [years]
-    output: effective diameter [default units mm]
-
-    Originally from ICRU 74, y = a + bx^1.5 + cx^0.5 + de^-x
-    a = 18.788598
-    b = 0.19486455
-    c = -1.060056
-    d = -7.6244784
-    """
-    a = 18.788598
-    b = 0.19486455
-    c = -1.060056
-    d = -7.6244784
-    effective_diameter_cm = a + b*age**1.5 + c*age**0.5 + d*np.exp(-age)
+def get_diameter(df, code, units='mm'):
+    diameter = float(df[df['Code #'] == code]['effective diameter (cm)'])
     if units == 'mm':
-        effective_diameter = 10*effective_diameter_cm
-    else:
-        effective_diameter = effective_diameter_cm
-    return effective_diameter
+        diameter *= 10
+    return diameter
 
 def get_nrb_filenames(phantom_df, code):
     if phantom_df['Code #'].dtype != int: code = str(code)
@@ -54,48 +35,69 @@ def get_nrb_filenames(phantom_df, code):
     patient_heart_nrb_file =  XCAT_MODELFILES_DIR / f'{patient}_heart.nrb'
     return patient_nrb_file, patient_heart_nrb_file, patient
 
-fovs = []
-heights = []
-for code in peds_codes:
-    patient_nrb_file, patient_heart_nrb_file, patient = get_nrb_filenames(ped_phantoms, code)
-    age = ped_phantoms[ped_phantoms['Code #'] == code]['age (year)'].to_numpy()[0]
-    height = ped_phantoms[ped_phantoms['Code #']==code]['height (cm)'].to_numpy()[0]
-    diameter = get_diameter_from_age(age)
-    fov = 1.1*diameter
-    fovs.append(fov)
-    heights.append(height)
-    vox_size_mm = fov/512
-    ds = 1 #detector size mm
-    pixel_width_cm = ds/10/2.5 #pixel width of phantom in cm (using 2.5 to exceed min nyquist frequency)
-    # array_size = 
-    print(code, patient_nrb_file.exists(), patient_heart_nrb_file.exists(), f'age: {age} yrs, diameter: {diameter:.2f} mm, fov: {fov:.2f} mm')
-max_fov_cm = max(fovs) / 10
-max_height_cm = max(heights)
-array_size = round(max_fov_cm / pixel_width_cm)
-array_size
-n_slices = round(max_height_cm / pixel_width_cm)
+def get_phantom_bin_filename(phantoms_dir, patient): return phantoms_dir / f'{patient}_atn_1.bin'
 
-energy=60
-# %%
-adult_phantoms = pd.read_csv('selected_xcat_adults.csv')
-adult_codes = adult_phantoms['Code #']
+def get_phantom_log_filename(phantoms_dir, patient): return phantoms_dir / f'{patient}_log'
 
-for code in adult_codes:
-    patient_nrb_file, patient_heart_nrb_file, patient = get_nrb_filenames(adult_phantoms, code)
-    print(code, patient_nrb_file.exists(), patient_heart_nrb_file.exists())
+def imread(fname, sz=1024, dtype=np.float32): return np.fromfile(open(fname), dtype=dtype, count=sz*sz).reshape(sz, sz)
 
-# %%
-assert len(adult_phantoms) + len(ped_phantoms) == len(list(XCAT_MODELFILES_DIR.glob('*_heart.nrb')))
-# %%
+def effective_diameter(ground_truth, pix_sz_mm): return 2*np.sqrt((ground_truth>0).sum()*pix_sz_mm**2/np.pi)
+
+def get_patient_name(phantoms, code):
+    _, _, patient = get_nrb_filenames(phantoms, code)
+    return patient
+
+def get_pixel_width(log_filename, units='mm'):
+    """
+    reads XCAT log file and returns pixel width in specified `units`
+    """
+    with open(log_filename, 'r') as f:
+        text = f.read()
+    m = re.search('(pixel width =  )(\d.\d+)', text)
+    pixel_width = float(m.group(2))
+    if units == 'mm':
+        pixel_width *= 10
+    return pixel_width
+
+def get_array_size(log_filename):
+    """
+    reads XCAT log file and returns array size in pixels
+    """
+    with open(log_filename, 'r') as f:
+        text = f.read()
+    m = re.search('(array_size =\s+)(\d.\d+)', text)
+    return int(m.group(2))
+
+# def measure_effective_diameter(phantom_df, code, units='mm'):
+#     patient = get_patient_name(phantom_df, code)
+#     bin_file = get_phantom_bin_filename(phantoms_dir / 'full_fov', patient)
+#     log_file = get_phantom_log_filename(phantoms_dir / 'full_fov', patient)
+#     array_size = get_array_size(log_file)
+#     pixel_width_mm = get_pixel_width(log_file, units=units)
+#     ground_truth = imread(bin_file, sz=array_size)
+#     return effective_diameter(ground_truth, pixel_width_mm)
+
+def get_effective_diameter(phantom_df, code): return phantom_df[phantom_df['Code #']==code]['effective diameter (cm)'].to_numpy()[0]
 
 def get_height(phantom_df, code): return phantom_df[phantom_df['Code #']==code]['height (cm)'].to_numpy()[0]
 
-def make_phantom(phantom_df, code):
+def get_age(phantom_df, code): return phantom_df[phantom_df['Code #']==code]['age (year)'].to_numpy()[0]
+
+def make_phantom(phantoms_dir, phantom_df, code, fov=None, array_size = 1024, energy=60):
     """
     energy [keV]
     """
+    # XCAT_dir = Path(XCAT_dir)
+    GENERAL_PARAMS_FILE = os.path.abspath(Path(__file__).parent / 'anthro_phantom.par')
+    phantoms_dir.mkdir(exist_ok=True, parents=True)
+    
     patient_nrb_file, patient_heart_nrb_file, patient = get_nrb_filenames(phantom_df, code)
-    height = get_height(ped_phantoms, code)
+    height = get_height(phantom_df, code)
+    # age = get_age(phantom_df, code)
+    estimated_eff_diameter = get_diameter(phantom_df, code, units='cm')
+    fov = fov or min(1.1*estimated_eff_diameter, 48) #in cm
+    pixel_width_cm = fov / array_size
+
     midslice = round(height / 1.7 / pixel_width_cm)
     cmd = f'cd {XCAT_dir}\n./{XCAT} {GENERAL_PARAMS_FILE}\
              --organ_file {patient_nrb_file}\
@@ -106,15 +108,49 @@ def make_phantom(phantom_df, code):
              --energy {energy}\
              --startslice {midslice}\
              --endslice {midslice}\
-             {BASE_DIR}/{patient}'
+             --arms_flag 0\
+             {phantoms_dir}/{patient}'
     cmd
     os.system(cmd)
 # %%
 
-for code in peds_codes:
-    print(code)
-    make_phantom(ped_phantoms, code)
-# %%
-for code in adult_codes:
-    print(code)
-    make_phantom(adult_phantoms, code)
+def main(phantoms_dir, xcat_patients_csv='selected_xcat_patients.csv'):
+
+    phantoms_dir = Path(phantoms_dir)
+    phantoms_dir.mkdir(exist_ok=True, parents=True)
+
+    phantoms = pd.read_csv(xcat_patients_csv)
+
+    codes = phantoms['Code #']
+    for code in codes:
+        patient_nrb_file, patient_heart_nrb_file, _ = get_nrb_filenames(phantoms, code)
+        assert patient_nrb_file.exists()
+        assert patient_heart_nrb_file.exists()
+
+    assert len(phantoms) == len(list(XCAT_MODELFILES_DIR.glob('*_heart.nrb')))
+
+    for code in codes:
+        fov = 48
+        print(f'making full fov: {fov} cm phantoms {code}')
+        make_phantom(phantoms_dir / 'full_fov', phantoms, code, fov=fov)
+
+    # update_effective_diameters = False
+    # if update_effective_diameters:
+    #     measured_effective_diameters_cm = [measure_effective_diameter(phantoms, code, units='cm') for code in codes]
+    #     phantoms['effective diameter (cm)'] = measured_effective_diameters_cm
+    #     phantoms.to_csv('selected_xcat_patients.csv', index=False)
+
+    for code in codes:
+        fov = int(1.3 * get_effective_diameter(phantoms, code))
+        print(f'making adaptive fov: {fov} cm phantoms {code}')
+        make_phantom(phantoms_dir / 'adaptive_fov', phantoms, code, fov=fov)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Make Anthropomorphic Phantoms using XCAT')
+    parser.add_argument('base_dir',
+                        help="output directory to save XCAT phantom bin files")
+    parser.add_argument('patient_info_csv_file',
+                        help="csv file containing virtual patient info in XCAT format")
+    args = parser.parse_args()
+    main(phantoms_dir=Path(args.base_dir) / 'anthropmorphic' / 'phantoms', xcat_patients_csv=args.patient_info_csv_file)

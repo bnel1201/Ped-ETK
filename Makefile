@@ -34,16 +34,14 @@ all :
 # $(MTF_RESULTS)/plots/mtf_cutoff_vals_processed.png : $(BASEDIR)/diameter112mm/I0_3000000_processed/results_MTF50.csv
 # 	python evaluation/MTF/plot_mtf_cutoffs.py $^ -o $@ --processed
 
-.PHONY : clean_test_results
-clean_test_results :
-	rm -rf test/results
-
 .PHONY : clean_tests
 clean_tests :
+	rm -rf test/results
 	rm -rf /gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/test/
 
 .PHONY : tests
 tests :
+	rm -rf test/results
 	bash run_all.sh experiments/test
 
 .PHONY : clean

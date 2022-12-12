@@ -222,7 +222,7 @@ X_tr = 0.0	# x translation in mm ;
 Y_tr = 0.0	# y translation in mm ;
 Z_tr = 0.0	# z translation in mm ;
 
-activity_unit = 0	# activity units (1= scale by voxel volume (multiply activity value times pixel_width * pixel_width * slice_width; 0= don't scale) 
+activity_unit = 1	# activity units (1= scale by voxel volume (multiply activity value times pixel_width * pixel_width * slice_width; 0= don't scale) 
 
 myoLV_act = 75		# hrt_myoLV_act - activity in left ventricle myocardium
 myoRV_act = 75		# hrt_myoRV_act - activity in right ventricle myocardium

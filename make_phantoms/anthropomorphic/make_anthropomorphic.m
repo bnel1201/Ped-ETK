@@ -1,5 +1,7 @@
-base_dir = '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/anthropomorphic_phantom_studies/main';
-phantom_dir = fullfile(base_dir, 'phantoms')
+if ~exist('basedataFolder', 'var')
+   basedataFolder = '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/anthropomorphic_phantom_studies/main/';
+end
+phantom_dir = fullfile(basedataFolder, 'anthropmorphic/phantoms/adaptive_fov')
 
 addpath('utils')
 
