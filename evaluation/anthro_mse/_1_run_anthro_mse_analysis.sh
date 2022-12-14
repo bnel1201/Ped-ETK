@@ -1,7 +1,9 @@
 BASE_DIR=${1-/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/anthropomorphic_phantom_studies/main/simulations} #directory containing simulations
 RESULTS_DIR=${2-anthro_results}
 
-results_csv_name=$(realpath $RESULTS_DIR/anthro_mse_dataset.csv) #csv to be generated containing mean squared error measurements
+mkdir -p $RESULTS_DIR
+RESULTS_DIR=$(realpath $RESULTS_DIR)
+results_csv_name=$RESULTS_DIR/anthro_mse_dataset.csv #csv to be generated containing mean squared error measurements
 
 cd $(dirname $0)
 orginal_dir=$(pwd)

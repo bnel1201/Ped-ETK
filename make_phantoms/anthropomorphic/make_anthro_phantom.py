@@ -153,4 +153,4 @@ if __name__ == '__main__':
     parser.add_argument('patient_info_csv_file',
                         help="csv file containing virtual patient info in XCAT format")
     args = parser.parse_args()
-    main(phantoms_dir=Path(args.base_dir) / 'anthropmorphic' / 'phantoms', xcat_patients_csv=args.patient_info_csv_file)
+    main(phantoms_dir=Path(args.base_dir) / 'anthropomorphic' / 'phantoms', xcat_patients_csv=args.patient_info_csv_file)

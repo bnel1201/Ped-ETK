@@ -41,7 +41,7 @@ sg = sino_geom('fan', 'units', 'mm', ...
     'down', down);
 
 % basedataFolder = fullfile(base_dir, 'simulations');
-sampleFolder = fullfile(basedataFolder, 'anthropmorphic', 'simulations', patient);
+sampleFolder = fullfile(basedataFolder, 'anthropomorphic', 'simulations', patient);
 if ~exist(sampleFolder, 'dir')
     mkdir(sampleFolder)
 end

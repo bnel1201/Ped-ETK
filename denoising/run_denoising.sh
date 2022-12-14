@@ -7,42 +7,34 @@ MODEL_FOLDER=${2-'/gpfs_projects/prabhat.kc/lowdosect/transfers/transfers_4_spie
 orginal_dir=$(pwd)
 cd $(dirname $0)
 
-for PHANTOM in $BASE_DIR/*
-    do
-    for DIAMETER in $PHANTOM/monochromatic/*
-    do
-        dosedir=${DIAMETER}/
-        contents=$(basename $DIAMETER)
-        if [ ${contents:0:8} == diameter ]; then
-            dosedir=$DIAMETER/I0*0/
-        fi
-        for DOSELEVEL in $dosedir
-        do
-            contents=$(basename $DOSELEVEL)
-            if [ ${contents:0:2} != I0 ]; then
-                continue
-            fi
-            DOSELEVEL=${DOSELEVEL:0:-1}
-            if [ $(basename $PHANTOM) == CCT189 ]; then
-                for OBJ in disk bkg
-                do
-                INPUT_FOLDER="$DOSELEVEL"/$OBJ/
-                OUTPUT_FOLDER="$DOSELEVEL"_processed/$OBJ/
-                bash denoise.sh $INPUT_FOLDER $OUTPUT_FOLDER $MODEL_FOLDER
+for PHANTOM_TYPE in $BASE_DIR/*; do
+    if [ $(basename $PHANTOM_TYPE) == anthropomorphic ]; then
+    PHANTOM_TYPE=$PHANTOM_TYPE/simulations
+    fi
+    for PHANTOM in $PHANTOM_TYPE/*; do
+        for DIAMETER in $PHANTOM/monochromatic/*; do
+            for DOSELEVEL in $DIAMETER/I0*0/; do
+                DOSELEVEL=${DOSELEVEL:0:-1}
+                if [ $(basename $PHANTOM) == CCT189 ]; then
+                    for OBJ in disk bkg; do
+                    INPUT_FOLDER="$DOSELEVEL"/$OBJ/
+                    OUTPUT_FOLDER="$DOSELEVEL"_processed/$OBJ/
+                    bash denoise.sh $INPUT_FOLDER $OUTPUT_FOLDER $MODEL_FOLDER
 
-                mkdir -p $OUTPUT_FOLDER/
-                mv $OUTPUT_FOLDER/checkpoint-25/*.raw $OUTPUT_FOLDER/
-                rm -r $OUTPUT_FOLDER/checkpoint-25
-                done
-            else
-                INPUT_FOLDER="$DOSELEVEL"/fbp_sharp/
-                OUTPUT_FOLDER="$DOSELEVEL"_processed/
-                bash denoise.sh $INPUT_FOLDER $OUTPUT_FOLDER $MODEL_FOLDER
-        
-                mkdir -p $OUTPUT_FOLDER/fbp_sharp
-                mv $OUTPUT_FOLDER/checkpoint-25/*.raw $OUTPUT_FOLDER/fbp_sharp/
-                rm -r $OUTPUT_FOLDER/checkpoint-25
-            fi
+                    mkdir -p $OUTPUT_FOLDER/
+                    mv $OUTPUT_FOLDER/checkpoint-25/*.raw $OUTPUT_FOLDER/
+                    rm -r $OUTPUT_FOLDER/checkpoint-25
+                    done
+                else
+                    INPUT_FOLDER="$DOSELEVEL"/fbp_sharp/
+                    OUTPUT_FOLDER="$DOSELEVEL"_processed/
+                    bash denoise.sh $INPUT_FOLDER $OUTPUT_FOLDER $MODEL_FOLDER
+            
+                    mkdir -p $OUTPUT_FOLDER/fbp_sharp
+                    mv $OUTPUT_FOLDER/checkpoint-25/*.raw $OUTPUT_FOLDER/fbp_sharp/
+                    rm -r $OUTPUT_FOLDER/checkpoint-25
+                fi
+            done
         done
     done
 done

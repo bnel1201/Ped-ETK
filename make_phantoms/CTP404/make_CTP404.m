@@ -20,7 +20,7 @@ sg = sino_geom('fan', 'units', 'mm', ...
     'dsd', sdd, 'dod', dod, 'offset_s', offset_s, ...
     'down', down);
 
-sampleFolder = [basedataFolder 'CTP404/'];
+sampleFolder = fullfile(basedataFolder, 'geometric', 'CTP404/');
 if ~exist(sampleFolder, 'dir')
     mkdir(sampleFolder)
 end

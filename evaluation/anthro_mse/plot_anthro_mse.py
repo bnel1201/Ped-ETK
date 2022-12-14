@@ -29,23 +29,21 @@ def main(result_csv_filename='anthro_mse_dataset.csv', output_dir='anthro_result
     xcat_df = pd.read_csv(result_csv_filename)
     rel_mse_df = make_relative_mse_reduction_dataframe(xcat_df)
 
-    output_dir = Path(output_dir)
-    if not output_dir.exists():
-        output_dir.mkdir(exist_ok=True, parents=True)
-
+    plots_dir = Path(output_dir) / 'plots'
+    plots_dir.mkdir(exist_ok=True, parents=True)
 
     rel_mse_df.plot.scatter(x='age (year)', y='MSE Reduction (%)', c='Dose (%)')
-    output_fname = output_dir / 'mse_reduction_v_age.png'
+    output_fname = plots_dir / 'mse_reduction_v_age.png'
     plt.savefig(output_fname, dpi=600)
     print(f'Saving: {output_fname}')
 
     rel_mse_df.plot.scatter(x='effective diameter (cm)', y='MSE Reduction (%)', c='Dose (%)')
-    output_fname = output_dir / 'mse_reduction_v_eff_diameter.png'
+    output_fname = plots_dir / 'mse_reduction_v_eff_diameter.png'
     plt.savefig(output_fname, dpi=600)
     print(f'Saving: {output_fname}')
 
     rel_mse_df.plot.scatter(x='WED (cm)', y='MSE Reduction (%)', c='Dose (%)')
-    output_fname = output_dir / 'mse_reduction_v_wed.png'
+    output_fname = plots_dir / 'mse_reduction_v_wed.png'
     plt.savefig(output_fname, dpi=600)
     print(f'Saving: {output_fname}')
 
@@ -53,8 +51,10 @@ def main(result_csv_filename='anthro_mse_dataset.csv', output_dir='anthro_result
 
     def get_closest_doselevel_idx(desired_doselevel):
         dose_idx = np.argmin(np.abs(doselevels_pct - desired_doselevel))
-        # print(f'desired: {desired_doselevel}, closest: {doselevels_pct[dose_idx]}')
         return dose_idx
+
+    imgs_dir = Path(output_dir) / 'images'
+    imgs_dir.mkdir(exist_ok=True, parents=True)
 
     codes = rel_mse_df['Code #'].unique()
     for code in codes:
@@ -62,7 +62,6 @@ def main(result_csv_filename='anthro_mse_dataset.csv', output_dir='anthro_result
         weight_kg = rel_mse_df[rel_mse_df['Code #'] == code]['weight (kg)'].unique()[0]
         eff_diameter = rel_mse_df[rel_mse_df['Code #'] == code]['effective diameter (cm)'].unique()[0]
         wed = rel_mse_df[rel_mse_df['Code #'] == code]['WED (cm)'].unique()[0]
-        patient_name = rel_mse_df[rel_mse_df['Code #'] == code]['Name'].unique()[0]
         desired_doselevels = [1, 0.5, 0.1]
         doseidxs = [get_closest_doselevel_idx(desired_doselevel) for desired_doselevel in desired_doselevels]
 
@@ -108,34 +107,35 @@ def main(result_csv_filename='anthro_mse_dataset.csv', output_dir='anthro_result
                         fontsize=6,
                         horizontalalignment='center')
         ax.set_title(f"{code}\nAge: {age_yrs} yrs, Weight: {weight_kg} kg\nEff. Diameter {eff_diameter:2.1f} cm, WED: {wed:2.1f} cm", fontsize=6)
-        output_fname = output_dir / f'{code}_montage.png'
+        output_fname = imgs_dir / f'{code}_montage.png'
         f.savefig(output_fname, dpi=600)
         print(f'Saving: {output_fname}')
 
-
+    phantom_info_dir = Path(output_dir) / 'patient_population_summary'
+    phantom_info_dir.mkdir(exist_ok=True, parents=True)
     xcat_df.plot.scatter(x='age (year)', y='weight (kg)')
-    output_fname = output_dir / 'age_v_weight.png'
-    f.savefig(output_fname, dpi=600)
+    output_fname = phantom_info_dir / 'age_v_weight.png'
+    plt.savefig(output_fname, dpi=600)
     print(f'Saving: {output_fname}')
 
     xcat_df.plot.scatter(y='effective diameter (cm)', x='weight (kg)')
-    output_fname = output_dir / 'weight_v_eff_diameteer.png'
-    f.savefig(output_fname, dpi=600)
+    output_fname = phantom_info_dir / 'weight_v_eff_diameteer.png'
+    plt.savefig(output_fname, dpi=600)
     print(f'Saving: {output_fname}')
 
     xcat_df.plot.scatter(y='WED (cm)', x='weight (kg)')
-    output_fname = output_dir / 'weight_v_wed.png'
-    f.savefig(output_fname, dpi=600)
+    output_fname = phantom_info_dir / 'weight_v_wed.png'
+    plt.savefig(output_fname, dpi=600)
     print(f'Saving: {output_fname}')
 
     xcat_df.plot.scatter(x='effective diameter (cm)', y = 'WED (cm)')
-    output_fname = output_dir / 'eff_diameter_v_wed.png'
-    f.savefig(output_fname, dpi=600)
+    output_fname = phantom_info_dir / 'eff_diameter_v_wed.png'
+    plt.savefig(output_fname, dpi=600)
     print(f'Saving: {output_fname}')
 
     xcat_df.plot.scatter(y='effective diameter (cm)', x='age (year)')
-    output_fname = output_dir / 'eff_diameter_v_age_measured.png'
-    f.savefig(output_fname, dpi=600)
+    output_fname = phantom_info_dir / 'eff_diameter_v_age_measured.png'
+    plt.savefig(output_fname, dpi=600)
     print(f'Saving: {output_fname}')
 
 
