@@ -6,6 +6,10 @@ end
 addpath([dirname(fileparts(mfilename('fullpath')), 2) '/utils'])
 diameter_dirs = dir([base_data_folder 'diameter*mm']);
 
+observers = ["conv_LG_CHO_2d", "DOG_CHO_2d", "Gabor_CHO_2d", "LG_CHO_2d", "NPWE_2d"];
+observer_name = observers(4);
+observer_function = str2func(observer_name);
+
 %%inserts info
 insert_info = read_phantom_info(fullfile(base_data_folder, diameter_dirs(1).name, 'phantom_info_pix_idx.csv'));
 insert_info(:, end) = insert_info(:, end)/insert_info(1, end)*1000; insert_info = insert_info(2:end, [1 2 3 6]);
@@ -184,7 +188,7 @@ for diam_idx=1:n_diameters
                     idx_sp_test = idx_sp1(n_train+1:end);
 
                     [auc(i), snr(i), chimg, tplimg, meanSP, meanSA, meanSig, kch, t_sp, t_sa] = ...
-                        conv_LG_CHO_2d(sa_roi(:, :, idx_sa_tr), sp_roi(:, :, idx_sp_tr), ...
+                        observer_function(sa_roi(:, :, idx_sa_tr), sp_roi(:, :, idx_sp_tr), ...
                         sa_roi(:, :, idx_sa_test), sp_roi(:, :, idx_sp_test), insert_r/1.5, 5, 0);
                     auc_all(diam_idx, idx_insert, k, iI, i) = auc(i);
                     snr_all(diam_idx, idx_insert, k, iI, i) = snr(i);

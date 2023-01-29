@@ -1,5 +1,10 @@
 # TODOs
 
+Priorities:
+
+1. finish cleaning up figures and write manuscript draft
+2. finish code clean up and refactor into RST *after* first draft while co-authors are editing
+
 ## converting to RST
 
 ### LCD module
@@ -7,7 +12,7 @@
 Building upon the existing [DIDSR MO repo](https://github.com/DIDSR/VICTRE_MO)
 
 - [ ] change input  of LCD module to be more flexible, they should just be a mask (truth mask) or pixel coordinates of the signal known exactly
-- [ ] add additional filters so users can switch between LGO and Gabor, etc...
+- [ ] add additional filters so users can switch between LGO and Gabor, etc... (Rongping working on this)
 
 ## make it work
 
@@ -29,12 +34,19 @@ Top priority, making sure all results are there and are consistent (reliable/rob
 
 ## make it right
 
-- [ ] include WED (TG 220 Eq 4b) to patient info csv
-  - [ ]  **current implementation of WED looks wrong... Double check** (likely just misorder when I put it into the dataframe, need to order it...)
+- [X] include WED (TG 220 Eq 4b) to patient info csv
 - [X] need to make sure I am getting the right diameter and FOV for the patient as this is important to performance, either measure it nowing pixel size or from XCAT, it's currently wrong because some images are way too zoomed in or out...
   - [X] make fixed FOV again (e.g. 340 or 480 mm, probs 480), then use that to measure diameter and make adapted FOV
 - [X] replace adult reference to be adult size and adult FOV (CCT189 200mm 340mm FOV; CTP404 150mm 340mm FOV) From Rongping: "The reference images I created was based on 340mm FOV (pixel size of 340/512=0.66). I think I set the pixel size to be 0.66, if I remembered correctly"
 - [ ] Consider saving out all generated CT simulation data in a database of CSV file so its easy to see what images were simulated in terms of: patient diameter, FOV, scanner, recon details, this would be saved out in the results folder under a  "simulation heading". Currently I have the Reference adult scans undergo the same processing but have a different FOV and a change the directory name, but this couples the phantom generation + CT sim with the analysis, ideally these would be decoupled which could be accomplished if I saved out all of this info and then in my analysis I could select which scans I want to use as baseline reference
+  - [ ] include results summary in this csv file too (thus can assess image quality performance against age, size, WED, ....):
+    - [ ] noise variance
+    - [X] NPS peak
+    - [x] MTF 50
+    - [ ] MTF 25
+    - [X] MTF 10
+    - [ ] LCD auc (convert fro  h5 to csv in `eval_lcd_catphanSim.m`)
+    - [ ] LCD detectability index
 - [ ] add unit tests and error checking to ensure inputs are correct
 - [ ] code clean-up and improved documentation
 - [ ] matlab -> octave + python

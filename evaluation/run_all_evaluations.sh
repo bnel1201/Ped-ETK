@@ -14,7 +14,7 @@ else
 echo $cmd
     $cmd
 fi
-bash MTF/_2_generate_MTF_plots.sh $BASE_DIR/CTP404/monochromatic/ $RESULTS_DIR/MTF
+bash MTF/_2_generate_MTF_plots.sh $BASE_DIR/geometric/CTP404/monochromatic/ $RESULTS_DIR/MTF
 
 # NPS
 cmd="bash NPS/_1_run_NPS_analysis.sh ${BASE_DIR}/geometric"
@@ -23,7 +23,7 @@ if [ $(hostname) == openhpc ]; then
 else
     $cmd
 fi
-bash NPS/_2_generate_NPS_plots.sh $BASE_DIR/CCT189/monochromatic/ $RESULTS_DIR/NPS
+bash NPS/_2_generate_NPS_plots.sh $BASE_DIR/geometric/CCT189/monochromatic/ $RESULTS_DIR/NPS
 
 # Objective Image Quality Summary
 

@@ -1,11 +1,48 @@
 import argparse
 from pathlib import Path
 
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from utils.mtf_cutoffs import merge_patient_diameters, abs_HU
 from utils.csv_io import (write_relative_sharpness_to_csv,
                           write_cutoffs_to_csv)
+
+
+def merge_mtf_csv_files(mtf_cutoff_csv1, mtf_cutoff_csv2):
+
+    mtf_df_1 = pd.read_csv(mtf_cutoff_csv1)
+    mtf_df_2 = pd.read_csv(mtf_cutoff_csv2)
+
+    mtf_df = pd.concat([mtf_df_1, mtf_df_2], axis=0).reset_index(drop=True)
+    mtf_df.replace('FBP Baseline', 'fbp', inplace=True)
+    mtf_df.replace('REDCNN', 'cnn', inplace=True)
+
+    patient_size_dict = {c : int(c.split('mm')[0]) for c in mtf_df.columns if c[-2:] == 'mm'}
+    contrasts = mtf_df['Contrast [HU]'].unique()
+    recon_types = mtf_df['Series'].unique()
+    mtf_cutoffs = mtf_df['%MTF cutoff'].unique()
+
+    recon_types_list = []
+    diameters_list = []
+    contrasts_list = []
+    mtf_cutoffs_list = []
+    cutoff_frequency_list = []
+    for recon in recon_types:
+        for col_name, diameter in patient_size_dict.items():
+            for cutoff in mtf_cutoffs:
+                for con in contrasts:
+                    recon_types_list.append(recon)
+                    diameters_list.append(diameter)
+                    contrasts_list.append(con)
+                    mtf_cutoffs_list.append(cutoff)
+                    cutoff_frequency_list.append(float(mtf_df[(mtf_df['Series'] == recon) & (mtf_df['Contrast [HU]'] == con) & (mtf_df['%MTF cutoff'] == cutoff)][col_name]))
+    return pd.DataFrame({'Phantom' : 'CTP404',
+                         'Contrast (HU)': contrasts_list,
+                         'patient diameter (mm)' : diameters_list,
+                         'recon' : recon_types_list,
+                         'MTF Cutoff Value (%)' : mtf_cutoffs_list,
+                         'MTF Cutoff Frequency (1/mm)' : cutoff_frequency_list})
 
 
 def plot_relative_cutoffs_by_contrast(mtf50_rel, mtf10_rel, output_fname=None):
@@ -79,6 +116,7 @@ def main(datadir=None, output_fname=None, contrasts=None):
     write_relative_sharpness_to_csv(mtf50_rel, mtf10_rel, mtf_results_dir / 'relative_sharpness_values.csv')
     write_cutoffs_to_csv(mtf50_baseline, mtf50_proc, 50, mtf_results_dir / 'mtf50.csv')
     write_cutoffs_to_csv(mtf10_baseline, mtf10_proc, 10, mtf_results_dir / 'mtf10.csv')
+    merge_mtf_csv_files(mtf_results_dir / 'mtf50.csv', mtf_results_dir / 'mtf10.csv')
 
     with plt.style.context('seaborn'):
         plot_relative_cutoffs_by_contrast(mtf50_rel, mtf10_rel, output_fname)

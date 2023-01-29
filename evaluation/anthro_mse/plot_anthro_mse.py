@@ -73,7 +73,7 @@ def main(result_csv_filename='anthro_mse_dataset.csv', output_dir='anthro_result
             np.concatenate([img_dict['fbp'][d, 0], img_dict['cnn'][d, 0]],axis=1) for d in doseidxs],axis=0)
         f, ax = plt.subplots(dpi=300)
         ww = 400
-        wl = 100
+        wl = 0
         offset = 1000
         ax.imshow(np.concatenate([base_images,
                                 noisey_images])-offset, cmap='gray', vmin=wl-ww/2, vmax=wl+ww/2)

@@ -2,7 +2,7 @@
 addpath('utils')
 if ~exist('basedir', 'var')
     disp('basedir not specified, using defaults')
-    basedir = '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/test'; %see ../../make_phantoms/make_phantoms.m
+    basedir = '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/test/geometric'; %see ../../make_phantoms/make_phantoms.m
 end
 
 if ~exist('resultsdir', 'var')
@@ -22,4 +22,4 @@ all_recon_type = {'fbp','dl_REDCNN'};
 % I0_vector = 3e5*[30 55 70 85 100]/100;
 run('utils/eval_lcd_catphanSim.m')
 
-exit
+% exit
