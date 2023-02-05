@@ -1,5 +1,6 @@
 % %LCD test
 addpath('utils')
+addpath(genpath('~/Dev/Regulatory_Science_Tools/Low_Contrast_Detectability/bin/'))
 if ~exist('basedir', 'var')
     disp('basedir not specified, using defaults')
     basedir = '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/test/geometric'; %see ../../make_phantoms/make_phantoms.m
@@ -21,5 +22,6 @@ all_recon_type = {'fbp','dl_REDCNN'};
 
 % I0_vector = 3e5*[30 55 70 85 100]/100;
 run('utils/eval_lcd_catphanSim.m')
+
 
 % exit

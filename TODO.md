@@ -4,6 +4,7 @@ Priorities:
 
 1. finish cleaning up figures and write manuscript draft
 2. finish code clean up and refactor into RST *after* first draft while co-authors are editing
+  - replace `my_write_raw` with [write_mha](make_phantoms/utils/writemha.m), this is an easier file to work with as its a Med Imaging standard and doesn't break our pipeline, it only adds an external header
 
 ## converting to RST
 

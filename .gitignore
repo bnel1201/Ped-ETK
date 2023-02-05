@@ -7,3 +7,5 @@ __pycache__
 evaluation/MTF/plot_mtf_cutoffs_compare.py
 launch.json
 .vscode/launch.json
+*.m~
+*.html
