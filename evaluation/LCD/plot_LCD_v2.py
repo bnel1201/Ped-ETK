@@ -26,307 +26,117 @@ observers
 # ## Getting the Mean and Standard Deviation
 # Use the dataframe `groupby` method to group the data by the following groups (all groups except reader number), and then take the mean
 # and standard deviation across readers
-grouped = lcd_data.groupby(["observer", "patient_diameter_mm", "insert_HU", "recon", "dose_level_pct"])
+grouped = lcd_data.groupby(["patient_diameter_mm","recon", "insert_HU", "observer", "dose_level_pct"])
 
 lcd_mean = grouped.mean()
 lcd_std = grouped.std()
 lcd_mean
 # %% [markdown]
 # # AUC and SNR vs dose
-# ## First look at everything (warning a bit overwhelming) AUC
+# ## First build up our plotting routines
 # %%
-master_fig = plt.figure(constrained_layout=True, figsize=(10, 10), dpi=150)
-figs = master_fig.subfigures(3, 3)
-restype = 'auc' 
+insert_HUs = lcd_data['insert_HU'].unique()
 
-for idx, diam in enumerate([292, 185, 112]):
+def plot_insert_level_results(img_level_mean, img_level_std, insert_HUs, ylabel, fig=None, legend=True):
+    fig = fig or plt.figure()
+    if len(insert_HUs) > 2:
+        axs = fig.subplots(2,2, sharex=True, sharey=True).flatten()
+    elif len(insert_HUs) == 2:
+        axs = fig.subplots(1,2, sharex=True, sharey=True)
+    elif len(insert_HUs) == 1:
+        axs = [fig.subplots(1,1, sharex=True, sharey=True)]
 
-    recontype = 'fbp'
-    fig = figs[idx, 0]
-    axs = fig.subplots(2,2, sharex=True, sharey=True)
-    fig.suptitle(f"{diam} mm {recontype}")
-    for insert_HU, ax in zip(insert_HU_size, axs.flatten()):
+    plt_idx=0
+    for insert_HU, ax in zip(insert_HUs, axs):
         for observer in observers:
-            series_mean = lcd_mean[restype][observer, diam, insert_HU, recontype]
-            series_std = lcd_std[restype][observer, diam, insert_HU, recontype]
+            series_mean = img_level_mean[insert_HU, observer]
+            series_std = img_level_std[insert_HU, observer]
             series_mean.plot(ax=ax, yerr=series_std, label=observer)
         ax.set_title(f'{insert_HU} HU, {insert_HU_size[insert_HU]}')
-        ax.set_ylabel(restype)
+        ax.set_ylabel(ylabel)
 
-
-    recontype = 'dlir'
-    fig = figs[idx, 1]
-    axs = fig.subplots(2,2, sharex=True, sharey=True)
-    fig.suptitle(f"{diam} mm {recontype}")
-    for insert_HU, ax in zip(insert_HU_size, axs.flatten()):
-        for observer in observers:
-            series_mean = lcd_mean[restype][observer, diam, insert_HU, recontype]
-            series_std = lcd_std[restype][observer, diam, insert_HU, recontype]
-            series_mean.plot(ax=ax, yerr=series_std, label=observer)
-        ax.set_title(f'{insert_HU} HU, {insert_HU_size[insert_HU]}')
-        ax.set_ylabel(restype)
-        if (idx == 0) & (insert_HU == 14):
+        if legend & (plt_idx < 1):
             fig.legend(bbox_to_anchor=(0.5, 1.1), loc = 'upper center', frameon=False, ncol=3)
+        plt_idx += 1
 
-    fig = figs[idx, 2]
-    axs = fig.subplots(2,2, sharex=True, sharey=True)
-    fig.suptitle(f"{diam} mm DLIR-FBP")
-    for insert_HU, ax in zip(insert_HU_size, axs.flatten()):
-        for observer in observers:
-            fbp_mean = lcd_mean[restype][observer, diam, insert_HU, 'fbp']
-            fbp_std = lcd_std[restype][observer, diam, insert_HU, 'fbp']
+def plot_img_level_results(recontype, diam, restype, insert_HUs=[14, 7, 5, 3], fig=None, legend=True):
+    fig = fig or plt.figure()
+    ylabel = f'{restype}'
+    fig_title = f'{diam} mm '
+    if isinstance(insert_HUs, int): insert_HUs = [insert_HUs]
+    if isinstance(recontype, str):
+        img_level_mean = lcd_mean[restype][diam, recontype]
+        img_level_std = lcd_std[restype][diam, recontype]
+        fig_title += f'{recontype}'
+    else:
+        dlir_mean = lcd_mean[restype][diam, recontype[0]]
+        dlir_std = lcd_std[restype][diam, recontype[0]]
+        fbp_mean = lcd_mean[restype][diam, recontype[1]]
+        fbp_std = lcd_std[restype][diam, recontype[1]]
+        img_level_mean = dlir_mean - fbp_mean
+        img_level_std = np.sqrt(fbp_std**2 + dlir_std**2)
+        ylabel = '$\Delta$' + ylabel
+        fig_title += f'{recontype[0]} - {recontype[1]}'
+    fig.suptitle(fig_title)
 
-            dlir_mean = lcd_mean[restype][observer, diam, insert_HU, 'dlir']
-            dlir_std = lcd_std[restype][observer, diam, insert_HU, 'dlir']
+    plot_insert_level_results(img_level_mean, img_level_std, insert_HUs, ylabel, fig=fig, legend=legend)
 
-            series_mean = dlir_mean - fbp_mean
-            series_std = np.sqrt(fbp_std**2 + dlir_std**2)
-            series_mean.plot(ax=ax, yerr=series_std, label=observer)
-        ax.set_title(f'{insert_HU} HU, {insert_HU_size[insert_HU]}')
-        ax.set_ylabel(f"$\Delta${restype}")
+
+# %%
+plot_img_level_results('fbp', 292, 'auc', insert_HUs = 7)
+# %%
+plot_img_level_results('dlir', 292, 'auc')
+# %%
+plot_img_level_results(['dlir', 'fbp'], 292, 'snr')
+# %%
+plot_img_level_results(['dlir', 'fbp'], 292, 'snr', insert_HUs = [5, 14])
+    
+# %%
+def plot_all_results(restype='auc', patient_diameters=[292, 185, 112], recontypes=['fbp', 'dlir', ['dlir', 'fbp']], insert_HUs=[14, 7, 5, 3]):
+    master_fig = plt.figure(constrained_layout=True, figsize=(3*len(recontypes) + 1, 3*len(patient_diameters) + 1), dpi=150)
+    figs = master_fig.subfigures(len(patient_diameters), len(recontypes))
+
+    fig_idx = 0
+    for fig_row, diam in zip(figs, patient_diameters):
+        for fig, recontype in zip(fig_row, recontypes):
+            legend = True if (fig_idx == 0) else False
+            plot_img_level_results(recontype, diam, restype, insert_HUs=insert_HUs, fig=fig, legend=legend)
+            fig_idx += 1
+# %% [markdown]
+# ### Let's look at everything (warning a bit overwhelming) AUC
+# these could be included in the paper appendix, but for the main figures we'll want to distill this down to
+# the main effects (described below)
+patient_diameters = sorted(lcd_data['patient_diameter_mm'].unique(), reverse=True)
+print(patient_diameters)
+plot_all_results('auc', patient_diameters=patient_diameters, recontypes=['fbp', 'dlir', ['dlir', 'fbp']])
 # %% [markdown]
 # ## First look at everything (warning a bit overwhelming) SNR
-# %%
-master_fig = plt.figure(constrained_layout=True, figsize=(10, 10), dpi=150)
-figs = master_fig.subfigures(3, 3)
-restype = 'snr' 
-
-for idx, diam in enumerate([292, 185, 112]):
-
-    recontype = 'fbp'
-    fig = figs[idx, 0]
-    axs = fig.subplots(2,2, sharex=True, sharey=True)
-    fig.suptitle(f"{diam} mm {recontype}")
-    for insert_HU, ax in zip(insert_HU_size, axs.flatten()):
-        for observer in observers:
-            series_mean = lcd_mean[restype][observer, diam, insert_HU, recontype]
-            series_std = lcd_std[restype][observer, diam, insert_HU, recontype]
-            series_mean.plot(ax=ax, yerr=series_std, label=observer)
-        ax.set_title(f'{insert_HU} HU, {insert_HU_size[insert_HU]}')
-        ax.set_ylabel(restype)
-
-    recontype = 'dlir'
-    fig = figs[idx, 1]
-    axs = fig.subplots(2,2, sharex=True, sharey=True)
-    fig.suptitle(f"{diam} mm {recontype}")
-    for insert_HU, ax in zip(insert_HU_size, axs.flatten()):
-        for observer in observers:
-            series_mean = lcd_mean[restype][observer, diam, insert_HU, recontype]
-            series_std = lcd_std[restype][observer, diam, insert_HU, recontype]
-            series_mean.plot(ax=ax, yerr=series_std, label=observer)
-        ax.set_title(f'{insert_HU} HU, {insert_HU_size[insert_HU]}')
-        ax.set_ylabel(restype)
-        if (idx == 0) & (insert_HU == 14):
-            fig.legend(bbox_to_anchor=(0.5, 1.1), loc = 'upper center', frameon=False, ncol=3)
-
-    fig = figs[idx, 2]
-    axs = fig.subplots(2,2, sharex=True, sharey=True)
-    fig.suptitle(f"{diam} mm DLIR-FBP")
-    for insert_HU, ax in zip(insert_HU_size, axs.flatten()):
-        for observer in observers:
-            fbp_mean = lcd_mean[restype][observer, diam, insert_HU, 'fbp']
-            fbp_std = lcd_std[restype][observer, diam, insert_HU, 'fbp']
-
-            dlir_mean = lcd_mean[restype][observer, diam, insert_HU, 'dlir']
-            dlir_std = lcd_std[restype][observer, diam, insert_HU, 'dlir']
-
-            series_mean = dlir_mean - fbp_mean
-            series_std = np.sqrt(fbp_std**2 + dlir_std**2)
-            series_mean.plot(ax=ax, yerr=series_std, label=observer)
-        ax.set_title(f'{insert_HU} HU, {insert_HU_size[insert_HU]}')
-        ax.set_ylabel(f"$\Delta${restype}")
+# Same as above, these could be included in the paper appendix, but for the main figures we'll want to distill this down to
+# the main effects (described below)
+plot_all_results('snr', patient_diameters=patient_diameters, recontypes=['fbp', 'dlir', ['dlir', 'fbp']])
 # %% [markdown]
-# ## all 4 inserts auc vs dose (no diffs)
+# ## Let's now break this down into smaller chunks to better understand the relationships between variables
+# ### Starting with insert size and HU
+# Let's first see if there's any noticeable difference in detectability based on insert size and contrast
+# 
+# #### all 4 inserts auc vs dose (no diffs)
 # this shows that there's not much difference between inserts
-# %%
-import numpy as np
-master_fig = plt.figure(constrained_layout=True, figsize=(10, 10), dpi=150)
-figs = master_fig.subfigures(2, 3)
-restype = 'auc' 
-
-for idx, diam in enumerate([292, 185, 112]):
-
-    recontype = 'fbp'
-    fig = figs[0, idx]
-    axs = fig.subplots(2,2, sharex=True, sharey=True)
-    fig.suptitle(f"{diam} mm {recontype}")
-    for insert_HU, ax in zip(insert_HU_size, axs.flatten()):
-        for observer in observers:
-            series_mean = lcd_mean[restype][observer, diam, insert_HU, recontype]
-            series_std = lcd_std[restype][observer, diam, insert_HU, recontype]
-            series_mean.plot(ax=ax, yerr=series_std, label=observer)
-        ax.set_title(f'{insert_HU} HU, {insert_HU_size[insert_HU]}')
-        ax.set_ylabel(restype)
-        if (idx == 1) & (insert_HU == 14):
-            fig.legend(bbox_to_anchor=(0.5, 1.1), loc = 'upper center', frameon=False, ncol=3)
-
-    recontype = 'dlir'
-    fig = figs[1, idx]
-    axs = fig.subplots(2,2, sharex=True, sharey=True)
-    fig.suptitle(f"{diam} mm {recontype}")
-    for insert_HU, ax in zip(insert_HU_size, axs.flatten()):
-        for observer in observers:
-            series_mean = lcd_mean[restype][observer, diam, insert_HU, recontype]
-            series_std = lcd_std[restype][observer, diam, insert_HU, recontype]
-            series_mean.plot(ax=ax, yerr=series_std, label=observer)
-        ax.set_title(f'{insert_HU} HU, {insert_HU_size[insert_HU]}')
-        ax.set_ylabel(restype)
-
+plot_all_results('auc', patient_diameters=[292, 185, 112], recontypes=['fbp', 'dlir'])
 # %% [markdown]
 # ## all 4 inserts snr vs dose (no diffs)
 # this shows that there's not much difference between inserts
-# %%
-import numpy as np
-master_fig = plt.figure(constrained_layout=True, figsize=(10, 10), dpi=150)
-figs = master_fig.subfigures(2, 3)
-restype = 'snr' 
-
-for idx, diam in enumerate([292, 185, 112]):
-
-    recontype = 'fbp'
-    fig = figs[0, idx]
-    axs = fig.subplots(2,2, sharex=True, sharey=True)
-    fig.suptitle(f"{diam} mm {recontype}")
-    for insert_HU, ax in zip(insert_HU_size, axs.flatten()):
-        for observer in observers:
-            series_mean = lcd_mean[restype][observer, diam, insert_HU, recontype]
-            series_std = lcd_std[restype][observer, diam, insert_HU, recontype]
-            series_mean.plot(ax=ax, yerr=series_std, label=observer)
-        ax.set_title(f'{insert_HU} HU, {insert_HU_size[insert_HU]}')
-        ax.set_ylabel(restype)
-        if (idx == 1) & (insert_HU == 14):
-            fig.legend(bbox_to_anchor=(0.5, 1.1), loc = 'upper center', frameon=False, ncol=3)
-
-
-    recontype = 'dlir'
-    fig = figs[1, idx]
-    axs = fig.subplots(2,2, sharex=True, sharey=True)
-    fig.suptitle(f"{diam} mm {recontype}")
-    for insert_HU, ax in zip(insert_HU_size, axs.flatten()):
-        for observer in observers:
-            series_mean = lcd_mean[restype][observer, diam, insert_HU, recontype]
-            series_std = lcd_std[restype][observer, diam, insert_HU, recontype]
-            series_mean.plot(ax=ax, yerr=series_std, label=observer)
-        ax.set_title(f'{insert_HU} HU, {insert_HU_size[insert_HU]}')
-        ax.set_ylabel(restype)
-
+plot_all_results('snr', patient_diameters=[292, 185, 112], recontypes=['fbp', 'dlir'])
 # %% [markdown]
 # ## Now just 1 insert but show diffs auc
-# %%
-master_fig = plt.figure(constrained_layout=True, figsize=(10, 10), dpi=150)
-figs = master_fig.subfigures(3, 3)
-restype = 'auc' 
+plot_all_results('auc', patient_diameters=[292, 185, 112], recontypes=['fbp', 'dlir', ['dlir', 'fbp']], insert_HUs=14)
 
-for idx, diam in enumerate([292, 185, 112]):
-
-    recontype = 'fbp'
-    row_figs = figs[idx]
-    fig = row_figs[0]
-    ax = fig.subplots(sharex=True, sharey=True)
-    insert_HU = 14
-    fig.suptitle(f"{diam} mm {recontype}")
-    for observer in observers:
-        series_mean = lcd_mean[restype][observer, diam, insert_HU, recontype]
-        series_std = lcd_std[restype][observer, diam, insert_HU, recontype]
-        series_mean.plot(ax=ax, yerr=series_std, label=observer)
-    ax.set_ylabel(restype)
-    ax.set_title(f'{insert_HU} HU, {insert_HU_size[insert_HU]}')
-    # axs[0, 0].legend()
-
-    recontype = 'dlir'
-    row_figs = figs[idx]
-    fig = row_figs[1]
-    ax = fig.subplots(sharex=True, sharey=True)
-    fig.suptitle(f"{diam} mm {recontype}")
-    for observer in observers:
-        series_mean = lcd_mean[restype][observer, diam, insert_HU, recontype]
-        series_std = lcd_std[restype][observer, diam, insert_HU, recontype]
-        series_mean.plot(ax=ax, yerr=series_std, label=observer)
-    ax.set_ylabel(restype)
-    ax.set_title(f'{insert_HU} HU, {insert_HU_size[insert_HU]}')
-    if (idx == 0):
-        fig.legend(bbox_to_anchor=(0.5, 1.1), loc = 'upper center', frameon=False, ncol=3)
-
-    row_figs = figs[idx]
-    fig = row_figs[2]
-    ax = fig.subplots(sharex=True, sharey=True)
-    fig.suptitle(f"{diam} mm DLIR-FBP")
-
-    recon_series = lcd_mean[restype]
-
-    for observer in observers:
-        fbp_mean = lcd_mean[restype][observer, diam, insert_HU, 'fbp']
-        fbp_std = lcd_std[restype][observer, diam, insert_HU, 'fbp']
-
-        dlir_mean = lcd_mean[restype][observer, diam, insert_HU, 'dlir']
-        dlir_std = lcd_std[restype][observer, diam, insert_HU, 'dlir']
-
-        series_mean = dlir_mean - fbp_mean
-        series_std = np.sqrt(fbp_std**2 + dlir_std**2)
-        series_mean.plot(ax=ax, yerr=series_std, label=observer)
-    ax.set_ylabel(f"$\Delta${restype}")
-    ax.set_title(f'{insert_HU} HU, {insert_HU_size[insert_HU]}')
 # %% [markdown]
 # ## Now just 1 insert but show diffs snr
-# %%
-master_fig = plt.figure(constrained_layout=True, figsize=(10, 10), dpi=150)
-figs = master_fig.subfigures(3, 3)
-restype = 'snr' 
-
-for idx, diam in enumerate([292, 185, 112]):
-
-    recontype = 'fbp'
-    row_figs = figs[idx]
-    fig = row_figs[0]
-    ax = fig.subplots(sharex=True, sharey=True)
-    insert_HU = 14
-    fig.suptitle(f"{diam} mm {recontype}")
-    for observer in observers:
-        series_mean = lcd_mean[restype][observer, diam, insert_HU, recontype]
-        series_std = lcd_std[restype][observer, diam, insert_HU, recontype]
-        series_mean.plot(ax=ax, yerr=series_std, label=observer)
-    ax.set_ylabel(restype)
-    ax.set_title(f'{insert_HU} HU, {insert_HU_size[insert_HU]}')
-    # axs[0, 0].legend()
-
-    recontype = 'dlir'
-    row_figs = figs[idx]
-    fig = row_figs[1]
-    ax = fig.subplots(sharex=True, sharey=True)
-    fig.suptitle(f"{diam} mm {recontype}")
-    for observer in observers:
-        series_mean = lcd_mean[restype][observer, diam, insert_HU, recontype]
-        series_std = lcd_std[restype][observer, diam, insert_HU, recontype]
-        series_mean.plot(ax=ax, yerr=series_std, label=observer)
-    ax.set_ylabel(restype)
-    ax.set_title(f'{insert_HU} HU, {insert_HU_size[insert_HU]}')
-    if (idx == 0):
-        fig.legend(bbox_to_anchor=(0.5, 1.1), loc = 'upper center', frameon=False, ncol=3)
-
-    row_figs = figs[idx]
-    fig = row_figs[2]
-    ax = fig.subplots(sharex=True, sharey=True)
-    fig.suptitle(f"{diam} mm DLIR-FBP")
-
-    recon_series = lcd_mean[restype]
-
-    for observer in observers:
-        fbp_mean = lcd_mean[restype][observer, diam, insert_HU, 'fbp']
-        fbp_std = lcd_std[restype][observer, diam, insert_HU, 'fbp']
-
-        dlir_mean = lcd_mean[restype][observer, diam, insert_HU, 'dlir']
-        dlir_std = lcd_std[restype][observer, diam, insert_HU, 'dlir']
-
-        series_mean = dlir_mean - fbp_mean
-        series_std = np.sqrt(fbp_std**2 + dlir_std**2)
-        series_mean.plot(ax=ax, yerr=series_std, label=observer)
-    ax.set_ylabel(f"$\Delta${restype}")
-    ax.set_title(f'{insert_HU} HU, {insert_HU_size[insert_HU]}')
+plot_all_results('snr', patient_diameters=[292, 185, 112], recontypes=['fbp', 'dlir', ['dlir', 'fbp']], insert_HUs=14)
 
 # %% [markdown]
 # # diff auc vs diam
-
-grouped = lcd_data.groupby(["observer", "insert_HU", "recon", "dose_level_pct", "patient_diameter_mm"])
+grouped = lcd_data.groupby(["recon", "insert_HU", "observer", "dose_level_pct", "patient_diameter_mm"])
 
 lcd_mean = grouped.mean()
 lcd_std = grouped.std()
@@ -344,11 +154,11 @@ for idx, dose_level in enumerate([100, 25, 10]):
     axs = fig.subplots(2,2, sharex=True, sharey=True)
     for insert_HU, ax in zip(insert_HU_size, axs.flatten()):
         for observer in observers:
-            fbp_mean = lcd_mean[restype][observer, insert_HU, 'fbp', dose_level,]
-            fbp_std = lcd_std[restype][observer, insert_HU, 'fbp', dose_level,]
+            fbp_mean = lcd_mean[restype]['fbp', insert_HU, observer, dose_level]
+            fbp_std = lcd_std[restype]['fbp', insert_HU, observer, dose_level]
 
-            dlir_mean = lcd_mean[restype][observer, insert_HU, 'dlir', dose_level,]
-            dlir_std = lcd_std[restype][observer, insert_HU, 'dlir', dose_level,]
+            dlir_mean = lcd_mean[restype]['dlir', insert_HU, observer, dose_level]
+            dlir_std = lcd_std[restype]['dlir', insert_HU, observer, dose_level]
 
             series_mean = dlir_mean - fbp_mean
             series_std = np.sqrt(fbp_std**2 + dlir_std**2)
@@ -359,6 +169,8 @@ for idx, dose_level in enumerate([100, 25, 10]):
             fig.legend(bbox_to_anchor=(0.5, 1.1), loc = 'upper center', frameon=False, ncol=3)
     fig.suptitle(f'{dose_level}% dose')
     # axs[0, 0].legend()
+# %%
+# plot_all_results('snr', patient_diameters=[292, 185, 112], recontypes=['fbp', 'dlir', ['dlir', 'fbp']], insert_HUs=14)
 # %% [markdown]
 # note above that sometimes NPWE can exceed NPW in \Delta AUC because the AUC is saturated, this cross-over doesn't occur in SNR
 # since we showed this earlier we probs only need to show SNR moving forward in the paper if we show the auc saturation once
@@ -375,11 +187,11 @@ for idx, dose_level in enumerate([100, 10]):
     axs = fig.subplots(2,2, sharex=True, sharey=True)
     for insert_HU, ax in zip(insert_HU_size, axs.flatten()):
         for observer in observers:
-            fbp_mean = lcd_mean[restype][observer, insert_HU, 'fbp', dose_level,]
-            fbp_std = lcd_std[restype][observer, insert_HU, 'fbp', dose_level,]
+            fbp_mean = lcd_mean[restype]['fbp', insert_HU, observer, dose_level]
+            fbp_std = lcd_std[restype]['fbp', insert_HU, observer, dose_level]
 
-            dlir_mean = lcd_mean[restype][observer, insert_HU, 'dlir', dose_level,]
-            dlir_std = lcd_std[restype][observer, insert_HU, 'dlir', dose_level,]
+            dlir_mean = lcd_mean[restype]['dlir', insert_HU, observer, dose_level]
+            dlir_std = lcd_std[restype]['dlir', insert_HU, observer, dose_level]
 
             series_mean = dlir_mean - fbp_mean
             series_std = np.sqrt(fbp_std**2 + dlir_std**2)
@@ -402,11 +214,11 @@ for idx, dose_level in enumerate([100, 25]):
     ax = fig.subplots()
     insert_HU = 7
     for observer in ['Laguerre-Gauss CHO 2D', 'NPW 2D']:
-        fbp_mean = lcd_mean[restype][observer, insert_HU, 'fbp', dose_level]
-        fbp_std = lcd_std[restype][observer, insert_HU, 'fbp', dose_level]
+        fbp_mean = lcd_mean[restype]['fbp', insert_HU, observer, dose_level]
+        fbp_std = lcd_std[restype]['fbp', insert_HU, observer, dose_level]
 
-        dlir_mean = lcd_mean[restype][observer, insert_HU, 'dlir', dose_level]
-        dlir_std = lcd_std[restype][observer, insert_HU, 'dlir', dose_level]
+        dlir_mean = lcd_mean[restype]['dlir', insert_HU, observer, dose_level]
+        dlir_std = lcd_std[restype]['dlir', insert_HU, observer, dose_level]
 
         series_mean = dlir_mean.abs() / fbp_mean.abs()
         series_std = np.sqrt(fbp_std**2 + dlir_std**2)
