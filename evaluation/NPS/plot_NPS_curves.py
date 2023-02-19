@@ -17,10 +17,11 @@ DOSELEVEL = 'I0_0300000'
 
 sns.set_style("darkgrid")
 # sns.set_context("talk")
-
+ref_diam = 200
 
 def plot_1D_nps_all_diams(datadir, output_fname=None, **subplots_kwargs):
     diam_dirs = sorted(list(datadir.glob('diameter*')))
+    diam_dirs.pop(diam_dirs.index(datadir/f'diameter{ref_diam}mm'))
     n_rows = len(diam_dirs) // 3
     f, axs = plt.subplots(n_rows, 3, dpi=300, **subplots_kwargs)
     for ax, patient_dir in zip(axs.flatten(), diam_dirs):
@@ -29,7 +30,7 @@ def plot_1D_nps_all_diams(datadir, output_fname=None, **subplots_kwargs):
         diam = fbp_dir.parents[1].stem
         plot_1D_nps(fbp_dir, proc_dir, fig=f, ax=ax)
         ax.set_title(f'{diam}')
-    [ax.get_legend().remove() for ax, d in zip(axs.flatten()[1:], diam_dirs)]
+    [ax.get_legend().remove() for ax, d in zip(axs.flatten()[1:], diam_dirs) if ax.get_legend()]
     f.tight_layout()
     if output_fname:
         Path(output_fname).parent.mkdir(exist_ok=True, parents=True)

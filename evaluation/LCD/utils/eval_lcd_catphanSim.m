@@ -255,29 +255,11 @@ end
 %%
 dose_level_pct = round(100*dose_photons ./ max(dose_photons));
                     
-%                     observer(row_idx) = model_observer.type;
-%                     patient_diameter_mm(row_idx) = diameter;
-%                     fov_size_mm(row_idx) = fov;
-%                     insert_HU(row_idx) = actual_insert_HU;
-%                     insert_diameter_pix(row_idx) = 2*insert_r;
-%                     pixel_size_mm(row_idx) = dx;
-%                     dose_photons(row_idx) = I0;
-%                     auc(row_idx) = res.auc;
-%                     snr(row_idx) = res.snr;
-%                     reader(row_idx) = i;
+
 res_table = table(observer, patient_diameter_mm, fov_size_mm, insert_HU,...
                   insert_diameter_pix, pixel_size_mm, recon, ...
                   dose_photons, dose_level_pct, auc, snr, reader)
 
 results_fname = [outfolder filesep 'LCD_results.csv']
 writetable(res_table, results_fname)
-% hdf5write(results_fname, '/auc', auc);
-% hdf5write(results_fname, '/recon_types', all_recon_type, 'WriteMode', 'append');
-% hdf5write(results_fname, '/readers', n_reader, 'WriteMode', 'append');
-% hdf5write(results_fname, '/dose_levels', I0_vector, 'WriteMode', 'append');
-% hdf5write(results_fname, '/patient_diameters', diameters_list, 'WriteMode', 'append');
-% hdf5write(results_fname, '/insert_HUs', inserts_list, 'WriteMode', 'append');
-% hdf5write(results_fname, '/insert_radii_pix', insert_radii, 'WriteMode', 'append');
-% hdf5write(results_fname, '/vox_size_mm', vox_size, 'WriteMode', 'append');
-% hdf5write(results_fname, '/fov_size_mm', fov_size, 'WriteMode', 'append');
-% hdf5write(results_fname, '/snr', snr, 'WriteMode', 'append');
+

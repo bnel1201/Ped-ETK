@@ -8,7 +8,7 @@ cd $(dirname $0)
 
 
 # plot LCD curves
-python plot_LCD_results.py $results_dir
+python plot_LCD.py $results_dir/LCD_results.csv
 plots_dir=$results_dir/plots
 bash ../utils/images_to_gif.sh $plots_dir/'auc/AUC_v_dose_diameter_*mm.png' $results_dir'/auc_v_dose_comparison.gif'
 bash ../utils/images_to_gif.sh $plots_dir/'snr/AUC_SNR_v_dose_diameter_*mm.png' $results_dir'/snr_v_dose_comparison.gif'

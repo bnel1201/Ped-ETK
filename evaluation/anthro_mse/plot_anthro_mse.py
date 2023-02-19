@@ -62,7 +62,7 @@ def main(result_csv_filename='anthro_mse_dataset.csv', output_dir='anthro_result
         weight_kg = rel_mse_df[rel_mse_df['Code #'] == code]['weight (kg)'].unique()[0]
         eff_diameter = rel_mse_df[rel_mse_df['Code #'] == code]['effective diameter (cm)'].unique()[0]
         wed = rel_mse_df[rel_mse_df['Code #'] == code]['WED (cm)'].unique()[0]
-        desired_doselevels = [1, 0.5, 0.1]
+        desired_doselevels = [1, 0.5, 0.25]
         doseidxs = [get_closest_doselevel_idx(desired_doselevel) for desired_doselevel in desired_doselevels]
 
         basedir = Path(rel_mse_df[rel_mse_df['Code #'] == code]['file'].to_list()[0]).parents[5]
@@ -101,7 +101,7 @@ def main(result_csv_filename='anthro_mse_dataset.csv', output_dir='anthro_result
                     color='white',
                     fontsize=6,
                     horizontalalignment='center')
-            ax.annotate(f'CNN {int(dl*100)}% dose', (nx + nx//2, nx*(idx+1) + nx//6),
+            ax.annotate(f'DLIR {int(dl*100)}% dose', (nx + nx//2, nx*(idx+1) + nx//6),
                         xycoords='data',
                         color='white',
                         fontsize=6,
