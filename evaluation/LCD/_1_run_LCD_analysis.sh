@@ -15,5 +15,5 @@ matlab -nodesktop -nodisplay -r "basedir='${BASE_DIR}';\
                                  run('./main_lcd_catphanSim.m');\
                                  exit"
 
-python h5_to_csv.py $RESULTS_DIR/LCD_results.h5 -o$RESULTS_DIR/LCD_results.csv
+# python h5_to_csv.py $RESULTS_DIR/LCD_results.h5 -o$RESULTS_DIR/LCD_results.csv
 cd $orginal_dir

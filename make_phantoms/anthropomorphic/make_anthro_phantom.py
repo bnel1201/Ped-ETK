@@ -98,7 +98,10 @@ def make_phantom(phantoms_dir, phantom_df, code, fov=None, array_size = 1024, en
     fov = fov or min(1.1*estimated_eff_diameter, 48) #in cm
     pixel_width_cm = fov / array_size
 
-    midslice = round(height / 1.7 / pixel_width_cm)
+
+    liver_location = phantom_df[phantom_df['Code #']==code]['liver location (relative to height)'].to_numpy()[0]
+
+    midslice = round(height / pixel_width_cm * liver_location)
     cmd = f'cd {XCAT_dir}\n./{XCAT} {GENERAL_PARAMS_FILE}\
              --organ_file {patient_nrb_file}\
              --heart_base {patient_heart_nrb_file}\
@@ -119,31 +122,25 @@ def main(phantoms_dir, xcat_patients_csv='selected_xcat_patients.csv'):
     phantoms_dir = Path(phantoms_dir)
     phantoms_dir.mkdir(exist_ok=True, parents=True)
 
-    phantoms = pd.read_csv(xcat_patients_csv)
+    phantoms_df = pd.read_csv(xcat_patients_csv)
 
-    codes = phantoms['Code #']
+    codes = phantoms_df['Code #']
     for code in codes:
-        patient_nrb_file, patient_heart_nrb_file, _ = get_nrb_filenames(phantoms, code)
+        patient_nrb_file, patient_heart_nrb_file, _ = get_nrb_filenames(phantoms_df, code)
         assert patient_nrb_file.exists()
         assert patient_heart_nrb_file.exists()
 
-    assert len(phantoms) == len(list(XCAT_MODELFILES_DIR.glob('*_heart.nrb')))
+    assert len(phantoms_df) == len(list(XCAT_MODELFILES_DIR.glob('*_heart.nrb')))
 
     for code in codes:
         fov = 48
         print(f'making full fov: {fov} cm phantoms {code}')
-        make_phantom(phantoms_dir / 'full_fov', phantoms, code, fov=fov)
-
-    # update_effective_diameters = False
-    # if update_effective_diameters:
-    #     measured_effective_diameters_cm = [measure_effective_diameter(phantoms, code, units='cm') for code in codes]
-    #     phantoms['effective diameter (cm)'] = measured_effective_diameters_cm
-    #     phantoms.to_csv('selected_xcat_patients.csv', index=False)
+        make_phantom(phantoms_dir / 'full_fov', phantoms_df, code, fov=fov)
 
     for code in codes:
-        fov = int(1.3 * get_effective_diameter(phantoms, code))
+        fov = int(1.3 * get_effective_diameter(phantoms_df, code))
         print(f'making adaptive fov: {fov} cm phantoms {code}')
-        make_phantom(phantoms_dir / 'adaptive_fov', phantoms, code, fov=fov)
+        make_phantom(phantoms_dir / 'adaptive_fov', phantoms_df, code, fov=fov)
 
 
 if __name__ == '__main__':

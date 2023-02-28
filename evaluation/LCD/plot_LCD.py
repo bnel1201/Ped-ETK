@@ -71,7 +71,7 @@ class LCD_Plotter:
         figs = figs.T.flatten() if transpose else figs.flatten()
         fig_idx = 0
         fig_dict = {}
-        # if len(row_data) == 1: row_data = [row_data]
+
         for rd in row_data:
             for recon in recons:
                 if fig_idx == 0:
@@ -96,7 +96,7 @@ class LCD_Plotter:
         
         fig = fig or plt.figure()
         ylabel = f'{restype.upper()}'
-        if restype == 'snr': ylabel = '$d_{' + ylabel + '}$'
+        if restype == 'snr': ylabel = "$d'_{" + ylabel + "}$"
         
         insert_HUs = self.insert_HUs
         if isinstance(insert_HUs, int): insert_HUs = [insert_HUs]
@@ -119,7 +119,7 @@ class LCD_Plotter:
                 img_level_std = np.sqrt((fbp_std/fbp_mean)**2 + (dlir_std/dlir_mean)**2)
                 fig_title += f'{ylabel}{recontype[0].upper()}/{ylabel}{recontype[1].upper()}'
                 ylabel +=  ' ratio'
-            # fig_title += f'{recontype[0]} - {recontype[1]}'
+
         fig.suptitle(fig_title)
 
         fig, axs = plot_insert_level_results(img_level_mean, img_level_std, self.observers, insert_HUs, ylabel, fig=fig, legend_loc=legend_loc)
@@ -139,18 +139,18 @@ def main(results_csv=None, outputdir=None):
     plotter = LCD_Plotter(lcd_data)
 
     plotter.insert_HUs = 7
-    plotter.dose_levels = [100, 25]
+    plotter.dose_levels = [25]
     plotter.recons = [['dlir', 'fbp']]
     plotter.observers = ['Laguerre-Gauss CHO 2D', 'NPW 2D']
     ylim = (0.25, 6.75)
-    fig_dict = plotter.plot(restype='snr', x='diameter', recon_cmp_method='div', transpose = True)
+    fig_dict = plotter.plot(restype='snr', x='diameter', recon_cmp_method='div', transpose = False)
     fig_dict['fig0'][1][0].set_ylim(ylim)
-    fig_dict['fig1'][1][0].set_ylim(ylim)
-    fig_dict['fig0'][1][0].annotate(r"$d_{SNR}$ ratio = $\frac{d_{SNR}\mathrm{DLIR}}{d_{SNR}\mathrm{FBP}}$",
+    # fig_dict['fig1'][1][0].set_ylim(ylim)
+    fig_dict['fig0'][1][0].annotate(r"$d'_{SNR}$ ratio = $\frac{d'_{SNR}\mathrm{DLIR}}{d'_{SNR}\mathrm{FBP}}$",
                                     xy=(120, 6))
 
     ages = [1, 5, 10, 15, 18]
-    axs = [fig_dict['fig0'][1][0], fig_dict['fig1'][1][0]]
+    axs = [fig_dict['fig0'][1][0]]
     for ax in axs:
         ax.annotate('Age groups with\ncorresponding mean\nabdomen diameter', xy=(160, 1), xytext=(105, 3), arrowprops=dict(facecolor='black', shrink=0.2), fontsize=8)
         for a in ages:
@@ -159,7 +159,7 @@ def main(results_csv=None, outputdir=None):
 
     f = plt.gcf()
     f.set_figheight(3)
-    f.set_figwidth(5.5)
+    f.set_figwidth(3.2)
     output_fname = outputdir/"SNR_ratio_v_diameter.png"
     plt.savefig(output_fname, dpi=600, bbox_inches="tight")
     print(f'file saved: {output_fname}')

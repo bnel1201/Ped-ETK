@@ -109,7 +109,7 @@ std_noise_reduction = grouped.std()
 diameters = nps_results.sort_values(by='FOV [mm]')['Phantom Diameter [mm]'].unique()
 fovs = nps_results['FOV [mm]'].unique()
 
-dose_levels = [100, 25]
+dose_levels = [25]
 ndoses = len(dose_levels)
 f, ax = plt.subplots(1, 1, figsize=(3.5, 3), dpi=150)
 
@@ -123,11 +123,11 @@ for c, dose in zip(['#1f77b4', '#ff7f0e'], dose_levels):
     ped_mean = ped_mean[ped_mean.index != 200]
     
     ped_mean.plot(ax=ax, yerr = ped_std, label=f'{dose}% dose', capsize=3)
-    adult_mean.plot(ax=ax, yerr=adult_std, marker='*', color=c, label="", capsize=3)
+    adult_mean.plot(ax=ax, yerr=adult_std, marker='*', color='black', label="", capsize=3)
 
 c = (310,71)
 circ1 = patches.Ellipse(c,width=13, height=15,lw=2.,ec='k',fill=False)
-ax.add_artist(circ1)
+# ax.add_artist(circ1)
 circ1.set_clip_box(ax.bbox)
 
 
@@ -138,7 +138,7 @@ twiny.set_xlabel("Recon FOV [mm]")
 
 ax.set_ylabel('Noise Reduction [%]\n$(\sigma_{FBP} - \sigma_{DLIR}) / \sigma_{FBP}\\times 100$')
 ax.legend()
-ax.annotate('Adult Protocol\n340 mm FOV', xy=(310, 63), xycoords='data', xytext=(265, 24), textcoords='data', ha='center', arrowprops=dict(facecolor='black', shrink=0.05), fontsize=8)
+ax.annotate('Adult Protocol\n340 mm FOV', xy=(310, 73), xycoords='data', xytext=(265, 35), textcoords='data', ha='center', arrowprops=dict(facecolor='black', shrink=0.05), fontsize=8)
 ax.annotate('Age groups with\ncorresponding mean\nabdomen diameter', xy=(165, 8), xytext=(105, 30), arrowprops=dict(facecolor='black', shrink=0.2), fontsize=8)
 
 ages = [1, 5, 10, 15, 18]
@@ -160,12 +160,13 @@ nps_results = nps_results[nps_results['Phantom Diameter [mm]'] != 200]
 
 grouped = nps_results.groupby(['recon', 'dose_level_pct','Phantom Diameter [mm]'])
 
-nps_peak = grouped.mean()['nps_peak_cyc_per_pix']
+nps_peak = grouped.mean()['nps_mean']
 # %%
-f, ax = plt.subplots()
-for recon in recons:
-    nps_peak[recon, 100].plot(ax=ax, label=recon)
-ax.legend()
+
+dose = 10
+plt.plot(nps_peak['dl_REDCNN', dose] - nps_peak['fbp', dose])
+plt.xlabel('Phantom Diameter')
+plt.ylabel('$\Delta \overline{NPS}$\n$\overline{NPS}_{DLIR} - \overline{NPS}_{FBP}$')
 # %%
 
 # %%
