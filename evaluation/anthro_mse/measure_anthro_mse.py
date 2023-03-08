@@ -69,9 +69,9 @@ def load_patient(simulations_dir, patient_name):
             'cnn_filenames': cnn_filenames}
 
 
-def mse(a,b): return np.sqrt((np.sum((a.ravel() - b.ravel())**2)))/a.size
+def rmse(a,b): return np.sqrt((np.mean((a.ravel() - b.ravel())**2)))
 
-def mse_summary(a_stack, b_true): return np.array([mse(a, b_true) for a in a_stack])
+def mse_summary(a_stack, b_true): return np.array([rmse(a, b_true) for a in a_stack])
 
 # consider turning this into a class...
 def get_patient_name(patient): return ' '.join(patient.split('_')[:2])
@@ -236,7 +236,7 @@ def main(simulations_dir, patient_info_csv_file, results_fname='anthro_mse_datas
                     'Dose (photons)' : doses,
                     'recon' : recons,
                     'simulation number': sim_number,
-                    'MSE' : mses,
+                    'RMSE' : mses,
                     'file': file_names})
     xcat_df.to_csv(results_fname, index=False)
 

@@ -1,5 +1,5 @@
-BASE_DIR=${1-/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/anthropomorphic_phantom_studies/main/simulations} #directory containing simulations
-RESULTS_DIR=${2-anthro_results}
+BASE_DIR=${1-/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/main/anthropomorphic/simulations/} #directory containing simulations
+RESULTS_DIR=${2-/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/results/anthropomorphic}
 
 mkdir -p $RESULTS_DIR
 RESULTS_DIR=$(realpath $RESULTS_DIR)

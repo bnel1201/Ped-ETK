@@ -126,7 +126,7 @@ class LCD_Plotter:
         return fig, axs
 
     
-def main(results_csv=None, outputdir=None):
+def main(results_csv=None, outputdir=None, restype='auc', comparator='diff'):
     results_csv = results_csv or '/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/results/LCD/LCD_results.csv'
     results_csv = Path(results_csv)
     outputdir = outputdir or results_csv.parent
@@ -142,25 +142,25 @@ def main(results_csv=None, outputdir=None):
     plotter.dose_levels = [25]
     plotter.recons = [['dlir', 'fbp']]
     plotter.observers = ['Laguerre-Gauss CHO 2D', 'NPW 2D']
-    ylim = (0.25, 6.75)
-    fig_dict = plotter.plot(restype='snr', x='diameter', recon_cmp_method='div', transpose = False)
-    fig_dict['fig0'][1][0].set_ylim(ylim)
-    # fig_dict['fig1'][1][0].set_ylim(ylim)
-    fig_dict['fig0'][1][0].annotate(r"$d'_{SNR}$ ratio = $\frac{d'_{SNR}\mathrm{DLIR}}{d'_{SNR}\mathrm{FBP}}$",
-                                    xy=(120, 6))
+    fig_dict = plotter.plot(restype=restype, x='diameter', recon_cmp_method=comparator, transpose = False)
+    fig_dict['fig0'][1][0].set_ylim((-0.1, 0.4))
+    fig_dict['fig0'][1][0].set_xlim((105, 308))
+    fig_dict['fig0'][0].suptitle('')
+    fig_dict['fig0'][1][0].set_title('')
 
     ages = [1, 5, 10, 15, 18]
     axs = [fig_dict['fig0'][1][0]]
+    age_yloc = -0.075
     for ax in axs:
-        ax.annotate('Age groups with\ncorresponding mean\nabdomen diameter', xy=(160, 1), xytext=(105, 3), arrowprops=dict(facecolor='black', shrink=0.2), fontsize=8)
+        ax.annotate('Age groups with\ncorresponding mean\nabdomen diameter', xy=(170, -0.08), xytext=(110, 0.2), arrowprops=dict(facecolor='black', shrink=0.2, alpha=0.25), fontsize=10)
         for a in ages:
             eff_diam = age_to_eff_diameter(a)*10
-            ax.annotate(f'{a}yrs', xy=(eff_diam, 0.5), xycoords='data', xytext=(eff_diam, 0.5), ha='center', textcoords='data')
+            ax.annotate(f'{a}yrs', xy=(eff_diam, age_yloc), xycoords='data', xytext=(eff_diam, age_yloc), ha='center', textcoords='data')
 
     f = plt.gcf()
     f.set_figheight(3)
     f.set_figwidth(3.2)
-    output_fname = outputdir/"SNR_ratio_v_diameter.png"
+    output_fname = outputdir/f"{restype.upper()}_{comparator}_v_diameter.png"
     plt.savefig(output_fname, dpi=600, bbox_inches="tight")
     print(f'file saved: {output_fname}')
 

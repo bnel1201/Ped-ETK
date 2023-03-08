@@ -1,5 +1,5 @@
 # datadir=${1-'/home/brandon.nelson/Data/temp/CCT189/monochromatic'}
-datadir=${1-'/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CCT189/monochromatic'}
+datadir=${1-'/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/main/geometric/CCT189/monochromatic/'}
 results_dir=${2-'../../results/NPS'}
 
 orginal_dir=$(pwd)

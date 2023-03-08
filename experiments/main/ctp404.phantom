@@ -1,6 +1,6 @@
 # PHANTOM PARAMETERS
 phantom=CTP404 # <-- current options include [CCT189, CTP404]
-patient_diameters='[112, 131, 150, 151, 185, 216, 292]' # <-- units in mm, this is a matlab array, so keep the list in this format '[xx, yy, zz]'
+patient_diameters='[112, 131, 150, 151, 185, 216, 292, 350]' # <-- units in mm, this is a matlab array, so keep the list in this format '[xx, yy, zz]'
 reference_diameter=150 # <-- diameter in mm of the real physcial phantom for comparison
 reference_fov=340 # <-- FOV in mm of adult protocol used in scanning real physical phantom for comparison
 

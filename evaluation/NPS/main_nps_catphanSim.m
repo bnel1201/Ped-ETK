@@ -8,7 +8,6 @@ end
 
 datadir = fullfile(basedir, 'CCT189/monochromatic/')
 
-
 if ~exist('resultsdir', 'var')
     disp('resultsdir not specified, using defaults')
     resultsdir = '/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/results/NPS'; %see ../../make_phantoms/make_phantoms.m

@@ -16,10 +16,10 @@ def imread(fname, sz=None):
 def make_relative_mse_reduction_dataframe(raw_dataframe):
     fbp_df = raw_dataframe[raw_dataframe['recon'] == 'fbp']
     cnn_df = raw_dataframe[raw_dataframe['recon'] == 'cnn']
-    mse_reduction = 100*abs(fbp_df['MSE'].to_numpy() - cnn_df['MSE'].to_numpy()) / fbp_df['MSE'].to_numpy()
+    mse_reduction = 100*abs(fbp_df['RMSE'].to_numpy() - cnn_df['RMSE'].to_numpy()) / fbp_df['RMSE'].to_numpy()
     rel_mse_df = fbp_df.copy()
     rel_mse_df.pop('recon')
-    rel_mse_df['MSE Reduction (%)'] = mse_reduction
+    rel_mse_df['RMSE Reduction (%)'] = mse_reduction
     rel_mse_df['Dose (%)'] = 100*rel_mse_df['Dose (photons)']/rel_mse_df['Dose (photons)'].max()
     return rel_mse_df
 
@@ -32,18 +32,18 @@ def main(result_csv_filename='anthro_mse_dataset.csv', output_dir='anthro_result
     plots_dir = Path(output_dir) / 'plots'
     plots_dir.mkdir(exist_ok=True, parents=True)
 
-    rel_mse_df.plot.scatter(x='age (year)', y='MSE Reduction (%)', c='Dose (%)')
-    output_fname = plots_dir / 'mse_reduction_v_age.png'
+    rel_mse_df.plot.scatter(x='age (year)', y='RMSE Reduction (%)', c='Dose (%)')
+    output_fname = plots_dir / 'rmse_reduction_v_age.png'
     plt.savefig(output_fname, dpi=600)
     print(f'Saving: {output_fname}')
 
-    rel_mse_df.plot.scatter(x='effective diameter (cm)', y='MSE Reduction (%)', c='Dose (%)')
-    output_fname = plots_dir / 'mse_reduction_v_eff_diameter.png'
+    rel_mse_df.plot.scatter(x='effective diameter (cm)', y='RMSE Reduction (%)', c='Dose (%)')
+    output_fname = plots_dir / 'rmse_reduction_v_eff_diameter.png'
     plt.savefig(output_fname, dpi=600)
     print(f'Saving: {output_fname}')
 
-    rel_mse_df.plot.scatter(x='WED (cm)', y='MSE Reduction (%)', c='Dose (%)')
-    output_fname = plots_dir / 'mse_reduction_v_wed.png'
+    rel_mse_df.plot.scatter(x='WED (cm)', y='RMSE Reduction (%)', c='Dose (%)')
+    output_fname = plots_dir / 'rmse_reduction_v_wed.png'
     plt.savefig(output_fname, dpi=600)
     print(f'Saving: {output_fname}')
 
