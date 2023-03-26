@@ -5,7 +5,7 @@ reference_diameter=200 # <-- diameter in mm of the real physcial phantom for com
 reference_fov=340 # <-- FOV in mm of adult protocol used in scanning real physical phantom for comparison
 
 # CT SIMULATION PARAMETERS
-nsims=5 # <-- number of simulations to perform with different noise instantiations
+nsims=10 # <-- number of simulations to perform with different noise instantiations
 image_matrix_size=512 # <-- reconstructed matrix size in pixels (square, equal on both sides)
 nangles=580 # <-- number of angular projections in the CT acquisition (currently only axial scans are supported)
 

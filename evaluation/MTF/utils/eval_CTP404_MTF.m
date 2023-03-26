@@ -118,8 +118,19 @@ for diam_idx = 1:length(diams)
                         disp(sprintf('Warning: Measured Disk HUs (%d HU) do not match expected (%d HU)', measured, expected))
                     end
                     %estimate the MTF
+                    try
                     [mtf, freq, esf] = MTF_from_disk_edge(disk_img);
-
+                    catch
+                       warning('Dose too low to calc MTF assigning 0')
+                       mtf = 0;
+                       freq = 0;
+                       esf = 0;
+                    end
+                    if isnan(mtf) | length(mtf) < (length(esf)/2 - 10)
+                        mtf = 0;
+                        esf = 0;
+                    end
+                    
                     freq_vector = freq/pixelsz;
                     dist_vector = ig.dx*(0:length(esf)-1);
 
@@ -128,16 +139,23 @@ for diam_idx = 1:length(diams)
                         mtf_data(1, :) = freq_vector;
                         esf_data(1, :) = dist_vector;
                     end
-                    if length(mtf) ~= length(mtf_data) | length(freq_vector) ~= length(mtf_data)
+                    if (length(mtf) ~= length(mtf_data) | length(freq_vector) ~= length(mtf_data)) & (mtf ~= 0)
                         mtf_data(j + 1, :) = interp1(freq_vector, mtf, mtf_data(1, :)); % <-- double check this later... meant to account for slight differences in array length from MTF_from_disk_edge due to rounding errors
+                        esf_data(j + 1, :) = interp1(dist_vector, esf, esf_data(1, :));
                     else
                         mtf_data(j + 1, :) = mtf;
+                        esf_data(j + 1, :) = esf;
                     end
-                    esf_data(j + 1, :) = esf;
+                    
 
                     %Estimate the mtf50% and mtf10% values
+                    if mtf
                     mtf50_all(i, j) = MTF_width(mtf, 0.5, freq_vector);
                     mtf10_all(i, j) = MTF_width(mtf, 0.1, freq_vector);
+                    else
+                    mtf50_all(i, j) = 0;
+                    mtf10_all(i, j) = 0;
+                    end
                     
                     expected_HU = [expected_HU; expected];
                     measured_HU = [measured_HU; measured];
@@ -149,10 +167,17 @@ for diam_idx = 1:length(diams)
                     recon = [recon; string(recon_type)];
                     dose_photons = [dose_photons; dose_level];
      
-                    MTF50 = [MTF50; MTF_width(mtf, 0.5, freq_vector)];
-                    MTF25 = [MTF25; MTF_width(mtf, 0.25, freq_vector)];
-                    MTF15 = [MTF15; MTF_width(mtf, 0.15, freq_vector)];
-                    MTF10 = [MTF10; MTF_width(mtf, 0.1, freq_vector)];
+                    if mtf | isnan(mtf)
+                        MTF50 = [MTF50; MTF_width(mtf, 0.5, freq_vector)];
+                        MTF25 = [MTF25; MTF_width(mtf, 0.25, freq_vector)];
+                        MTF15 = [MTF15; MTF_width(mtf, 0.15, freq_vector)];
+                        MTF10 = [MTF10; MTF_width(mtf, 0.1, freq_vector)];
+                    else
+                        MTF50 = [MTF50; 0];
+                        MTF25 = [MTF25; 0];
+                        MTF15 = [MTF15; 0];
+                        MTF10 = [MTF10; 0];
+                    end
 
                     fprintf(fnames_MTF50_id, ', %3.5g', [mtf50_all(i, j)]);
                     fprintf(fnames_MTF10_id, ', %3.5g', [mtf10_all(i, j)]);

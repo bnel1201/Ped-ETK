@@ -37,7 +37,7 @@ all :
 .PHONY : clean_tests
 clean_tests :
 	rm -rf test/results
-	rm -rf /gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/test/
+	rm -rf /gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geometric_phantom_studies/test/
 
 .PHONY : tests
 tests :

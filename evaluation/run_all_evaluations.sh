@@ -1,4 +1,4 @@
-BASE_DIR=${1-/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/main}
+BASE_DIR=${1-/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geometric_phantom_studies/main}
 RESULTS_DIR=${2-../results}
 
 # Do Not Edit Below

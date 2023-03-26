@@ -4,7 +4,7 @@
 # 2. join a node manually: `ssh -X nodexyz` where `xyz` is one of the nodes available see `clusterTop`
 #    to see available nodes
 
-BASE_DIR=${1-/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/test/geometric}
+BASE_DIR=${1-/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geometric_phantom_studies/test/geometric}
 RESULTS_DIR=${2-../../test/results}
 
 orginal_dir=$(pwd)

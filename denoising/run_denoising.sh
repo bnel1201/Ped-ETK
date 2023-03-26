@@ -1,4 +1,4 @@
-BASE_DIR=${1-/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/main}
+BASE_DIR=${1-/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geometric_phantom_studies/main}
 # Model from here: </gpfs_projects/prabhat.kc/lowdosect/transfers/transfers_4_spie/exps/exps/exps_4r_phan_insert/resolve_phan_exe.sh>
 MODEL_FOLDER=${2-'/gpfs_projects/prabhat.kc/lowdosect/transfers/transfers_4_spie/exps/exps/w8_exps_4_spie_dose/checkpoints/p96/augTrTaTdT/redcnn/hvd_cpt_for_mse_tv-fbd_wd_0.0_lr_1e-05_bs_64/'}
 # MODEL_FOLDER='/gpfs_projects/prabhat.kc/lowdosect/transfers/transfers_4_spie/exps/exps/w9_exps_4r_didsr/checkpoints/d95_2_d75_2_d25_p96/augFrFaTdF_2_augTrTaTdT/redcnn/hvd_cpt_for_mse_tv-fbd_reg_0.0001_wd_0.0_lr_1e-05_bs_64/'

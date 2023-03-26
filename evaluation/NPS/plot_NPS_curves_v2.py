@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # %%
-nps_curves = pd.read_csv('/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/results/NPS/diameter_1D_nps.csv')
+nps_curves = pd.read_csv('/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geometric_phantom_studies/results/NPS/diameter_1D_nps.csv')
 # %%
 diameters = [int(d.split('diameter')[1].split('mm')[0]) for d in nps_curves.columns if d.startswith('diameter')]
 diameters.remove(200)
@@ -30,5 +30,6 @@ nps_df.replace('REDCNN', 'DLIR', inplace=True)
 bool_filt = [d in [112, 151, 185, 216, 292] for d in nps_df['Phantom Diameter [mm]']]
 f, ax = plt.subplots(figsize=(4.5, 3.5), tight_layout=True)
 sns.lineplot(ax=ax, x='Spatial Frequency [cyc/pix]', y='Noise Power', hue='Phantom Diameter [mm]', style='Reconstruction', data=nps_df[bool_filt], palette='crest')
+ax.set_ylabel('Noise Power [HU$^2$]')
 f.savefig('nps_curves.png', dpi=600)
 # %%

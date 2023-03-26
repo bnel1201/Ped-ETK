@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 # %%
-nps_results = pd.read_csv('/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/results/NPS/NPS_results.csv')
+nps_results = pd.read_csv('/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geometric_phantom_studies/results/NPS/NPS_results.csv')
 nps_results.rename(columns={'fov_size_mm': 'FOV [mm]', 'phantom_diameter_mm': 'Phantom Diameter [mm]'}, inplace=True)
 
 # nps_results = nps_results[nps_results['phantom_diameter_mm'] != 200]
@@ -151,7 +151,7 @@ f.savefig('noise_reduction_v_diameter.png', dpi=600)
 
 # %% [markdown]
 # now let's look at the peak noise frequency shift
-nps_results = pd.read_csv('/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/results/NPS/NPS_results.csv')
+nps_results = pd.read_csv('/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geometric_phantom_studies/results/NPS/NPS_results.csv')
 nps_results.rename(columns={'fov_size_mm': 'FOV [mm]', 'phantom_diameter_mm': 'Phantom Diameter [mm]'}, inplace=True)
 
 recons = nps_results['recon'].unique()

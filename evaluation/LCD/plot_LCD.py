@@ -127,13 +127,16 @@ class LCD_Plotter:
 
     
 def main(results_csv=None, outputdir=None, restype='auc', comparator='diff'):
-    results_csv = results_csv or '/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/results/LCD/LCD_results.csv'
+    plt.style.use('seaborn-v0_8-deep')
+    results_csv = results_csv or '/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geometric_phantom_studies/results/LCD/LCD_results.csv'
     results_csv = Path(results_csv)
     outputdir = outputdir or results_csv.parent
     outputdir = Path(outputdir)
     lcd_data = pd.read_csv(results_csv)
 
-    lcd_data.replace('dl_REDCNN', 'dlir', inplace=True)
+    lcd_data.replace({'dl_REDCNN': 'dlir',
+                      'NPW 2D': 'NPW', 
+                      'Laguerre-Gauss CHO 2D': 'Laguerre-Gauss CHO'}, inplace=True)
     lcd_data.rename(columns={'patient_diameter_mm': 'phantom diameter [mm]', 'dose_level_pct': 'dose [%]'}, inplace=True)
     lcd_data = lcd_data[lcd_data['phantom diameter [mm]'] != 200] #ref has large fov
     plotter = LCD_Plotter(lcd_data)
@@ -141,8 +144,8 @@ def main(results_csv=None, outputdir=None, restype='auc', comparator='diff'):
     plotter.insert_HUs = 7
     plotter.dose_levels = [25]
     plotter.recons = [['dlir', 'fbp']]
-    plotter.observers = ['Laguerre-Gauss CHO 2D', 'NPW 2D']
-    fig_dict = plotter.plot(restype=restype, x='diameter', recon_cmp_method=comparator, transpose = False)
+    plotter.observers = ['Laguerre-Gauss CHO', 'NPW'] # 'Laguerre-Gauss CHO 2D', 'NPW 2D'
+    fig_dict = plotter.plot(restype=restype, x='diameter', recon_cmp_method=comparator, transpose=False)
     fig_dict['fig0'][1][0].set_ylim((-0.1, 0.4))
     fig_dict['fig0'][1][0].set_xlim((105, 308))
     fig_dict['fig0'][0].suptitle('')

@@ -16,14 +16,14 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-anthro_results = pd.read_csv('/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/results/anthropomorphic/anthro_mse_dataset.csv')
+anthro_results = pd.read_csv('/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geometric_phantom_studies/results/anthropomorphic/anthro_mse_dataset.csv')
 anthro_results['Dose [%]'] = 100*anthro_results['Dose (photons)']/anthro_results['Dose (photons)'].max()
 anthro_results['Dose [%]'] = anthro_results['Dose [%]'].astype(int)
 anthro_results.replace({'cnn': 'DLIR', 'fbp': 'FBP'}, inplace=True)
 anthro_results['Diameter [mm]'] = anthro_results['effective diameter (cm)']*10
 anthro_results
 # %%
-iq_results = pd.read_csv('/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/results/NPS/NPS_results.csv')
+iq_results = pd.read_csv('/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geometric_phantom_studies/results/NPS/NPS_results.csv')
 iq_results.rename(columns = {'rmse': 'RMSE', 'phantom_diameter_mm': 'Diameter [mm]', 'dose_level_pct': 'Dose [%]'}, inplace=True)
 iq_results = iq_results[iq_results['Diameter [mm]'] != 200]
 iq_results.replace({'dl_REDCNN': 'DLIR', 'fbp': 'FBP'}, inplace=True)
@@ -69,16 +69,93 @@ anthro_rmse_reduction_df['Phantom'] = 'Anthropomorphic'
 anthro_rmse_reduction_df['Diameter [mm]'] = anthro_rmse_reduction_df['Diameter [mm]'].astype(int)
 # %%
 rmse_reduction_df = pd.concat([iq_rmse_reduction_df, anthro_rmse_reduction_df])
-rmse_reduction_df
-# %%
+
 f, ax = plt.subplots(figsize=(4, 3.5), tight_layout=True)
-plot = sns.lineplot(ax=ax, x='Diameter [mm]', y='RMSE Reduction [%]', style='Phantom', hue='Dose [%]', data=rmse_reduction_df, palette='crest')
+plot = sns.lineplot(ax=ax, x='Diameter [mm]', y='RMSE Reduction [%]',
+                   style='Phantom', hue='Dose [%]',
+                   data=rmse_reduction_df[np.array(rmse_reduction_df['Dose [%]'] == 100) | np.array(rmse_reduction_df['Dose [%]'] == 10)],
+                   palette='crest')
 handles, labels = plot.get_legend_handles_labels()
 plot.get_legend().remove()
-f.legend(handles, labels, ncol=3, loc='upper center', 
-                bbox_to_anchor=(0.5, 1.25), frameon=False)
+f.legend(handles, labels, ncol=2, loc='upper center', 
+                bbox_to_anchor=(0.5, 1.175), frameon=False)
 f.tight_layout()
 f.savefig('rmse_reduction_v_diameter.png', dpi=600, bbox_inches='tight')
+# %%
+def age_to_eff_diameter(age):
+    # https://www.aapm.org/pubs/reports/rpt_204.pdf
+    x = age
+    a = 18.788598
+    b = 0.19486455
+    c = -1.060056
+    d = -7.6244784
+    y = a + b*x**1.5 + c *x**0.5 + d*np.exp(-x)
+    eff_diam = y
+    return eff_diam
+
+
+f, ax = plt.subplots(figsize=(4, 3.5), tight_layout=True)
+
+rmse_reduction_df = pd.concat([iq_rmse_reduction_df, anthro_rmse_reduction_df])
+rmse_reduction_df = rmse_reduction_df[rmse_reduction_df['Phantom'] != 'Anthropomorphic']
+rmse_reduction_df
+plot = sns.lineplot(ax=ax, x='Diameter [mm]', y='RMSE Reduction [%]',
+                   hue='Dose [%]',
+                   style='Phantom',
+                   data=rmse_reduction_df[np.array(rmse_reduction_df['Dose [%]'] == 100) | np.array(rmse_reduction_df['Dose [%]'] == 10)],
+                   palette='crest')
+line_handles, line_labels = plot.get_legend_handles_labels()
+
+rmse_reduction_df = pd.concat([iq_rmse_reduction_df, anthro_rmse_reduction_df])
+rmse_reduction_df = rmse_reduction_df[rmse_reduction_df['Phantom'] == 'Anthropomorphic']
+plot = sns.scatterplot(ax=ax, x='Diameter [mm]', y='RMSE Reduction [%]',
+                   style='Phantom', hue='Dose [%]',
+                   data=rmse_reduction_df[np.array(rmse_reduction_df['Dose [%]'] == 100) | np.array(rmse_reduction_df['Dose [%]'] == 10)],
+                   palette='crest')
+
+ages = [1, 5, 10, 15, 18]
+age_yloc = 2
+ax.annotate('Age groups with\ncorresponding mean\nabdomen diameter', xy=(170, -0.08), xytext=(110, 0.2), arrowprops=dict(facecolor='black', shrink=0.2, alpha=0.25), fontsize=10)
+for a in ages:
+    eff_diam = age_to_eff_diameter(a)*10
+    ax.annotate(f'{a}yrs', xy=(eff_diam, age_yloc), xycoords='data', xytext=(eff_diam, age_yloc), ha='center', textcoords='data')
+
+
+
+handles, labels = plot.get_legend_handles_labels()
+# k=np.array([0, 1, 2, 3, 4, 9])
+new_handles = handles[:4]
+new_handles.append(line_handles[-1])
+new_handles.append(handles[-1])
+new_labels = labels[:4]
+new_labels.append(line_labels[-1])
+new_labels.append(labels[-1])
+plot.get_legend().remove()
+f.legend(new_handles, new_labels, ncol=2, loc='upper center', 
+                bbox_to_anchor=(0.5, 1.175), frameon=False)
+f.tight_layout()
+f.savefig('rmse_reduction_v_diameter_revised.png', dpi=600, bbox_inches='tight')
+#%%
+f, ax = plt.subplots(figsize=(4, 3.5), tight_layout=True)
+for p in ['Anthropomorphic', 'Uniform Water']:
+    temp_df = rmse_reduction_df[np.array(rmse_reduction_df['Phantom'] == p)]
+    if p == 'Uniform Water':
+        plot = sns.lineplot(ax=ax, x='Diameter [mm]', y='RMSE Reduction [%]',
+                        style='Phantom', hue='Dose [%]',
+                        data=rmse_reduction_df[np.array(rmse_reduction_df['Dose [%]'] == 100) | np.array(rmse_reduction_df['Dose [%]'] == 10)],
+                        palette='crest')
+    else:
+        ax.scatter(temp_df['Diameter [mm]'], temp_df['RMSE Reduction [%]'])
+plot
+# %%
+f, ax = plt.subplots(figsize=(4, 3.5), tight_layout=True)
+
+for d in [10, 100]:
+    for p in ['Anthropomorphic', 'Uniform Water']:
+        temp_df = rmse_reduction_df[np.array(rmse_reduction_df['Dose [%]'] == d) & np.array(rmse_reduction_df['Phantom'] == p)]
+        plotter = ax.errorbar if p == 'Anthropmorphic' else ax.plot
+        plotter(temp_df['Diameter [mm]'], temp_df['RMSE Reduction [%]'], label=f'{d}$ Dose')
+
 # %%
 iq_rmse_reduction_df.join(anthro_rmse_reduction_df, on=['Dose [%]'], rsuffix=' anthro', how='outer')
 # %%

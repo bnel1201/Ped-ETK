@@ -3,8 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-anthro_mse_df = pd.read_csv("/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/test/results/anthropomorphic/anthro_mse_dataset.csv")
-nps_df = pd.read_csv("/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/test/results/NPS/diameter_1D_nps.csv")
+anthro_mse_df = pd.read_csv("/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geometric_phantom_studies/test/results/anthropomorphic/anthro_mse_dataset.csv")
+nps_df = pd.read_csv("/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geometric_phantom_studies/test/results/NPS/diameter_1D_nps.csv")
 
 # %% first join mtf50 and 10
 
@@ -44,11 +44,11 @@ def merge_mtf_csv_files(mtf_cutoff_csv1, mtf_cutoff_csv2):
                          'MTF Cutoff Value (%)' : mtf_cutoffs_list,
                          'MTF Cutoff Frequency (1/mm)' : cutoff_frequency_list})
 
-# mtf50_csv = "/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/test/results/MTF/mtf50.csv"
-# mtf10_csv = "/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/test/results/MTF/mtf10.csv"
+# mtf50_csv = "/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geometric_phantom_studies/test/results/MTF/mtf50.csv"
+# mtf10_csv = "/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geometric_phantom_studies/test/results/MTF/mtf10.csv"
 
-mtf50_csv = "/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/results_lower_doses/MTF/mtf50.csv"
-mtf10_csv = "/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/results_lower_doses/MTF/mtf10.csv"
+mtf50_csv = "/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geometric_phantom_studies/results_lower_doses/MTF/mtf50.csv"
+mtf10_csv = "/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geometric_phantom_studies/results_lower_doses/MTF/mtf10.csv"
 new_mtf_df = merge_mtf_csv_files(mtf50_csv, mtf10_csv)
 new_mtf_df.to_csv('mtf_dataset.csv', index=False)
 new_mtf_df
@@ -64,7 +64,7 @@ f, ax = plt.subplots()
 rel_sharpness_df[rel_sharpness_df['MTF Cutoff Value (%)'] == 50].plot.scatter(ax=ax, x='patient diameter (mm)', y='Relative Sharpness', c='Contrast (HU)', cmap='jet')
 ax.set_ylim([0.7, 1.05])
 # %% Now NPS
-nps_df = pd.read_csv("/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/results_lower_doses/NPS/diameter_1D_nps.csv")
+nps_df = pd.read_csv("/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geometric_phantom_studies/results_lower_doses/NPS/diameter_1D_nps.csv")
 
 nps_df
 nps_df.replace('FBP', 'fbp', inplace=True)

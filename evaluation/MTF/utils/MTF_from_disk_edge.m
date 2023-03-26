@@ -36,6 +36,8 @@ for iz = 1:nz
         a(jj) = mean(xx(disk_img>edge_thr(jj))); 
         b(jj) = mean(yy(disk_img>edge_thr(jj)));
     end
+    a=a(~isnan(a));
+    b=b(~isnan(b));
     x0 = mean(a); y0 = mean(b);    
     
     %get the distance matrix

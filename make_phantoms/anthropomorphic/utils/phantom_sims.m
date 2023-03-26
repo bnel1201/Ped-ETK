@@ -11,9 +11,9 @@
 % Date: July 23, 2018
 
 % Run path setup
-run('/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/make_phantoms/configs/SiemensSomatomDefinitionAS.m')
+run('/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geometric_phantom_studies/make_phantoms/configs/SiemensSomatomDefinitionAS.m')
 
-run('/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geomtric_phantom_studies/make_phantoms/utils/setup.m') % need to double check that this isn't overwriting anything from the base config
+run('/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geometric_phantom_studies/make_phantoms/utils/setup.m') % need to double check that this isn't overwriting anything from the base config
 
 % base_dir = '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/anthropomorphic_phantom_studies/main';
 % phantom_dir = fullfile(base_dir, 'phantoms', 'adaptive_fov')

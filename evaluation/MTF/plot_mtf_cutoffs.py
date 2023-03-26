@@ -8,7 +8,7 @@ from utils.mtf_cutoffs import merge_patient_diameters, abs_HU
 
 
 def main(datadir=None, output_fname=None, processed=False):
-    datadir = datadir or '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/CTP404/monochromatic/'
+    datadir = datadir or '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geometric_phantom_studies/main/CTP404/monochromatic/'
     patient_dirs = sorted(list(Path(datadir).glob('diameter*')))
     sns.set_style("darkgrid")
     # sns.set_context("talk")

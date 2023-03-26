@@ -3,7 +3,7 @@
 addpath('utils')
 if ~exist('basedir', 'var')
     disp('basedir not specified, using defaults')
-    basedir = '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geomtric_phantom_studies/main/geometric'; %see ../../make_phantoms/make_phantoms.m
+    basedir = '/gpfs_projects/brandon.nelson/DLIR_Ped_Generalizability/geometric_phantom_studies/main/geometric'; %see ../../make_phantoms/make_phantoms.m
 end
 
 datadir = fullfile(basedir, 'CTP404/monochromatic/');

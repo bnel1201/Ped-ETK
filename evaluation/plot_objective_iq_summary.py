@@ -15,7 +15,7 @@ def plot_sharpness_heatmap(mtf_rel, cutoff_val=50, ax=None):
     mtf_rel.columns = [int(c.split('mm')[0]) for c in mtf_rel.columns]
     ax = sns.heatmap(mtf_rel.astype(float), annot=True, ax=ax,
                 cbar_kws=dict(label=f'Relative Sharpness\n(REDCNN {cutoff_val}% MTF / FBP {cutoff_val}% MTF',
-                location='bottom'))
+                location='bottom'), cmap='crest')
     ax.collections[0].colorbar.ax.invert_xaxis()
     plt.yticks(rotation=0) 
     ax.set_xlabel('Patient Diameter [mm]')

@@ -17,7 +17,7 @@ def plot_sharpness_heatmap(mtf_rel, cutoff_val, results_dir=None, ax=None):
     if ax is None:
         f, ax = plt.subplots()
     sns.heatmap(mtf_rel, annot=True, ax=ax,
-                cbar_kws=dict(label=f'Relative Sharpness\n(REDCNN {cutoff_val}% MTF / FBP {cutoff_val}% MTF'))
+                cbar_kws=dict(label=f'Relative Sharpness\n(REDCNN {cutoff_val}% MTF / FBP {cutoff_val}% MTF'), cmap='crest')
     ax.set_xlabel('Patient Diameter [mm]')
     twiny = ax.twiny()
 
