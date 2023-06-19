@@ -12,40 +12,41 @@ def load_results():
                                    'recon': 'Recon'}, inplace=True)
     ctp404_results = ctp404_results[ctp404_results['Diameter [mm]'] < 300]
     ctp404_results = ctp404_results[ctp404_results['Diameter [mm]'] != 150]
-    ctp404_results['Contrast'] = ctp404_results['Expected HU'].abs() 
+    ctp404_results = ctp404_results[ctp404_results['Expected HU'].abs() < 900]
+    ctp404_results['Contrast'] = ctp404_results['Expected HU'].abs().astype('category') 
     ctp404_results.replace({'dl_REDCNN': 'DLIR', 'fbp': 'FBP'}, inplace=True)
     return ctp404_results
 ctp404_results = load_results()
 # %%
-ctp404_results = ctp404_results[ctp404_results['MTF50'] > 0]
+# ctp404_results = ctp404_results[ctp404_results['MTF50'] > 0]
 # %%
 f, axs = plt.subplots(1,2, tight_layout=True, figsize=(8, 4), sharey=True)
 sns.lineplot(ax=axs[0], x='Diameter [mm]', y='MTF50', hue='Contrast', style='Recon', data=ctp404_results, palette='crest')
 sns.lineplot(ax=axs[1], x='Diameter [mm]', y='MTF25', hue='Contrast', style='Recon', data=ctp404_results, palette='crest')
 # %%
 delta_mtf = ctp404_results[ctp404_results['Recon'] == 'FBP'][['Diameter [mm]', 'Contrast', 'dose_level_pct', 'MTF50']]
-delta_mtf['$\Delta$MTF50'] = ctp404_results[ctp404_results['Recon'] == 'DLIR']['MTF50'].to_numpy() - ctp404_results[ctp404_results['Recon'] == 'FBP']['MTF50'].to_numpy()
-delta_mtf['$\Delta$MTF25'] = ctp404_results[ctp404_results['Recon'] == 'DLIR']['MTF25'].to_numpy() - ctp404_results[ctp404_results['Recon'] == 'FBP']['MTF25'].to_numpy()
-delta_mtf['$\Delta$MTF15'] = ctp404_results[ctp404_results['Recon'] == 'DLIR']['MTF15'].to_numpy() - ctp404_results[ctp404_results['Recon'] == 'FBP']['MTF15'].to_numpy()
+delta_mtf['$\Delta$MTF50 [lp/cm]'] = ctp404_results[ctp404_results['Recon'] == 'DLIR']['MTF50'].to_numpy() - ctp404_results[ctp404_results['Recon'] == 'FBP']['MTF50'].to_numpy()
+delta_mtf['$\Delta$MTF25 [lp/cm]'] = ctp404_results[ctp404_results['Recon'] == 'DLIR']['MTF25'].to_numpy() - ctp404_results[ctp404_results['Recon'] == 'FBP']['MTF25'].to_numpy()
+delta_mtf['$\Delta$MTF15 [lp/cm]'] = ctp404_results[ctp404_results['Recon'] == 'DLIR']['MTF15'].to_numpy() - ctp404_results[ctp404_results['Recon'] == 'FBP']['MTF15'].to_numpy()
 delta_mtf = delta_mtf[delta_mtf['MTF50'] > 0]
 delta_mtf = delta_mtf[delta_mtf['dose_level_pct'] == 100]
 
-f, axs = plt.subplots(1,3, tight_layout=True, figsize=(12, 3))
-plot = sns.lineplot(ax=axs[0], x='Diameter [mm]', y='$\Delta$MTF50', hue='Contrast', data=delta_mtf, palette='crest')
+f, axs = plt.subplots(1,2, tight_layout=True, figsize=(8, 3))
+plot = sns.lineplot(ax=axs[0], x='Diameter [mm]', y='$\Delta$MTF50 [lp/cm]', hue='Contrast', data=delta_mtf, palette='crest')
 plot.get_legend().remove()
-plot = sns.lineplot(ax=axs[1], x='Diameter [mm]', y='$\Delta$MTF25', hue='Contrast', data=delta_mtf, palette='crest')
+plot = sns.lineplot(ax=axs[1], x='Diameter [mm]', y='$\Delta$MTF15 [lp/cm]', hue='Contrast', data=delta_mtf, palette='crest')
 handles, labels = plot.get_legend_handles_labels()
 plot.get_legend().remove()
-plot = sns.lineplot(ax=axs[2], x='Diameter [mm]', y='$\Delta$MTF15', hue='Contrast', data=delta_mtf, palette='crest')
-plot.get_legend().remove()
+# plot = sns.lineplot(ax=axs[2], x='Diameter [mm]', y='$\Delta$MTF15', hue='Contrast', data=delta_mtf, palette='crest')
+# plot.get_legend().remove()
 f.legend(handles, labels, ncol=3, loc='upper center', 
-                bbox_to_anchor=(0.5, 1.2), frameon=False, title='Contrast')
+                bbox_to_anchor=(0.5, 1.2), frameon=False, title='Contrast [HU]')
 [ax.set_ylim([-0.35, 0.12]) for ax in axs]
 f.savefig('mtf_v_diameter.png', dpi=600, bbox_inches='tight')
 # %%
 
 f, ax = plt.subplots(figsize=(4, 3))
-plot = sns.lineplot(ax=ax,x='Diameter [mm]', y='Measured HU', style='Recon', hue='Expected HU', data=ctp404_results, palette='crest')
+plot = sns.lineplot(ax=ax,x='Diameter [mm]', y='Measured HU', style='Recon', hue='Expected HU', data=ctp404_results[ctp404_results['Expected HU']<340], palette='crest')
 handles, labels = plot.get_legend_handles_labels()
 plot.get_legend().remove()
 f.legend(handles, labels, ncol=3, loc='upper center', 

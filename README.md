@@ -12,7 +12,7 @@ email: Brandon.Nelson@fda.hhs.gov
 2. make a virtual environment and load the required dependencies:
 
    ```bash
-   conda create -n DLIR --file requirements.txt -y
+   conda create -n DLIR --file requirements.txt -y -c conda-forge
    ```
 
    then activate it

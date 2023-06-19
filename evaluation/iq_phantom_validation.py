@@ -43,10 +43,16 @@ sns.lineplot(x='Diameter [mm]', y='RMSE', style='recon', hue='Dose [%]', data=iq
 sns.lineplot(x='Diameter [mm]', y='RMSE', style='recon', hue='Dose [%]', data=anthro_results, palette='crest')
 # %%
 f, axs = plt.subplots(1, 2, sharey=True, tight_layout=True, figsize=(8, 4))
-sns.lineplot(ax=axs[0], x='Diameter [mm]', y='RMSE', style='recon', hue='Dose [%]', data=iq_results, palette='crest')
-sns.lineplot(ax=axs[1], x='Diameter [mm]', y='RMSE', style='recon', hue='Dose [%]', data=anthro_results, palette='crest')
+plot = sns.lineplot(ax=axs[0], x='Diameter [mm]', y='RMSE', style='recon', hue='Dose [%]', data=iq_results[np.array(iq_results['Dose [%]'] == 100) | np.array(iq_results['Dose [%]'] == 10)], palette='crest')
+handles, labels = plot.get_legend_handles_labels()
+plot.get_legend().remove()
+plot = sns.lineplot(ax=axs[1], x='Diameter [mm]', y='RMSE', style='recon', hue='Dose [%]', data=anthro_results[np.array(anthro_results['Dose [%]'] == 100) | np.array(anthro_results['Dose [%]'] == 10)], palette='crest')
 axs[0].set_title('Image Quality Phantoms')
 axs[1].set_title('Anthropomorphic Phantoms')
+handles, labels = plot.get_legend_handles_labels()
+plot.get_legend().remove()
+f.legend(handles, labels, ncol=2, loc='upper center', 
+                bbox_to_anchor=(0.5, 1.175), frameon=False)
 # %% [markdown]
 # to clean this up, focus on RMSE *reduction* [%] = 100*(RMSE_fbp - RMSE_DLIR)/RMSE_fbp
 
@@ -102,7 +108,7 @@ rmse_reduction_df
 plot = sns.lineplot(ax=ax, x='Diameter [mm]', y='RMSE Reduction [%]',
                    hue='Dose [%]',
                    style='Phantom',
-                   data=rmse_reduction_df[np.array(rmse_reduction_df['Dose [%]'] == 100) | np.array(rmse_reduction_df['Dose [%]'] == 10)],
+                   data=rmse_reduction_df[np.array(rmse_reduction_df['Dose [%]'] == 25)],
                    palette='crest')
 line_handles, line_labels = plot.get_legend_handles_labels()
 
@@ -110,7 +116,7 @@ rmse_reduction_df = pd.concat([iq_rmse_reduction_df, anthro_rmse_reduction_df])
 rmse_reduction_df = rmse_reduction_df[rmse_reduction_df['Phantom'] == 'Anthropomorphic']
 plot = sns.scatterplot(ax=ax, x='Diameter [mm]', y='RMSE Reduction [%]',
                    style='Phantom', hue='Dose [%]',
-                   data=rmse_reduction_df[np.array(rmse_reduction_df['Dose [%]'] == 100) | np.array(rmse_reduction_df['Dose [%]'] == 10)],
+                   data=rmse_reduction_df[np.array(rmse_reduction_df['Dose [%]'] == 25)],
                    palette='crest')
 
 ages = [1, 5, 10, 15, 18]
@@ -124,15 +130,15 @@ for a in ages:
 
 handles, labels = plot.get_legend_handles_labels()
 # k=np.array([0, 1, 2, 3, 4, 9])
-new_handles = handles[:4]
+new_handles = []#handles[:2]
 new_handles.append(line_handles[-1])
 new_handles.append(handles[-1])
-new_labels = labels[:4]
+new_labels = []#labels[:2]
 new_labels.append(line_labels[-1])
 new_labels.append(labels[-1])
 plot.get_legend().remove()
 f.legend(new_handles, new_labels, ncol=2, loc='upper center', 
-                bbox_to_anchor=(0.5, 1.175), frameon=False)
+                bbox_to_anchor=(0.5, 1.1), frameon=False, title='Phantom')
 f.tight_layout()
 f.savefig('rmse_reduction_v_diameter_revised.png', dpi=600, bbox_inches='tight')
 #%%

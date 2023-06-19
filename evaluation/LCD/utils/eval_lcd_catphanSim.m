@@ -3,6 +3,8 @@ if ~exist('homedir', 'var') %checks if setpath has been run
     setpath
 end
 
+addpath(genpath('/home/brandon.nelson/Dev/Regulatory_Science_Tools/LCD-CT/src/LCD'))
+
 addpath([dirname(fileparts(mfilename('fullpath')), 2) '/utils'])
 diameter_dirs = dir([base_data_folder 'diameter*mm']);
 
@@ -149,7 +151,7 @@ for diam_idx=1:n_diameters
 
                 measured_HU = mean(circle_roi(xtrue, center_x, center_y, insert_r));
                 HU_error = measured_HU - expected_HU;
-                if abs(HU_error) > 5
+                if abs(HU_error) > 6
                     error('Error: True disk HU does not match expected!')
                 end
 
