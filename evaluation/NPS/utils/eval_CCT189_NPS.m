@@ -62,7 +62,7 @@ for diam_idx = 1:length(diams)
             dx = ig.dx; %in mm
             fov = ig.fov; %in mm
 
-            relative_roisize = 1/4;
+            relative_roisize = 1/3;
             half_roisize = nx*relative_roisize/2;
             % half_roisize = 32;
             roi_xfov = nx/2+[-half_roisize:half_roisize-1];

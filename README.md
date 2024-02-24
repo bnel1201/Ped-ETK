@@ -36,9 +36,9 @@ email: Brandon.Nelson@fda.hhs.gov
 
 ## Introduction
 
-This pipeline enables automatic assessment of the generalizability of objective image quality in noise reduction algorithms in pediatric populations with a focus on pretrained deep-learning-based noise reduction and reconstruction algorithms.
+This pipeline enables automatic assessment of the generalizability of objective image quality in noise reduction algorithms in pediatric populations with a focus on pre-trained deep-learning-based noise reduction and reconstruction algorithms.
 
-This flexible tool enables simulation of standard image quality phantoms (the CATPHAN CTP404 Sensitometry module, and the CATPHAN CCT189 MITA Low Contrast Detectability (LCD) phantom). A weakness of the practical use of these phantoms is that they are manufactured at a defined size representating adult anatomy and are routinely evaluated with adult protocols, meaning that their results have limited transferability to pediatric imaging protocols. This discrepency is more apparent in deep-learning based image enhancement algorithms which are particularly sensitive to changes to reconstructed field of view (smaller in pediatric protocols).
+This flexible tool enables simulation of standard image quality phantoms (the CATPHAN CTP404 Sensitometry module, and the CATPHAN CCT189 MITA Low Contrast Detectability (LCD) phantom). A weakness of the practical use of these phantoms is that they are manufactured at a defined size representing adult anatomy and are routinely evaluated with adult protocols, meaning that their results have limited transferability to pediatric imaging protocols. This discrepancy is more apparent in deep-learning based image enhancement algorithms which are particularly sensitive to changes to reconstructed field of view (smaller in pediatric protocols).
 
 Unique to this toolkit is the ability to simulate pediatric scaled versions of these standard image quality phantoms to better evaluate these objective image quality measures under a variety of image conditions and simulations patient sizes.
 
@@ -73,7 +73,7 @@ The main syntax for running a whole experiment, both (a) phantom generation + CT
 bash run_all.sh path/to/experiment
 ```
 
-For example `bash run_all.sh experiments/main` will run the main experiment and `bash run_all.sh experiments/test` will run an abbreviatdd simulation experiment used for testing and developing the simulation and evaluation pipeline.
+For example `bash run_all.sh experiments/main` will run the main experiment and `bash run_all.sh experiments/test` will run an abbreviated simulation experiment used for testing and developing the simulation and evaluation pipeline.
 
 Reading the contents of this shell script reveals how different stages can be done separately such as phantom generation + CT sim alone or evaluation. A common examples are given below
 
@@ -123,6 +123,6 @@ bash evaluation/run_all_evaluations.sh $BASE_DIR $RESULTS_DIR
 
 1. `ffmpeg` not found or my gifs are not being generated. --> `sudo apt-get install ffmpeg`
 2. CUDA vs no CUDA for inference?
-`denoising/SPIE2023_models/resolve_fly.py` chould detect whether CUDA is installed and functioning (using `torch.cuda/is_available()`), if it is it will automatically use gpu inference which should improve inference
+`denoising/SPIE2023_models/resolve_fly.py` could detect whether CUDA is installed and functioning (using `torch.cuda/is_available()`), if it is it will automatically use gpu inference which should improve inference
    - with --cuda inference takes `1 m 57 s`
    - without inference takes `5 m 49 s`

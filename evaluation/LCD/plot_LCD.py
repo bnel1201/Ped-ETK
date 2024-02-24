@@ -127,7 +127,7 @@ class LCD_Plotter:
 
     
 def main(results_csv=None, outputdir=None, restype='auc', comparator='diff'):
-    plt.style.use('seaborn-v0_8-deep')
+    plt.style.use('seaborn-deep')
     results_csv = results_csv or '/home/brandon.nelson/Dev/DLIR_Ped_Generalizability/geometric_phantom_studies/results/LCD/LCD_results.csv'
     results_csv = Path(results_csv)
     outputdir = outputdir or results_csv.parent
@@ -144,9 +144,10 @@ def main(results_csv=None, outputdir=None, restype='auc', comparator='diff'):
     plotter.insert_HUs = 7
     plotter.dose_levels = [25]
     plotter.recons = [['dlir', 'fbp']]
-    plotter.observers = ['Laguerre-Gauss CHO', 'NPW'] # 'Laguerre-Gauss CHO 2D', 'NPW 2D'
+    plotter.observers = ['NPW'] # 'Laguerre-Gauss CHO 2D', 'NPW 2D'
+    # plotter.observers = ['Laguerre-Gauss CHO'] # 'Laguerre-Gauss CHO 2D', 'NPW 2D'
     fig_dict = plotter.plot(restype=restype, x='diameter', recon_cmp_method=comparator, transpose=False)
-    fig_dict['fig0'][1][0].set_ylim((-0.1, 0.4))
+    # fig_dict['fig0'][1][0].set_ylim((-0.1, 0.4))
     fig_dict['fig0'][1][0].set_xlim((105, 308))
     fig_dict['fig0'][0].suptitle('')
     fig_dict['fig0'][1][0].set_title('')
@@ -161,7 +162,7 @@ def main(results_csv=None, outputdir=None, restype='auc', comparator='diff'):
             ax.annotate(f'{a}yrs', xy=(eff_diam, age_yloc), xycoords='data', xytext=(eff_diam, age_yloc), ha='center', textcoords='data')
 
     f = plt.gcf()
-    f.set_figheight(3)
+    f.set_figheight(2)
     f.set_figwidth(3.2)
     output_fname = outputdir/f"{restype.upper()}_{comparator}_v_diameter.png"
     plt.savefig(output_fname, dpi=600, bbox_inches="tight")
@@ -169,7 +170,7 @@ def main(results_csv=None, outputdir=None, restype='auc', comparator='diff'):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Plots LCD images from CCT189')
-    parser.add_argument('csvfile')
+    parser.add_argument('csvfile', nargs='?', default=None)
     parser.add_argument('--output_dir','-o', required=False,
                     help="Directory to save image files")
     args = parser.parse_args()

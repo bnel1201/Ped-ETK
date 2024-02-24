@@ -27,17 +27,17 @@ sns.lineplot(ax=axs[1], x='Diameter [mm]', y='MTF25', hue='Contrast', style='Rec
 delta_mtf = ctp404_results[ctp404_results['Recon'] == 'FBP'][['Diameter [mm]', 'Contrast', 'dose_level_pct', 'MTF50']]
 delta_mtf['$\Delta$MTF50 [lp/cm]'] = ctp404_results[ctp404_results['Recon'] == 'DLIR']['MTF50'].to_numpy() - ctp404_results[ctp404_results['Recon'] == 'FBP']['MTF50'].to_numpy()
 delta_mtf['$\Delta$MTF25 [lp/cm]'] = ctp404_results[ctp404_results['Recon'] == 'DLIR']['MTF25'].to_numpy() - ctp404_results[ctp404_results['Recon'] == 'FBP']['MTF25'].to_numpy()
-delta_mtf['$\Delta$MTF15 [lp/cm]'] = ctp404_results[ctp404_results['Recon'] == 'DLIR']['MTF15'].to_numpy() - ctp404_results[ctp404_results['Recon'] == 'FBP']['MTF15'].to_numpy()
+delta_mtf['$\Delta$MTF10 [lp/cm]'] = ctp404_results[ctp404_results['Recon'] == 'DLIR']['MTF10'].to_numpy() - ctp404_results[ctp404_results['Recon'] == 'FBP']['MTF10'].to_numpy()
 delta_mtf = delta_mtf[delta_mtf['MTF50'] > 0]
 delta_mtf = delta_mtf[delta_mtf['dose_level_pct'] == 100]
 
 f, axs = plt.subplots(1,2, tight_layout=True, figsize=(8, 3))
 plot = sns.lineplot(ax=axs[0], x='Diameter [mm]', y='$\Delta$MTF50 [lp/cm]', hue='Contrast', data=delta_mtf, palette='crest')
 plot.get_legend().remove()
-plot = sns.lineplot(ax=axs[1], x='Diameter [mm]', y='$\Delta$MTF15 [lp/cm]', hue='Contrast', data=delta_mtf, palette='crest')
+plot = sns.lineplot(ax=axs[1], x='Diameter [mm]', y='$\Delta$MTF10 [lp/cm]', hue='Contrast', data=delta_mtf, palette='crest')
 handles, labels = plot.get_legend_handles_labels()
 plot.get_legend().remove()
-# plot = sns.lineplot(ax=axs[2], x='Diameter [mm]', y='$\Delta$MTF15', hue='Contrast', data=delta_mtf, palette='crest')
+# plot = sns.lineplot(ax=axs[2], x='Diameter [mm]', y='$\Delta$MTF10', hue='Contrast', data=delta_mtf, palette='crest')
 # plot.get_legend().remove()
 f.legend(handles, labels, ncol=3, loc='upper center', 
                 bbox_to_anchor=(0.5, 1.2), frameon=False, title='Contrast [HU]')
